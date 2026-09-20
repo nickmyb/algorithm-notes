@@ -42,6 +42,10 @@ new: ## 新开一题，如 make new ID=1 [LANGS=go,python]
 readme: ## 重新生成仓库根 README.md
 	cd ctl && $(GO) run . build readme
 
+.PHONY: readme-anon
+readme-anon: ## 生成匿名版 README（个人数据全为 0），给 template 分支用
+	cd ctl && $(GO) run . build readme --anonymous
+
 ## ---------- 测试 ----------
 
 .PHONY: test

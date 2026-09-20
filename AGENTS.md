@@ -407,6 +407,20 @@ README 的渲染逻辑不用动，`Solution` 列会自动多出这门语言的�
 
 工具链改动应同时反映到 `template` 分支，并 `git tag -f init template` 把标签移到最新。
 
+### 生成 template 的 README 必须用 `make readme-anon`
+
+`build readme` 只要 `ctl/config.toml` 存在就会带上 Cookie，拿回来的是**本人已登录的数据**，README 的「个人数据」表格里会出现真实的 AC 计数。放在 `main` 上是对的（那张表就是为此存在的），但 `template` / `init` 是给任何人当起点用的，出现别人的刷题数据没有意义。
+
+所以给 `template` 分支生成 README 时用：
+
+```sh
+make readme-anon        # 等价于 cd ctl && go run . build readme --anonymous
+```
+
+`--anonymous` 会直接跳过 `config.toml`，强制匿名请求，个人数据全为 0。
+
+这条是踩过坑才加的：作者配好 Cookie 之后，有两个提交把 `Accepted|**1**|...` 写进了本该通用的 README，后来用 rebase 重写历史才清掉。
+
 ## 凭据
 
 `ctl/config.toml` 存 LeetCode 的 Cookie，已在 `.gitignore` 里（`config.toml` 不带斜杠，任意层级生效）。**不要提交它，不要把 Cookie 写进任何其他文件或日志。**

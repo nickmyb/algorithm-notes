@@ -31,13 +31,16 @@ func newBuildCommand() *cobra.Command {
 }
 
 func newBuildREADME() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "readme",
 		Short: "Build readme.md commands",
 		Run: func(cmd *cobra.Command, args []string) {
 			buildREADME()
 		},
 	}
+	cmd.Flags().BoolVar(&anonymous, "anonymous", false,
+		"忽略 config.toml，以未登录身份请求，个人数据全为 0（生成 template 分支的 README 时用）")
+	return cmd
 }
 
 func buildREADME() {

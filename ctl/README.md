@@ -10,6 +10,7 @@ cd ctl && go run . <command>
 |:---|:---|:---|
 | `new <题号>` | `make new ID=1` | 按题号建题目目录，抓题目描述写进 README，复制各语言骨架 |
 | `build readme` | `make readme` | 重新生成仓库根 `README.md` |
+| `build readme --anonymous` | `make readme-anon` | 同上，但跳过 `config.toml` 强制匿名，个人数据全为 0 |
 | `refresh` | — | 目前等同于 `build readme` |
 | `version` | — | 打印版本 |
 
@@ -42,7 +43,15 @@ cd ctl && go run . <command>
 
 不配也能用，只是上表里标了「是」的那两处没内容。
 
-想要这两块有内容：
+反过来，**配了 Cookie 之后要生成一份不含个人数据的 README**（比如给 `template` 分支用），加 `--anonymous`：
+
+```sh
+make readme-anon
+```
+
+它直接跳过 `config.toml`，不读也不发 Cookie。
+
+想要「个人数据」有内容：
 
 1. 在 `ctl/` 下新建 `config.toml`（已在 `.gitignore` 里，不会被提交）
 2. 填入下面的内容，把占位符换成自己的
