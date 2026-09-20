@@ -5,44 +5,49 @@ import (
 	"testing"
 )
 
-// 表驱动测试：每个 question 是一组「入参 + 期望结果」，往 qs 里加一行就是加一个用例。
-type question struct {
-	para para
-	ans  ans
-}
-
-// para 是入参
-type para struct {
-	nums []int
-}
-
-// ans 是期望结果
-type ans struct {
-	one []int
-}
-
 func TestSolve(t *testing.T) {
 	t.Skip("骨架还没有题解，写完后删掉这一行")
 
-	qs := []question{
-		// {para{[]int{2, 7, 11, 15}}, ans{[]int{0, 1}}},
+	// 表驱动测试：一行一个用例，三列分别是用例名、输入、期望输出。
+	//
+	// name 直接写题目里的 Example 几，t.Run 会逐条报告通过与否，失败时也带上
+	// 是哪个用例；还能用 go test -run TestSolve/Example_1 单独跑某一个。
+	//
+	// 用例照着该题 README 里 ## 题目 那节的 Example 转录，题目给几个就写几个。
+	qs := []struct {
+		name string
+		in   []int
+		want []int
+	}{
+		// {"Example 1", []int{2, 7, 11, 15}, []int{0, 1}},
 	}
 
-	// 一题有多种解法时，把每种实现登记进来，同一组用例跑全部实现，
-	// 顺带保证它们结果一致。
-	impls := map[string]func([]int) []int{
-		"solve": solve,
-		// "solveBruteForce": solveBruteForce,
-	}
-
-	for name, solve := range impls {
-		t.Run(name, func(t *testing.T) {
-			for _, q := range qs {
-				got := solve(q.para.nums)
-				if !reflect.DeepEqual(got, q.ans.one) {
-					t.Fatalf("%v(%v) = %v, want %v", name, q.para.nums, got, q.ans.one)
-				}
+	for _, q := range qs {
+		t.Run(q.name, func(t *testing.T) {
+			got := solve(q.in)
+			if !reflect.DeepEqual(got, q.want) {
+				t.Fatalf("solve(%v) = %v, want %v", q.in, got, q.want)
 			}
 		})
 	}
 }
+
+// 输入是树或链表时，用 structures.Ints2TreeNode / Ints2List 建结构，
+// 报错里的输入用 structures.FormatInts 打印——它把空节点的哨兵还原成 null，
+// 否则 %v 会打出 -9223372036854775808，和题面里的 [1,null,2,3] 对不上：
+//
+//	got := maxDepth(structures.Ints2TreeNode(q.in))
+//	t.Fatalf("maxDepth(%v) = %v, want %v", structures.FormatInts(q.in), got, q.want)
+//
+// 一题写了多种解法时，把它们登记进一个 map，同一组用例跑全部实现，
+// 顺带保证几种解法结果一致。子测试名会变成 Example_1/solveBruteForce：
+//
+//	impls := map[string]func([]int) []int{
+//		"solve":           solve,
+//		"solveBruteForce": solveBruteForce,
+//	}
+//	for _, q := range qs {
+//		for implName, solve := range impls {
+//			t.Run(q.name+"/"+implName, func(t *testing.T) { ... })
+//		}
+//	}
