@@ -58,6 +58,8 @@ algorithm-notes/
 ├── gotest.sh                    # Go 测试 + 覆盖率
 ├── javatest.sh                  # Java 逐目录编译并测试
 ├── scripts/init.sh              # make init 的实现
+├── AGENTS.md                    # 给 AI 编码助手看的项目说明
+├── CLAUDE.md                    # 导入 AGENTS.md，Claude Code 和 ChatGPT 共用一份
 └── Makefile                     # 所有日常命令的入口
 ```
 
@@ -79,6 +81,16 @@ make clean                       # 清构建产物，不碰题解
 ```
 
 `make` 只是 `ctl` 的薄封装，`make new ID=1` 等价于 `cd ctl && go run . new 1`。细节见 [ctl/README.md](./ctl/README.md)。
+
+`LANGS` 可以只指定一门或几门语言，没写的语言就不生成骨架文件：
+
+```sh
+make new ID=15 LANGS=go          # 只有 Solution.go / Solution_test.go
+make new ID=20 LANGS=python      # 只有 solution.py / solution_test.py
+make new ID=21 LANGS=go,java     # Go 和 Java
+```
+
+下面的题目表格按目录里**实际存在**的文件渲染，写了几门语言就显示几个链接，事后补另一门语言只要把文件放进去再 `make readme`。
 
 ## 写一道题
 
