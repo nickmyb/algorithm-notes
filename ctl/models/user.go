@@ -41,8 +41,6 @@ func (ui UserInfo) table() string {
 		percent(ui.AcMedium, ui.MediumTotal),
 		percent(ui.AcHard, ui.HardTotal),
 		percent(ui.AcEasy+ui.AcMedium+ui.AcHard, ui.EasyTotal+ui.MediumTotal+ui.HardTotal))
-	// 加这一行是为了撑开整个表格
-	res += "|------------|----------------------------|----------------------------|----------------------------|----------------------------|"
 	return res
 }
 

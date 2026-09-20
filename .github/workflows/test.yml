@@ -11,9 +11,9 @@ jobs:
     name: Go
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod # 用 go.mod 里声明的版本，和本地保持一致
 
@@ -33,7 +33,7 @@ jobs:
 
       - name: Upload coverage profile
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-profile
           path: coverage.txt
@@ -42,9 +42,9 @@ jobs:
     name: Python
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           # 与 scripts/init.sh 里检查的下限一致，见 README 的「环境要求」
           python-version: "3.12"
@@ -59,9 +59,9 @@ jobs:
     name: Java
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           # 实际的语言版本由 javatest.sh 的 --release 约束，这里只要不低于它即可

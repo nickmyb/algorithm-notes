@@ -98,8 +98,6 @@ func LanguageTable(solutions []util.Solution) string {
 	}
 	// 合计行的占比恒等于 100%，是噪音，留空。
 	res += fmt.Sprintf("|**合计题数**|**%v**|—|\n", len(solutions))
-	// 加这一行是为了撑开整个表格
-	res += "|------------|----------------------------|----------------------------|"
 	return res
 }
 
@@ -141,8 +139,6 @@ func (mds Mdrows) table() string {
 	for _, p := range mds.Mdrows {
 		res += p.tableLine()
 	}
-	// 加这一行是为了撑开整个表格
-	res += "|------------|-------------------------------------------------------|-------| ----------------| ---------------|-------------|"
 	return res
 }
 
