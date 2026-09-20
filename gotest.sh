@@ -37,7 +37,17 @@ if [ $# -gt 0 ]; then
     exit
 fi
 
-go test -covermode=atomic -coverprofile=coverage.txt "${ROOTS[@]}"
+# 排除 IDE 的编译输出目录。IDEA 把题目目录当项目打开时会在里面建 out/，并且把
+# 所有非 .java 文件当资源复制进去——包括 Solution.go 和 Solution_test.go 的旧副本。
+# go 的 ./... 会把那儿当成一个真实的包编译测试：旧题解配旧测试，永远是绿的，
+# 但它早就不是你在写的那份了。这种"测试说谎"比测试失败危险得多。
+mapfile -t pkgs < <(go list "${ROOTS[@]}" | grep -v '/out/')
+if [ ${#pkgs[@]} -eq 0 ]; then
+    echo "没有找到可测试的 Go 包"
+    exit 0
+fi
+
+go test -covermode=atomic -coverprofile=coverage.txt "${pkgs[@]}"
 
 # 工具链自己的测试（ctl 的 HTML→Markdown 转换、structures 的数据结构）不进覆盖率统计，
 # 但必须跑，否则改坏了 ctl 要到下次生成 README 才发现。

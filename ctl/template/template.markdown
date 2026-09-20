@@ -97,23 +97,32 @@ algorithm-notes/
 
 Java 侧的约束：每道题都是 default package 里的 `class Solution`，**同一个编译范围里只能有一个**，否则撞成一片 `Duplicate class Solution`（`javac` 同理，所以 `javatest.sh` 才逐目录编译）。
 
-两种配法，都是让同一时刻只有一个题目目录进入 Java 的编译范围。Module SDK / Project SDK 都选 **17**（和 `javatest.sh` 的 `JAVA_RELEASE` 一致）。
+两种配法，都是让同一时刻只有一个题目目录进入 Java 的编译范围。Project SDK / Module SDK 都选 **17**（和 `javatest.sh` 的 `JAVA_RELEASE` 一致）。
 
-**方案 A：按题打开 + 模块依赖**
+**推荐：打开仓库根 + 标记 Sources Root**
+
+1. 打开仓库根，设好 Project SDK 17
+2. 目录树上把**当前在写的那道题的目录**和 `structures/java` 都标记为 **Mark Directory as → Sources Root**
+3. 换题时取消上一题的标记，标到新的题目目录上
+
+一个窗口搞定，换题只要改两次标记，不用建模块。代价是同一时刻只有一道题被索引。
+
+推荐它还有一个更实际的理由：**IDEA 的编译输出会落在仓库根的 `out/`**，而 `go list ./leetcode/...` 和 pytest 的 `testpaths` 都够不到那里，不会污染测试。下面那种配法就没这个好处。
+
+**备选：按题打开 + 模块依赖**
 
 1. 直接把题目目录作为项目打开，如 `leetcode/0094.Binary-Tree-Inorder-Traversal`
 2. `Project Structure` → `Modules` → `+` 添加 `structures/java`，命名为 `structures`
 3. 选中题目模块 → **`Dependencies`** 标签 → `+` → **Module Dependency** → 选 `structures`，Scope 为 `Compile`
 
-一题一个窗口，模块关系明确。换题要重开窗口并重配一次。
+模块关系明确，但换题要重开窗口重配一次。
 
-**方案 B：打开仓库根 + 标记 Source Root**
-
-1. 打开仓库根，设好 Project SDK 17
-2. 目录树上把**当前在写的那道题的目录**和 `structures/java` 都标记为 **Sources Root**
-3. 换题时把上一题的标记取消，标到新的题目目录上
-
-一个窗口搞定，换题只要改标记，不用建模块。代价是同一时刻只有一道题被索引。
+> **这种配法有个坑**：IDEA 会把编译输出建在**题目目录里面**（`leetcode/0094.xxx/out/`），而且把所有非 `.java` 文件**当资源复制进去**——`solution.py`、`solution_test.py`、`Solution.go`、`Solution_test.go` 全都有一份副本。这些副本会随着你改代码而过时，而**测试工具不看 `.gitignore`**：
+>
+> - `go list ./leetcode/...` 把 `out/production/<题目>/` 当成一个真实的包编译测试
+> - pytest 把 `out/` 里那份旧 `solution_test.py` 也收集了
+>
+> 旧题解配旧测试永远是绿的，比测试失败更危险。仓库已经挡住了这一层（`gotest.sh` 过滤 `/out/`、`pytest.ini` 的 `norecursedirs` 含 `out`），所以现在用是安全的；但如果你想从根上避免，在 `Project Structure` → `Project` → **Compiler output** 里把输出路径改到题目目录之外。
 
 配好之后 `TreeNode` / `TreeNodes` 在题解里能正常补全和跳转。嫌配置麻烦的话，IDE 只当编辑器用，验证一律走 `make test-java ID=94`。
 
