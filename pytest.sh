@@ -12,6 +12,10 @@ set -u
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTEST="${PYTEST:-$ROOT/.venv/bin/pytest}"
 
+# 切到仓库根再干活。pytest 的 rootdir 和 pytest.ini 的 testpaths 都跟着 cwd 走，
+# 从子目录启动会静默缩小测试范围（只跑当前目录那几个），看起来还是绿的。
+cd "$ROOT"
+
 if [ ! -x "$PYTEST" ]; then
     echo "找不到 pytest（$PYTEST），先跑 make init" >&2
     exit 1

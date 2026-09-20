@@ -70,6 +70,53 @@ algorithm-notes/
 
 以后要收 LCP、剑指 Offer 这类非编号题，会新开 `lcp/` 这样的同级目录，因为 `%04d` 表达不了 `LCP 82` 这种题号。
 
+## IDE 配置
+
+测试脚本内部会切到仓库根，所以 Run Configuration 的 working directory 设成哪里都不影响结果。
+
+### GoLand —— 打开仓库根
+
+| 配置项 | 值 |
+|:---|:---|
+| GOROOT | 指向 `go.mod` 要求的版本（当前 1.26.4） |
+| Go Modules | 自动从 `go.mod` 识别，不用动 |
+
+`ctl/` 下 7 个带 `//go:build ignore` 的文件会被标成排除在构建外、灰掉，这是故意的（见 [ctl/README.md](./ctl/README.md) 的「已停用的功能」），不要去"修"。
+
+### PyCharm —— 打开仓库根
+
+| 配置项 | 值 |
+|:---|:---|
+| Python Interpreter | `<仓库根>/.venv/bin/python`（`make init` 建的） |
+| **`structures/python`** | 目录树右键 → **Mark Directory as → Sources Root** |
+| 测试框架 | pytest，自动读 `pytest.ini` |
+
+标记 Sources Root 那步是关键：运行时是 `conftest.py` 把这个目录加进 `sys.path` 的，属于运行期行为，IDE 的静态分析看不到，不标记的话 `from tree_node import TreeNode` 会一直标红。
+
+### IntelliJ IDEA
+
+Java 侧的约束：每道题都是 default package 里的 `class Solution`，**同一个编译范围里只能有一个**，否则撞成一片 `Duplicate class Solution`（`javac` 同理，所以 `javatest.sh` 才逐目录编译）。
+
+两种配法，都是让同一时刻只有一个题目目录进入 Java 的编译范围。Module SDK / Project SDK 都选 **17**（和 `javatest.sh` 的 `JAVA_RELEASE` 一致）。
+
+**方案 A：按题打开 + 模块依赖**
+
+1. 直接把题目目录作为项目打开，如 `leetcode/0094.Binary-Tree-Inorder-Traversal`
+2. `Project Structure` → `Modules` → `+` 添加 `structures/java`，命名为 `structures`
+3. 选中题目模块 → **`Dependencies`** 标签 → `+` → **Module Dependency** → 选 `structures`，Scope 为 `Compile`
+
+一题一个窗口，模块关系明确。换题要重开窗口并重配一次。
+
+**方案 B：打开仓库根 + 标记 Source Root**
+
+1. 打开仓库根，设好 Project SDK 17
+2. 目录树上把**当前在写的那道题的目录**和 `structures/java` 都标记为 **Sources Root**
+3. 换题时把上一题的标记取消，标到新的题目目录上
+
+一个窗口搞定，换题只要改标记，不用建模块。代价是同一时刻只有一道题被索引。
+
+配好之后 `TreeNode` / `TreeNodes` 在题解里能正常补全和跳转。嫌配置麻烦的话，IDE 只当编辑器用，验证一律走 `make test-java ID=94`。
+
 ## 命令
 
 ```sh

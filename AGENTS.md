@@ -26,6 +26,15 @@ make fmt / vet / tidy / clean
 
 `make` 只是 `ctl` 的薄封装，`make new ID=1` 等价于 `cd ctl && go run . new 1`。**ctl 的所有命令都必须在 `ctl/` 目录下执行**，它用的是相对路径（`../leetcode/`、`./template/`）。
 
+## IDE
+
+三门语言的 IDE 配置写在根 README 的「IDE 配置」一节。两个容易被问到的点：
+
+- **PyCharm 必须把 `structures/python` 标记为 Sources Root** —— 运行时是 `conftest.py` 把它加进 `sys.path` 的，属于运行期行为，IDE 静态分析看不到，不标记则 `from tree_node import ...` 一直标红。这不是配置错误，也别为了"修"它去改 `conftest.py`。
+- **IDEA 同一时刻只能让一个题目目录进入 Java 编译范围** —— 每题都是 default package 的 `class Solution`，多个一起索引会撞成 `Duplicate class`。两种配法（按题开窗口 + 模块依赖，或开仓库根 + 逐题标记 Sources Root）都是绕这一条。
+
+三个测试脚本内部都会切到仓库根（`cd "$(dirname "${BASH_SOURCE[0]}")"`），所以从任何工作目录调用结果都一致。**不要去掉这个 cd**：`gotest.sh` 用的是 `./leetcode/...` 相对路径，从子目录跑会直接报 `no such file or directory`；`pytest.sh` 更隐蔽，pytest 的 rootdir 跟着 cwd 走，从子目录跑会**静默缩小测试范围**（只跑当前目录那几个）却仍然显示绿色。
+
 ## 环境版本
 
 只在这三个版本上测试过，各有唯一声明来源，改版本要改对应的那处：

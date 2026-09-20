@@ -10,6 +10,11 @@
 # "mode: atomic" 头，新版 Codecov 上传器会把它算成 0% 覆盖率。
 set -e
 
+# 切到仓库根再干活。下面用的是 ./leetcode/... 这类相对路径，而 IDE 的 Run
+# Configuration、编辑器终端常常在别的目录启动，不切的话会直接报
+# "pattern ./leetcode/...: no such file or directory"。
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # 题解根目录。以后新增 lcp/ 这类同级目录，在这里加一项即可。
 ROOTS=(./leetcode/...)
 
