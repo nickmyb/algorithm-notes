@@ -23,6 +23,63 @@ make new ID=1         # 开始第一题
 
 `make init` 需要 Go（`ctl` 是 Go 写的，必需）；Python 和 Java 缺了只会警告并跳过对应的测试链路，不写那门语言就不受影响。
 
+## 写一道题
+
+从开题到提交的完整流程：
+
+```sh
+make new ID=1                    # 1. 建目录，题目描述自动填好
+make new ID=1 LANGS=go,python    #    只写某几门语言就带 LANGS
+                                 # 2. 写题解（见下），删掉测试骨架里的 t.Skip / pytest.skip
+                                 # 3. 照着题目 README 里的 Example 写测试用例
+make test ID=1                   # 4. 只测这一道，反复改的时候快得多
+make readme                      # 5. 刷新本 README 的题目表格
+make test                        # 6. 提交前全量跑一遍
+git add . && git commit          # 7. 提交
+```
+
+### 1. 建目录
+
+`make new ID=1` 会去 LeetCode 按题号查标题，建出 `leetcode/0001.Two-Sum/`，把**英文题目描述和折叠的官方中文翻译**写进该题的 `README.md`，再从 `leetcode/0000.Template/` 复制各语言的骨架。
+
+**只打算写一门语言时记得带 `LANGS=`。** 三门全生成却只写一门的话，下面的题目表格会显示三个链接、语言统计三门都算 1，而点进去另外两个是空骨架——ctl 判断"有没有题解"看的是**文件存不存在，不看内容**。事后想补语言，把文件放进目录再 `make readme` 即可，不用重建。
+
+### 2. 写题解
+
+题解文件分两段，详见下文[多语言约定](#题解本体可以原样复制到-leetcode)：
+
+```
+[本地接线区]   ← import、Go 的 package 和类型别名
+[题解本体]     ← 逐字等于 LeetCode 提交框里的内容
+```
+
+从 LeetCode 复制进来只需补接线，复制出去只需删接线，本体一个字都不改。`TreeNode`、`ListNode` 由 `structures/` 提供，不用自己定义。
+
+### 3. 写测试
+
+**照着该题 README 里 `## 题目` 那节的 Example 转录**，题目给几个就写几个。注意以**英文版**为准——官方中文翻译滞后，示例可能更少（第 94 题英文版 4 个、中文版 3 个，中文版缺的恰好是覆盖面最广的那个）。
+
+想加题目没给的边界用例，先想清楚它能抓到题目示例抓不到的什么错误；说不出来就别加，那只会给测试增重而不增强。
+
+### 4. 跑测试
+
+`make test ID=1` 按题号找目录（`94` → `leetcode/0094.*`），**那道题没写的语言会安静跳过**——只写了 Java 的题，Go 和 Python 不会因为"没有测试"而报错。题号不存在时直接报错退出，不会静默退化成全量。
+
+单题模式不跑 `structures/` 的测试，改了共享结构记得跑一次全量 `make test`。
+
+### 5. 填题解 README
+
+`make new` 生成的那份 README 有四个小节：
+
+| 小节 | 谁来填 |
+|:---|:---|
+| `## 题目` | **自动**：英文原文 + 折叠的官方中文翻译 |
+| `## 题目大意` | **自己写**，一两句话复述题意。这一步的价值就在于自己写，所以没有自动填 |
+| `## 解题思路` | 思路推导，为什么这么做 |
+| `## 复杂度` | 时间 / 空间复杂度 |
+
+前三节沿用 halfrost 原仓库的格式，`## 复杂度` 是本仓库加的——原仓库把复杂度记在 `ctl/meta/` 里用于渲染站点，那套机制没有搬过来，所以在 README 里留个固定位置。
+
 ## 环境要求
 
 **项目只在下面这三个版本上测试过**，其他版本不保证可用：
@@ -130,54 +187,19 @@ Java 侧的约束：每道题都是 default package 里的 `class Solution`，**
 
 ```sh
 make help                        # 列出所有命令
-make new ID=1                    # 新开一题，自动抓题目描述填进 README
-make new ID=15 LANGS=go,python   # 只生成指定语言的骨架
-make test                        # 跑三门语言的全部测试
-make test ID=94                  # 只测一道题（那题没写的语言会安静跳过）
-make test-go / test-python / test-java   # 同样支持 ID=94
-make readme                      # 重新生成本 README 的题目表格
+make init                        # 初始化：检查工具链、装依赖、跑测试、生成 README
+make new ID=1 [LANGS=go,python]  # 新开一题，自动抓题目描述填进 README
+make test [ID=94]                # 跑测试，带 ID 只测一道
+make test-go / test-python / test-java   # 单语言，同样支持 ID=94
+make readme                      # 重新生成本 README
+make readme-anon                 # 同上但不含个人数据，给 template 分支用
 make fmt / vet / tidy            # Go 格式化、静态检查、依赖整理
 make clean                       # 清构建产物，不碰题解
 ```
 
 `make` 只是 `ctl` 的薄封装，`make new ID=1` 等价于 `cd ctl && go run . new 1`。细节见 [ctl/README.md](./ctl/README.md)。
 
-`LANGS` 可以只指定一门或几门语言，没写的语言就不生成骨架文件：
-
-```sh
-make new ID=15 LANGS=go          # 只有 Solution.go / Solution_test.go
-make new ID=20 LANGS=python      # 只有 solution.py / solution_test.py
-make new ID=21 LANGS=go,java     # Go 和 Java
-```
-
-下面的题目表格按目录里**实际存在**的文件渲染，写了几门语言就显示几个链接，事后补另一门语言只要把文件放进去再 `make readme`。
-
-## 写一道题
-
-```sh
-make new ID=1     # 建出 leetcode/0001.Two-Sum/，题目描述已经填好
-# 写题解，把测试骨架里的 t.Skip / pytest.skip 删掉
-make test ID=1    # 只测这一道，反复改的时候快得多
-make test         # 提交前全量跑一遍
-make readme       # 刷新下面的题目表格
-```
-
-`make test ID=1` 会按题号找到目录（`94` → `leetcode/0094.*`），那道题没写的语言安静跳过 —— 比如只写了 Java 的题，Go 和 Python 不会因为"没有测试"而报错。题号不存在时直接报错退出，不会静默退化成全量。
-
-题解 README 的四个小节：
-
-| 小节 | 内容 |
-|:---|:---|
-| `## 题目` | `make new` 自动填：英文原文 + 折叠的官方中文翻译 |
-| `## 题目大意` | **自己写**，一两句话复述题意。这一步的价值就在于自己写，所以没有自动填 |
-| `## 解题思路` | 思路推导，为什么这么做 |
-| `## 复杂度` | 时间 / 空间复杂度 |
-
-前三节沿用 halfrost 原仓库的格式，`## 复杂度` 是本仓库加的——原仓库把复杂度记在 `ctl/meta/` 里用于渲染站点，那套机制没有搬过来，所以在 README 里留个固定位置。
-
-> **统计的口径**：ctl 判断一道题"有没有题解"，看的是目录里**有没有对应语言的文件，不看内容**。所以 `make new` 一建完目录，那道题就计入下面的统计了，哪怕里面还是骨架。
->
-> 由此有个实际建议：**只打算写一门语言时，`make new` 记得带 `LANGS=`**。三门全生成却只写一门的话，下面的表格会显示三个链接、语言统计三门都算 1，而点进去另外两个是空骨架。事后想补语言，把文件放进目录再 `make readme` 即可，不用重建。
+`LANGS` 的取值是 `go`、`python`、`java` 的任意组合，默认三门全生成。下面的题目表格按目录里**实际存在**的文件渲染，写了几门语言就显示几个链接。
 
 ## 多语言约定
 
