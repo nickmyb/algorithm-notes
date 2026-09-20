@@ -1,0 +1,71 @@
+name: Test
+
+on:
+  push:
+    branches: [main, template]
+  pull_request:
+    branches: [main, template]
+
+jobs:
+  go:
+    name: Go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod # 用 go.mod 里声明的版本，和本地保持一致
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test with coverage
+        run: bash ./gotest.sh
+
+      - name: Show coverage gaps # 打印总覆盖率和未达 100% 的函数，方便定位
+        if: always()
+        run: |
+          echo "===== TOTAL ====="
+          go tool cover -func=coverage.txt | tail -n 1
+          echo "===== functions below 100% ====="
+          go tool cover -func=coverage.txt | grep -v '100.0%' || true
+
+      - name: Upload coverage profile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-profile
+          path: coverage.txt
+
+  python:
+    name: Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          # 与 scripts/init.sh 里检查的下限一致，见 README 的「环境要求」
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install -r requirements-dev.txt
+
+      - name: Test
+        run: pytest -q
+
+  java:
+    name: Java
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # 实际的语言版本由 javatest.sh 的 --release 约束，这里只要不低于它即可
+          java-version: "17"
+
+      - name: Test
+        run: bash ./javatest.sh

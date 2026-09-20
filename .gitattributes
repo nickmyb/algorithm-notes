@@ -1,0 +1,3 @@
+# 让 GitHub Linguist 的语言统计只反映真正的题解代码。
+# 题解讲解和各级 README 都是文档，不是源码。
+*.md linguist-documentation=true

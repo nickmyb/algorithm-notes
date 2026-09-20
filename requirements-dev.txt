@@ -1,0 +1,5 @@
+# Python 题解的测试依赖。只有 pytest，题解本身不依赖任何第三方库。
+#
+# Python 版本下限（3.12）由 scripts/init.sh 检查，不在这里声明——
+# requirements.txt 没有表达解释器版本的标准写法。见 README 的「环境要求」。
+pytest>=8.0

@@ -1,0 +1,35 @@
+# ========== 凭据 ==========
+# ctl 的 LeetCode 登录配置，含 LEETCODE_SESSION cookie 和 csrftoken。
+# ctl/config.go 用的是相对路径 "config.toml"：`cd ctl && go run .` 落在 ctl/config.toml，
+# 从仓库根 `go run ./ctl` 则落在根目录。不带斜杠的模式在任意层级生效，两处都挡住。
+#
+# 原版 .gitignore 是一刀切的 *.toml，这里只挡真正含密的那个，
+# 免得以后加 pyproject.toml / .golangci.toml 之类被静默忽略掉。
+config.toml
+
+# 兜底：常见的密钥和环境变量文件，不该出现在这个仓库里，出现了也别提交
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+cookies.txt
+
+# ========== 构建产物 ==========
+out/
+coverage.txt
+
+# ========== Python ==========
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# ========== ctl 的题库缓存 ==========
+# 配了 Cookie 时，缓存里会带上 user_name 和你每道题的 AC 状态，属于个人数据
+ctl/.cache/
+
+# ========== 编辑器 ==========
+.idea/
+.vscode/
+.DS_Store
