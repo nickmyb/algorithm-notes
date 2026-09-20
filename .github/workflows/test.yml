@@ -1,8 +1,8 @@
 name: Test
 
 on:
+  # push 不限分支：dev 之类的试验分支推上去也验一遍，不用先合进 main 才知道有没有坏。
   push:
-    branches: [main, template]
   pull_request:
     branches: [main, template]
 
