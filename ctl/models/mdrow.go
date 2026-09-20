@@ -112,9 +112,10 @@ func percent[T int | int32](num, den T) string {
 	return fmt.Sprintf("%.1f%%", float64(num)/float64(den)*100)
 }
 
-// | 0001 | Two Sum | [Go](…/leetcode/0001.Two-Sum/Solution.go) [Python](…) | 45.6% | Easy | |
+// | 0001 | Two Sum | [Go](…/leetcode/0001.Two-Sum/Solution.go) [Python](…) | 45.6% | Easy |
 func (m Mdrow) tableLine() string {
-	return fmt.Sprintf("|%04d|%v|%v|%v|%v||\n", m.FrontendQuestionID, m.QuestionTitle, m.SolutionPath, m.Acceptance, m.Difficulty)
+	return fmt.Sprintf("|%04d|%v|%v|%v|%v|\n",
+		m.FrontendQuestionID, m.QuestionTitle, m.SolutionPath, m.Acceptance, m.Difficulty)
 }
 
 // SortByQuestionID define
@@ -131,11 +132,14 @@ type Mdrows struct {
 	Mdrows []Mdrow
 }
 
-// | No.    |  Title  |  Solution  |  Acceptance |  Difficulty |  Frequency |
-// |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|:--------:|
+// | No. | Title | Solution | Acceptance | Difficulty |
+// |:---:|:---|:---:|:---:|:---:|
+//
+// 上游表头还有一列 Frequency，但 tableLine 从来没填过值——接口返回的 frequency
+// 字段对未登录用户恒为 0，所以每一行末尾都是空的。这里直接去掉那一列。
 func (mds Mdrows) table() string {
-	res := "| No.    |  Title  |  Solution  |  Acceptance |  Difficulty |  Frequency |\n"
-	res += "|:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|:--------:|\n"
+	res := "| No. |  Title  |  Solution  |  Acceptance |  Difficulty |\n"
+	res += "|:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|\n"
 	for _, p := range mds.Mdrows {
 		res += p.tableLine()
 	}
