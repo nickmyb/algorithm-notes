@@ -23,6 +23,13 @@ var (
 
 var req *request.Request
 
+// sentCookie 记录本次进程有没有真的带着 Cookie 去请求。
+//
+// 它和「接口返回的 user_name 非空」是两个不同的信号：前者是本地事实（我们发没发凭据），
+// 后者是服务器的判断（认不认这个凭据）。两个合起来才能分辨出「Cookie 过期」——
+// 那种情况下接口不报错，只是返回未登录数据，光看任何一个信号都会误判。
+var sentCookie bool
+
 func newReq() *request.Request {
 	if req == nil {
 		req = signin()
@@ -32,6 +39,7 @@ func newReq() *request.Request {
 
 func signin() *request.Request {
 	cfg := getConfig()
+	sentCookie = cfg.Cookie != ""
 	req := request.NewRequest(new(http.Client))
 	req.Headers = map[string]string{
 		"Content-Type":    "application/json",

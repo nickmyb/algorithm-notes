@@ -92,6 +92,35 @@ func buildREADME() {
 	}
 	util.WriteFile("../README.md", res)
 	fmt.Println("write file successful")
+	reportPersonalData(info)
+}
+
+// reportPersonalData 在写完 README 之后说清楚「个人数据」那张表里是真实数据还是全 0。
+//
+// 未登录时接口不报错，只是所有 AC 计数都返回 0，README 里就是一张全 0 的表——
+// 看起来像"一道题都没做"而不是"没拿到数据"，很容易误判，所以这里明确讲一句。
+//
+// 用两个信号区分三种状态：sentCookie 是本地事实（发没发凭据），info.UserName
+// 是服务器的判断（认不认）。发了但服务器不认，就是 Cookie 过期——这种情况接口
+// 照常返回 200，只是数据是未登录的，光看任何一个信号都会误判。
+func reportPersonalData(info m.UserInfo) {
+	switch {
+	case info.UserName != "":
+		solved := info.AcEasy + info.AcMedium + info.AcHard
+		optimizing := info.OptimizingEasy + info.OptimizingMedium + info.OptimizingHard
+		fmt.Printf("个人数据（%v）：已 AC %v 题，其中 %v 题还没在仓库里写题解\n",
+			info.UserName, solved, optimizing)
+
+	case sentCookie:
+		fmt.Println("【带了 Cookie 但服务器按未登录处理，多半是 Cookie 过期了】")
+		fmt.Println("  README 的「个人数据」一节因此没有渲染，这不代表你没做过题。")
+		fmt.Println("  重新登录 leetcode.cn 取一次 csrftoken 和 LEETCODE_SESSION，更新 ctl/config.toml。")
+
+	default:
+		fmt.Println("【未登录，README 不渲染「个人数据」一节】")
+		fmt.Println("  接口对未登录请求返回的 AC 计数全是 0，与其展示一张全 0 的表，不如不展示。")
+		fmt.Println("  配好 ctl/config.toml 之后这一节会自动出现，见 ctl/README.md。")
+	}
 }
 
 // renderReadme 读模板，把 {{.Xxx}} 占位符替换成渲染好的内容。

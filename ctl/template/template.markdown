@@ -313,11 +313,7 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 配置方法见 [ctl/README.md](./ctl/README.md)，配置文件 `ctl/config.toml` 已在 `.gitignore` 里。
 
 ---
-
-## 个人数据
-
 {{.PersonalData}}
-
 ## 题解统计
 
 {{.LanguageTable}}

@@ -53,7 +53,19 @@ func perfection(optimizing, accepted int32) string {
 	return percent(accepted-optimizing, accepted)
 }
 
-// PersonalData define
+// PersonalData 渲染「个人数据」整节，**包括 ## 标题**。
+//
+// 未登录时接口把所有 AC 计数都返回 0，渲染出来是一张全 0 的表——看起来像
+// "一道题都没做"而不是"没拿到数据"，反而误导人。所以未登录时整节都不渲染，
+// 返回空串：配好 Cookie 之后它会自动出现，template 分支上则不会有这一节。
+//
+// 标题之所以放在这里而不是留在 template.markdown 里，就是为了让它能跟着一起消失，
+// 否则模板里那个 ## 个人数据 会变成一个后面什么都没有的空标题。
+//
+// 判据是接口返回的 user_name，未登录时是空串。
 func (ui UserInfo) PersonalData() string {
-	return ui.table()
+	if ui.UserName == "" {
+		return ""
+	}
+	return "\n## 个人数据\n\n" + ui.table()
 }
