@@ -82,7 +82,9 @@ Cookie 不跨站点通用：leetcode.com 的 session 在 leetcode.cn 上无效�
 {Name: "Java",   Ext: ".java", TestSuffix: "Test.java", Entry: "Solution.java"},
 ```
 
-加一门语言（C++、Rust）只要在这里加一行，其余代码不用动。`Entry` 是入口文件名：一个目录里同语言有多个文件时（比如题解之外还有个 `SegmentTree.go`）优先链到它，避免 README 链到辅助文件上。
+`Entry` 是入口文件名：一个目录里同语言有多个文件时（比如题解之外还有个 `SegmentTree.go`）优先链到它，避免 README 链到辅助文件上。
+
+加一门语言（C++、Rust）在这里加一行，**ctl 这一侧**就完事了——`Solution` 列会自动多出该语言的链接，语言统计表自动多一行，`ctl new --langs` 也会认。但 ctl 之外还有五步：骨架文件、测试脚本、`structures/<lang>/` 的共享数据结构、把共享结构接进该语言的编译、共享结构自己的测试。完整清单见 [AGENTS.md 的「加一门新语言」](../AGENTS.md#加一门新语言)。
 
 题号 `0000` 保留给 `leetcode/0000.Template` 骨架目录，扫描时跳过，不计入任何统计。
 

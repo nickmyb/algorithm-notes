@@ -133,7 +133,7 @@ Go 的目录叫 `go` 但包名是 `structures`（`go` 是关键字，不能当�
 3. **命名跨语言可对应**：`Ints2TreeNode`（Go）/ `TreeNodes.build`（Java）/ `build_tree`（Python）是同一件事，各自用本语言的惯例，但读者要能一眼对上。
 4. 只在真需要时加。halfrost 的 Go 版树相关函数有 13 个，Java / Python 侧移植了建树、层序展开、三种遍历、查找、比较，其余用到哪个补哪个。
 
-加新语言时照这个模式：`structures/<lang>/` + 在对应测试脚本里接上。C/C++ 用 `-I structures/cpp`（已验证可行）。
+加新语言时，`structures/<lang>/` 只是其中一步，完整的六步清单见下文「加一门新语言」。
 
 ## 不要破坏的约束
 
@@ -274,7 +274,41 @@ Java 测试没有引入 JUnit，就是一个 `main` + 断言抛 `AssertionError`
 
 ### 加一门新语言
 
-改 `ctl/util/util.go` 的 `Languages` 表加一行，再写一个对应的测试脚本（照 `javatest.sh` 抄）、在 `Makefile` 和 CI 里各加一项。README 渲染逻辑不用动。
+六步，缺一不可。前三步只让 README 认得这门语言，**第四、五步才让树和链表的题能写**——漏掉的话，加完语言会发现第一道 `TreeNode` 的题就卡住。
+
+**1. 登记语言** —— `ctl/util/util.go` 的 `Languages` 表加一行：
+
+```go
+{Name: "C++", Ext: ".cpp", TestSuffix: "_test.cpp", Entry: "Solution.cpp"},
+```
+
+README 的渲染逻辑不用动，`Solution` 列会自动多出这门语言的链接，语言统计表也自动多一行。
+
+**2. 骨架文件** —— `leetcode/0000.Template/` 里加 `Solution.cpp` 和 `SolutionTest.cpp`。`ctl new --langs cpp` 靠扩展名从这里复制，不需要改 `new.go`。骨架要遵守约束 8：分「本地接线区」和「题解本体」两段，本体形态和 LeetCode 该语言的模板一致。
+
+**3. 测试脚本** —— 照 `javatest.sh` 抄一个 `cpptest.sh`。必须做到：
+
+- 接受可选的目录参数（单题模式），不给参数则遍历 `ROOTS`
+- 「这道题没写这门语言」按**跳过**处理，不是失败（见「单题测试」一节）
+- 失败时退出码非零
+
+**4. 共享数据结构** —— 新建 `structures/cpp/`，至少把 `TreeNode` 和 `ListNode` 照 LeetCode 该语言的定义移植过去，外加建树/建链表的测试辅助。不要照搬 Go 的 `Stack`/`Queue`/`Heap`/`PriorityQueue`，先看这门语言的标准库有没有。
+
+**5. 把共享结构接进编译** —— 这是最容易漏的一步，各语言机制不同：
+
+| 语言 | 接法 |
+|:---|:---|
+| Go | 普通包，题解 `import` + 类型别名即可，脚本不用改 |
+| Java | `javatest.sh` 把 `structures/java/*.java` 加进每次 `javac` 的源文件列表 |
+| Python | `conftest.py` 把 `structures/python` 加进 `sys.path` |
+| C / C++ | `cpptest.sh` 编译时加 `-I structures/cpp`（已验证可行） |
+| Rust | 见下 |
+
+**6. 共享结构的测试** —— `structures/<lang>/` 里的辅助方法写错了会让所有相关题解给出假结果（见「共享结构必须有测试」），所以要跟着全量测试跑。注意 Java 那种「共享目录按 glob 全量编译」的语言，测试要放在 `test/` 子目录，否则测试类会被编进每一道题。
+
+最后在 `Makefile` 加 `test-<lang>` 目标（记得支持 `ID=`）、并入 `test`，再在 `.github/workflows/test.yml` 加一个 job。
+
+**Rust 要单独决策**：Rust 的模块名必须是合法标识符，而 `0094.Binary-Tree-Inorder-Traversal` 数字开头、带 `.` 和 `-`，三条全犯，常规 `mod` 声明指不到题目目录。逃生口是 `#[path = "..."] mod xxx;` 加 `rustc --test <任意路径>.rs`，或者用 Cargo workspace + 一个 `src/lib.rs` 逐题 `#[path]` 登记（`ctl new` 可以自动追加）。**这两条都没有实测过**，选哪条要先验证。注意问题出在题目目录的命名上，和 `structures/rust/` 无关。
 
 ## 相对上游 halfrost/LeetCode-Go 的修改
 
