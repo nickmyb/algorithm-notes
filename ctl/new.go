@@ -35,10 +35,14 @@ func newNewCommand() *cobra.Command {
 		Example: "  algorithm-notes new 1\n  algorithm-notes new 15 --langs go,python",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// 参数不对是用法错误，这时打出用法说明有帮助
 			id, err := strconv.Atoi(args[0])
 			if err != nil || id <= 0 {
 				return fmt.Errorf("题号必须是正整数，收到 %q", args[0])
 			}
+			// 往下都是运行时错误（目录已存在、拉不到题库…），跟用法无关，
+			// 再打一整篇 usage 只会把真正的错误信息淹掉
+			cmd.SilenceUsage = true
 			return scaffold(id, strings.Split(newLangs, ","))
 		},
 	}

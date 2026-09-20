@@ -18,7 +18,8 @@ make init                        # 初始化：检查工具链、装依赖、跑
 make new ID=1                    # 新开一题（三门语言）
 make new ID=15 LANGS=go          # 只要某一门或某几门语言
 make test                        # 三门语言全跑
-make test-go / test-python / test-java
+make test ID=94                  # 只测一道题，那题没写的语言安静跳过
+make test-go / test-python / test-java   # 同样支持 ID=94
 make readme                      # 重新生成根 README.md
 make fmt / vet / tidy / clean
 ```
@@ -46,11 +47,93 @@ leetcode/<NNNN>.<英文标题>/    # 一题一目录，NNNN 是四位题号
 ├── solution.py  solution_test.py
 └── Solution.java SolutionTest.java
 ctl/                          # 命令行工具
-structures/                   # Go 题解共用数据结构
+structures/                   # 各语言共用的数据结构，按语言分子目录
+├── go/                       # package structures，import 路径 .../structures/go
+├── java/                     # TreeNode.java 等，javac 编译每个题目目录时一并带上
+└── python/                   # tree_node.py / list_node.py，conftest.py 把它加进 sys.path
 conftest.py pytest.ini        # Python 测试基建
-gotest.sh javatest.sh         # Go / Java 测试脚本
-scripts/init.sh Makefile
+gotest.sh pytest.sh javatest.sh   # 三门语言的测试脚本，都接受可选的目录参数
+scripts/init.sh               # make init 的实现
+scripts/problem-dir.sh        # 题号 -> 目录，供 Makefile 的 ID= 用
+Makefile
 ```
+
+### 单题测试
+
+`make test ID=94` 只测一道题。链路是 `Makefile` 用 `scripts/problem-dir.sh` 把题号解析成目录，再把目录作为参数传给三个测试脚本。
+
+三个脚本都必须把「这道题没写这门语言」当成**跳过而不是失败**，改动它们时不要破坏这一点：
+
+- `gotest.sh`：`compgen -G "$dir/*.go"` 判断有没有 Go 文件，没有就跳过——否则 `go test` 报 `no Go files` 让整条命令变红
+- `pytest.sh`：pytest 在「一个测试都没收集到」时返回 **5**，单题模式下要把它当成 0。这正是 `pytest.sh` 存在的唯一理由，不要把它简化成直接调 pytest
+- `javatest.sh`：本来就会跳过没有 `.java` 的目录，另外在 `total == 0` 时提前返回 0
+
+题号解析失败时 Makefile 用 `$(error ...)` 直接中止，**不能**静默退化成全量测试——那会让你以为测了单题，实际跑了整个仓库。
+
+## 共享数据结构
+
+`TreeNode`、`ListNode` 这些在 LeetCode 上是平台提供的，本仓库由 `structures/` 扮演这个角色，**不要在题目目录里重复定义**（Java 会直接撞类名编译失败）。
+
+| 语言 | 位置 | 题解里怎么用 | 接入机制 |
+|:---|:---|:---|:---|
+| Go | `structures/go/` | `import structures "github.com/nickmyb/algorithm-notes/structures/go"` | 普通 Go 包 |
+| Java | `structures/java/` | 直接用 `TreeNode` / `TreeNodes` | `javatest.sh` 把 `structures/java/*.java` 加进每次 `javac` 的源文件列表 |
+| Python | `structures/python/` | `from tree_node import TreeNode, build_tree` | `conftest.py` 把该目录加进 `sys.path` |
+
+### 现在有哪些，以及为什么只有这些
+
+Go 那边带着 halfrost 的 9 个文件，但它们不是一类东西，**不要照数量去补齐 Java/Python**：
+
+| 类别 | Go 里的 | Java / Python 要不要 |
+|:---|:---|:---|
+| LeetCode 题目里真正出现的节点类型 | `TreeNode`、`ListNode`、`NestedInteger`、`Interval`、`Point` | 要。目前移植了 `TreeNode` 和 `ListNode` |
+| 补 Go 标准库缺口的容器 | `Stack`、`Queue`、`Heap`、`PriorityQueue` | **不要**。Java 有 `ArrayDeque`/`PriorityQueue`，Python 有 `deque`/`heapq`，手写一份反而没人会用 |
+| 测试辅助函数 | `Ints2TreeNode`、`Tree2ints`… | 要，跟着对应的节点类型一起移植 |
+
+`NestedInteger`（4 道题）、`Interval` / `Point`（早期题型，现在多用 `int[][]`）用到再补。Java 的 `NestedInteger` 在 LeetCode 上是 `interface`，本地测试还要配一个实现类，比另外两个复杂。
+
+### 共享结构必须有测试
+
+`structures/` 里的辅助方法是所有树/链表题的地基，**写错了会让题解测试给出假结果**——初版 Java `toLevelOrder` 就因为往 `ArrayDeque` 塞 null 子节点而 NPE（Python 的 `deque` 允许 None，同样的写法在那边不会暴露）。所以三门语言各自都有测试，且都跟着全量测试跑：
+
+| 语言 | 测试位置 | 由谁跑 |
+|:---|:---|:---|
+| Go | `structures/go/*_test.go` | `gotest.sh` 末尾的 `go test ./structures/...` |
+| Java | `structures/java/test/StructuresTest.java` | `javatest.sh` 全量模式下单独编译运行 |
+| Python | `structures/python/*_test.py` | `pytest.ini` 的 `testpaths` 包含 `structures/python` |
+
+Java 的测试放在 `test/` **子目录**是必须的：`javatest.sh` 取共享结构用的是 `structures/java/*.java` 这个非递归 glob，放同级的话这个测试类会被编进每一道题的产物里。
+
+单题模式（`make test ID=94`）**不跑**共享结构的测试——那个模式是为了快速迭代一道题。改了 `structures/` 记得跑一次全量 `make test`。
+
+Go 的目录叫 `go` 但包名是 `structures`（`go` 是关键字，不能当包名），所以 import 路径末段和包名不一致——这是刻意的，为了和 `java/`、`python/` 对称。实测 `build`/`vet`/`gofmt`/`test` 全部正常。题解里用显式别名 `import structures ".../structures/go"` 让它更好读。
+
+**节点类型的定义要和 LeetCode 给的一字不差**（`TreeNode.java` / `tree_node.py` 里的 `TreeNode` 都是照搬的），这样题解在本地和在提交框里可以原样来回复制。测试辅助方法另外放（Java 放 `TreeNodes`，Python 放同文件的函数），不要挂到节点类上。
+
+### 怎么新增一个共享结构
+
+三门语言的接入都是自动的（Java 按 glob 取整个目录、Python 靠 `sys.path`、Go 是普通包），**加文件就生效，不用改测试脚本**。但各语言有各自的正确性约束：
+
+**Go** —— 在 `structures/go/` 加 `.go` 文件，包名必须是 `structures`。没有别的限制。
+
+**Java** —— 在 `structures/java/` 加 `.java` 文件，public 类名和文件名一致。关键约束：
+
+> 这里的每个类都会被加进**每一个**题目目录的编译单元。所以类名要足够独特，一旦和某道题里的辅助类重名，那道题直接编译失败（`duplicate class`）。反过来说，题目目录里也不要定义和这里同名的类。
+
+**都要配测试**——见上一节，`structures/` 的东西写错了会让所有相关题解的测试给出假结果。
+
+**Python** —— 在 `structures/python/` 加 `.py` 文件。关键约束：
+
+> 这个目录在 `sys.path` 上，**文件名就是模块名**。不要起 `queue.py`、`heapq.py`、`collections.py` 这类和标准库重名的名字。`conftest.py` 用的是 `sys.path.append` 而不是 `insert(0)`，所以标准库优先，重名时是你的模块取不到（会立刻报错），而不是标准库被静默遮蔽——但仍然别这么命名。
+
+**三门语言共同的约定：**
+
+1. **节点类型的定义照搬 LeetCode 给的那段注释，一字不改**（字段名、构造器都不动）。这样题解在本地和在提交框之间可以原样复制。
+2. **测试辅助另外放**，不要挂到节点类上：Java 放 `XxxNodes` 工具类（`TreeNode` → `TreeNodes`），Python 放同文件的模块级函数，Go 放同包的函数。挂上去就破坏了第 1 条。
+3. **命名跨语言可对应**：`Ints2TreeNode`（Go）/ `TreeNodes.build`（Java）/ `build_tree`（Python）是同一件事，各自用本语言的惯例，但读者要能一眼对上。
+4. 只在真需要时加。halfrost 的 Go 版树相关函数有 13 个，Java / Python 侧移植了建树、层序展开、三种遍历、查找、比较，其余用到哪个补哪个。
+
+加新语言时照这个模式：`structures/<lang>/` + 在对应测试脚本里接上。C/C++ 用 `-I structures/cpp`（已验证可行）。
 
 ## 不要破坏的约束
 
@@ -71,9 +154,10 @@ scripts/init.sh Makefile
 
 ```python
 def test_two_sum(solution):
-    assert solution.twoSum([2, 7, 11, 15], 9) == [0, 1]
+    assert solution.Solution().twoSum([2, 7, 11, 15], 9) == [0, 1]
 ```
 
+题解本体是 `class Solution`（见约束 8），所以要先 `solution.Solution()` 实例化。
 不要"顺手改成" `from solution import twoSum`，那样一定会坏。
 
 ### 3. Java 必须逐目录编译
@@ -106,7 +190,59 @@ Java 测试没有引入 JUnit，就是一个 `main` + 断言抛 `AssertionError`
 
 题号 `0` 被 `util.LoadSolutions` 跳过，不计入任何统计。`ctl new` 从这里复制各语言文件。它的测试里有 `t.Skip` / `pytest.skip`，**保持跳过状态**。
 
-### 8. 题解 README 的「题目大意」故意留空
+### 8. 题解本体必须能原样复制到 LeetCode
+
+**这是本仓库最硬的一条约束。** 题解文件的结构固定为：
+
+```
+[本地接线区]   ← LeetCode 上不需要、本地才要的几行
+[题解本体]     ← 逐字等于 LeetCode 提交框里的内容
+```
+
+两个方向都要成立：从 LeetCode 复制进来只需**补接线**，从仓库复制出去只需**删接线**，本体一个字都不改。
+
+| 语言 | 本地接线区 | 题解本体 |
+|:---|:---|:---|
+| Go | `package leetcode` + `import structures ".../structures/go"` + `type TreeNode = structures.TreeNode` | `func inorderTraversal(root *TreeNode) []int {…}` |
+| Java | `import java.util.List;` 等（LeetCode 预置了 `java.util.*`） | `class Solution {…}` |
+| Python | `from tree_node import TreeNode`（LeetCode 预置了节点类型） | `class Solution:` + 带 `self` 的方法 |
+
+**接线区的判据**：凡是 LeetCode 提交框里**不存在**的代码行，都属于接线区。这包括 Go 的 `package leetcode`、三门语言的 import 语句、Go 的类型别名。所以「以下是题解本体」这个标记必须放在**所有 import 之后**，而不是文件最开头——放错位置的话，按标记复制出去会连 import 一起带走。
+
+各语言的接线内容不同，标记位置也不同：
+
+| 语言 | 接线区包含 | 标记放在 |
+|:---|:---|:---|
+| Go | `package leetcode` + `import` + `type TreeNode = structures.TreeNode` | 类型别名之后 |
+| Java | `import java.util.…` | import 之后 |
+| Python | `from typing import …`、`from tree_node import …` | import 之后 |
+
+由此有三条不能改的细节：
+
+- **Java 的类声明是 `class Solution`，不带 `public`**。LeetCode 模板里带 `public` 的是 `TreeNode`，`Solution` 没有。文件名仍是 `Solution.java`，非 public 类不要求和文件名匹配，测试在同一个 default package 里照样访问得到。
+- **Python 的题解是 `class Solution:` 里带 `self` 的方法**，不是顶层函数。Python 靠缩进表达结构，改成顶层函数意味着每道题复制时都要删类声明、去 `self`、整段反缩进——三件事，不是"差一个 self"。测试里用 `solution.Solution().方法名(...)` 取。
+- **Go 用类型别名而不是直接写 `*structures.TreeNode`**：`type TreeNode = structures.TreeNode`（注意是别名 `=`，不是定义新类型），这样本体里的签名和 LeetCode 一字不差。这是上游 halfrost 的做法，照搬。
+
+### 9. 统计看文件存不存在，不看内容
+
+`util.LoadSolutions` 判断一道题"有没有题解"，看的是目录里有没有对应语言的文件，**不看文件内容**。所以 `make new` 一建完目录，那道题就立刻计入 README 的统计，哪怕里面还是骨架。
+
+这是有意保持简单：正常流程是「建目录 → 写题解 → 跑测试 → `make readme`」，刷新 README 时题解已经写完了。但如果先 `make new` 一批题占坑，统计会虚高。
+
+同一个判据也决定了单题测试跳不跳过某门语言，于是有个实际后果——**只打算写一门语言时，`make new` 要带 `LANGS=`**：
+
+| | `make new ID=94 LANGS=java` | `make new ID=94`（三门都生成，只写了 Java） |
+|:---|:---|:---|
+| 目录里 | 只有 `Solution.java` | `Solution.go` / `solution.py` 也在，是空骨架 |
+| `make test ID=94` | Go/Python 跳过 | Go/Python 照跑，靠骨架里的 `t.Skip` / `pytest.skip` 通过 |
+| README | `[Java]` | `[Go] [Python] [Java]`，点进去两个是空骨架 |
+| 语言统计 | Java 1 / Go 0 / Python 0 | 三门都算 1 ⚠️ |
+
+事后补语言只要把文件放进目录再 `make readme`，不用重建目录。
+
+由此，`LoadSolutions` 返回的 `pending`（"建了目录但还没有题解"）在实际中几乎恒为 0，因为 `make new` 总会创建语言文件。它只在手工建了空目录时才会非零。**不要因为这个计数总是 0 就以为逻辑坏了。**
+
+### 10. 题解 README 的「题目大意」故意留空
 
 `ctl new` 会自动填「题目」（英文原文 + 折叠的官方中文翻译），但**不填「题目大意」**。那是留给作者用一两句话自己复述题意的地方，自动填就失去意义了。不要"补全"它。
 
@@ -174,4 +310,12 @@ Java 测试没有引入 JUnit，就是一个 `main` + 断言抛 `AssertionError`
 
 `ctl/config.toml` 存 LeetCode 的 Cookie，已在 `.gitignore` 里（`config.toml` 不带斜杠，任意层级生效）。**不要提交它，不要把 Cookie 写进任何其他文件或日志。**
 
-没有这个文件也能正常工作，只是 README 的「个人数据」表格会全是 0。
+这个文件是可选的，绝大部分操作不需要登录：
+
+| 操作 | 需要登录？ |
+|:---|:---|
+| `new <免费题>`、`build readme` 的题目表格 | 否 |
+| `new <会员题>` 的题目描述 | 是，且账号要有 LeetCode 会员，否则接口返回空 |
+| `build readme` 的「个人数据」和「已 AC 但未收录」 | 是 |
+
+所以不要因为「没有 config.toml」就认为工具坏了或去加什么回退逻辑——未登录是正常路径。

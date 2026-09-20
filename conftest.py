@@ -11,11 +11,26 @@
 """
 
 import importlib.util
+import sys
 from pathlib import Path
 
 import pytest
 
 SOLUTION_FILENAME = "solution.py"
+
+# 共享数据结构（TreeNode、ListNode 等）放在 structures/python，加进 sys.path 后
+# 题解里直接 `from tree_node import TreeNode, build_tree` 即可，不用每道树的题重抄一遍。
+# 对应 Go 的 structures/go 包和 Java 的 structures/java 目录。
+#
+# 这里只加这一个路径，题解模块本身仍然由下面的 fixture 按文件路径加载——
+# 那是为了绕开几百个同名 solution.py 的模块名冲突，不能改成普通 import。
+#
+# 用 append 而不是 insert(0)：插到最前面的话，这个目录会排在标准库之前，
+# 哪天在里面放个 queue.py 或 heapq.py 就会把整个测试进程的标准库遮蔽掉。
+# 追加到末尾则是标准库优先，重名时最多是自己的模块取不到，立刻就能发现。
+_STRUCTURES = Path(__file__).parent / "structures" / "python"
+if _STRUCTURES.is_dir() and str(_STRUCTURES) not in sys.path:
+    sys.path.append(str(_STRUCTURES))
 
 
 @pytest.fixture

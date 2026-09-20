@@ -9,6 +9,17 @@ PYTEST := $(VENV)/bin/pytest
 # make new 默认生成三门语言的骨架，用 LANGS=go,python 可以只要其中几门
 LANGS ?= go,python,java
 
+# 给了 ID 就只测那一道题，没给就全量。
+# 解析失败（题号不存在）直接报错，免得静默退化成"测了全部"。
+ifdef ID
+ifneq ($(filter test test-go test-python test-java,$(MAKECMDGOALS)),)
+PROBLEM_DIR := $(shell bash ./scripts/problem-dir.sh $(ID) 2>/dev/null)
+ifeq ($(PROBLEM_DIR),)
+$(error 找不到题号 $(ID) 对应的目录，先跑 make new ID=$(ID))
+endif
+endif
+endif
+
 .PHONY: help
 help: ## 列出所有命令
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -34,19 +45,19 @@ readme: ## 重新生成仓库根 README.md
 ## ---------- 测试 ----------
 
 .PHONY: test
-test: test-go test-python test-java ## 跑三门语言的全部测试
+test: test-go test-python test-java ## 跑测试，加 ID=94 只测一道题
 
 .PHONY: test-go
-test-go: ## 跑 Go 题解测试并生成覆盖率
-	bash ./gotest.sh
+test-go: ## 跑 Go 题解测试并生成覆盖率，加 ID=94 只测一道题
+	bash ./gotest.sh $(PROBLEM_DIR)
 
 .PHONY: test-python
-test-python: $(PYTEST) ## 跑 Python 题解测试
-	$(PYTEST) -q
+test-python: $(PYTEST) ## 跑 Python 题解测试，加 ID=94 只测一道题
+	PYTEST=$(PYTEST) bash ./pytest.sh $(PROBLEM_DIR)
 
 .PHONY: test-java
-test-java: ## 编译并跑 Java 题解测试
-	bash ./javatest.sh
+test-java: ## 编译并跑 Java 题解测试，加 ID=94 只测一道题
+	bash ./javatest.sh $(PROBLEM_DIR)
 
 # 只在缺失或依赖清单变动时重建虚拟环境，避免每次跑测试都重装
 $(PYTEST): requirements-dev.txt

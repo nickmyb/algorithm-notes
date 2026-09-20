@@ -10,12 +10,15 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "algorithm-notes",
 	Short: "A simple command line client for algorithm-notes.",
+	// cobra 默认自己打一遍错误，下面 execute() 又打一遍，同一句话会出现两次。
+	// 交给 execute() 统一处理，顺便写到 stderr 而不是 stdout。
+	SilenceErrors: true,
 }
 
 func execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
 	}
 }
 
