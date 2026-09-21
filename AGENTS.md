@@ -300,6 +300,26 @@ Java 测试没有引入 JUnit，就是一个 `main` + 断言抛 `AssertionError`
 - **Python 的题解是 `class Solution:` 里带 `self` 的方法**，不是顶层函数。Python 靠缩进表达结构，改成顶层函数意味着每道题复制时都要删类声明、去 `self`、整段反缩进——三件事，不是"差一个 self"。测试里用 `solution.Solution().方法名(...)` 取。
 - **Go 用类型别名而不是直接写 `*structures.TreeNode`**：`type TreeNode = structures.TreeNode`（注意是别名 `=`，不是定义新类型），这样本体里的签名和 LeetCode 一字不差。这是上游 halfrost 的做法，照搬。
 
+#### 不要引入会自动重写题解的工具
+
+**题解本体的裁判是 LeetCode，本地不该再设一个。** 已经评估过并决定**不引入 lint**（2026-09）：风格类规则在这里是反的，它们想改的恰恰是不能改的东西。
+
+实测 `ruff check --fix` 对第 94 题的题解做了什么：
+
+```diff
+-     def inorderTraversal(self, root: TreeNode | None) -> List[int]:
++     def inorderTraversal(self, root: TreeNode | None) -> list[int]:
+- from typing import List          # 连接线区的 import 一起删了
+```
+
+**改完测试照样全绿**——这才是危险的地方，破坏了可复制性却没有任何信号。同类冲突还有 `N802`（要把 `inorderTraversal` 改成蛇形，可那是 LeetCode 定的名字）、`INP001`（要加 `__init__.py`，和 conftest 按路径加载的设计对立）、`RUF002/003` 和 `D400/D415`（中文注释和 docstring 的误报，一次扫描 40 多处）。
+
+所以：
+
+- **不要为 `leetcode/` 引入 lint、formatter 或任何会自动改写的工具**。真要加，也只能开正确性规则（比如 `E711` 抓到的 `root == None` 确实该改成 `is None`，且 `is None` 在 LeetCode 上一样跑），并且**硬编码不带 `--fix`**。
+- 工具链侧（`ctl/` `scripts/` `structures/` `conftest.py`）不受这条限制，那些是普通工程代码。Go 侧的 `go vet` 本来就在 CI 里跑。
+- **同样的危险存在于 IDE**：PyCharm 的 Reformat Code / Optimize Imports 会做和 `ruff --fix` 一模一样的事。在题目目录里写题时不要用全局重排，`gofmt` 是唯一被接受的例外（只影响缩进，见上文）。
+
 ### 9. 统计看文件存不存在，不看内容
 
 `util.LoadSolutions` 判断一道题"有没有题解"，看的是目录里有没有对应语言的文件，**不看文件内容**。所以 `make new` 一建完目录，那道题就立刻计入 README 的统计，哪怕里面还是骨架。
