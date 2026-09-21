@@ -103,6 +103,45 @@ def test_unwritten_language_is_skipped(repo, script):
     assert ": SKIP\n" in result.stdout
 
 
+@pytest.mark.parametrize("script", ["gotest.sh", "javatest.sh"])
+def test_template_is_skipped_by_default(repo, script):
+    """0000.Template 是 ctl new 的复制源，属于工具链，日常 make test 不该测它。
+
+    它每次只贡献一条 SKIP 和几行噪音，却会出现在每道题的测试输出里。
+    """
+    (repo / "leetcode/0000.Template/Solution.go").write_text("package leetcode\n")
+    (repo / "leetcode/0094.Example/Solution.go").write_text("package leetcode\n")
+    go = executable(repo, "fake-go", 'if [ "$1" = list ]; then\n'
+                    'printf "%s\\n" example/leetcode/0000.Template example/leetcode/0094.Example\n'
+                    'else printf "%s\\n" "$@"; fi\n')
+    result = run(repo, script, env={"GO": go})
+    assert result.returncode == 0, result.stdout
+    assert "0000.Template" not in result.stdout
+
+
+@pytest.mark.parametrize("script", ["gotest.sh", "javatest.sh"])
+def test_template_runs_when_requested(repo, script):
+    """make init 和 CI 设 TEST_TEMPLATE=1：骨架坏了每次 make new 都产出坏目录，
+    不能完全不验。"""
+    (repo / "leetcode/0000.Template/Solution.go").write_text("package leetcode\n")
+    go = executable(repo, "fake-go", 'if [ "$1" = list ]; then\n'
+                    'printf "%s\\n" example/leetcode/0000.Template\n'
+                    'else printf "%s\\n" "$@"; fi\n')
+    result = run(repo, script, env={"GO": go, "TEST_TEMPLATE": "1"})
+    assert result.returncode == 0, result.stdout
+    if script == "gotest.sh":
+        assert "0000.Template" in result.stdout
+
+
+def test_template_runs_when_named_explicitly(repo):
+    """显式 make test ID=0 时始终尊重用户的选择，不受默认排除影响。"""
+    (repo / "leetcode/0000.Template/Solution.go").write_text("package leetcode\n")
+    go = executable(repo, "fake-go", 'printf "%s\\n" "$@"\n')
+    result = run(repo, "gotest.sh", repo / "leetcode/0000.Template", env={"GO": go})
+    assert result.returncode == 0, result.stdout
+    assert "0000.Template" in result.stdout
+
+
 def test_all_runs_remaining_languages_after_failure(repo):
     pytest_cmd = executable(repo, "fake-pytest", "echo PYTHON_RAN\nexit 5\n")
     (repo / "leetcode/0094.Example/Solution.go").write_text("package leetcode\n")

@@ -18,6 +18,12 @@ cd "$ROOT"
 TEST_LANGUAGE=Python
 source ./scripts/test-common.sh
 
+# 骨架目录 leetcode/0000.Template 默认不测。它是 ctl new 的复制源，属于工具链而不是
+# 题解，日常 make test 里只会贡献一条 SKIP 和几行噪音。但它坏了每次 make new 都会
+# 产出坏目录，所以不能完全不验：make init 和 CI 设 TEST_TEMPLATE=1 把它带上。
+# 显式指定目录时（make test ID=0）始终尊重用户的选择。
+TEST_TEMPLATE="${TEST_TEMPLATE:-0}"
+
 if ! command -v "$PYTEST" >/dev/null 2>&1; then
     echo "找不到 pytest（$PYTEST），先跑 make init" >&2
     exit 1
@@ -34,7 +40,9 @@ else
     #   题解测试   每题就几个 Example，逐条显示才知道哪道题的哪个用例挂了
     #   工具链测试 structures 和 scripts 加起来几十个，只要一行结论
     # 合在一起用 -v 会把题解淹掉（make init 里刷过 59 行），全用 -q 又看不见题解用例。
-    "$PYTEST" -v --no-header leetcode
+    solution_args=(leetcode)
+    [ "$TEST_TEMPLATE" = 1 ] || solution_args+=(--ignore=leetcode/0000.Template)
+    "$PYTEST" -v --no-header "${solution_args[@]}"
     rc=$?
     "$PYTEST" -q --no-header structures/python scripts
     tooling_rc=$?

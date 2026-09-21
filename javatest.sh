@@ -40,6 +40,12 @@ if [ -d "$SHARED_DIR" ]; then
 fi
 
 # 要测哪些目录：给了参数就只测这些，否则遍历所有题解根目录
+# 骨架目录 leetcode/0000.Template 默认不测。它是 ctl new 的复制源，属于工具链而不是
+# 题解，日常 make test 里只会贡献一条 SKIP 和几行噪音。但它坏了每次 make new 都会
+# 产出坏目录，所以不能完全不验：make init 和 CI 设 TEST_TEMPLATE=1 把它带上。
+# 显式指定目录时（make test ID=0）始终尊重用户的选择。
+TEST_TEMPLATE="${TEST_TEMPLATE:-0}"
+
 dirs=()
 if [ $# -gt 0 ]; then
     dirs=("${test_dirs[@]}")
@@ -47,6 +53,9 @@ else
     for root in "${ROOTS[@]}"; do
         for dir in "$ROOT/$root"/*/; do
             [ -d "$dir" ] || continue
+            if [ "$(basename "$dir")" = "0000.Template" ] && [ "$TEST_TEMPLATE" != 1 ]; then
+                continue
+            fi
             dirs+=("${dir%/}")
         done
     done

@@ -100,6 +100,21 @@ Makefile
 - `pytest.sh`：pytest 在「一个测试都没收集到」时返回 **5**，单题模式下要把它当成 0。这正是 `pytest.sh` 存在的唯一理由，不要把它简化成直接调 pytest
 - `javatest.sh`：本来就会跳过没有 `.java` 的目录，另外在 `total == 0` 时提前返回 0
 
+### 日常测试不跑 `0000.Template`
+
+骨架是 `ctl new` 的复制源，属于工具链而不是题解。日常 `make test` 里它只贡献一条 SKIP 和几行噪音，却夹在每道真实题目的输出中间，所以三个测试脚本默认跳过它。
+
+但**不能完全不验**——骨架坏了，之后每次 `make new` 都会产出坏目录。所以：
+
+| 场景 | 是否测骨架 | 怎么控制 |
+|:---|:---|:---|
+| 日常 `make test` / `make test-go` 等 | 否 | 默认 `TEST_TEMPLATE=0` |
+| `make init` | 是 | `scripts/init.sh` 里三处设 `TEST_TEMPLATE=1` |
+| CI | 是 | `.github/workflows/test.yml` 三个 job 都设 |
+| 显式 `make test ID=0` | 是 | 指定了目录就尊重用户，不受默认排除影响 |
+
+改这些脚本时不要把默认值反过来，也不要在 `make init` / CI 里去掉这个变量——那等于骨架再没人验。回归在 `scripts/tooling_test.py` 的 `test_template_*` 三组。
+
 题号解析失败时 Makefile 用 `$(error ...)` 直接中止，**不能**静默退化成全量测试——那会让你以为测了单题，实际跑了整个仓库。
 
 题号用十进制文本解析并补零，`0094` 和 `94` 必须等价。不要直接用 `printf '%04d' "$id"`：它把前导零当八进制，`0094` 报错后曾误匹配到 `0000.Template`。

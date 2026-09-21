@@ -93,6 +93,8 @@ tests.finish();
 
 单题模式不跑 `structures/` 的测试，改了共享结构记得跑一次全量 `make test`。
 
+全量模式也不跑 `0000.Template`——骨架是 `make new` 的复制源，不是题解，放在日常输出里只会添噪音。它由 `make init` 和 CI 负责验证；想单独测用 `make test ID=0`。
+
 三门语言保留各自的用例明细，脚本最后统一输出 `===== Go/Python/Java: PASS/FAIL/SKIP =====`。`make test` 会跑完三门语言，再输出 `===== All: PASS =====` 或 `FAIL`；任意一门失败，整条命令返回非零。`PASS` 表示本次运行没有失败，骨架的跳过数仍应查看用例明细。
 
 在 IDE 的原生运行按钮里，Go 和 Python 的格式由 IDE/测试框架决定；Java 直接运行 `SolutionTest.main` 也会输出用例数及总结果。需要相同的语言汇总格式时，从 IDE 终端运行 `make test ID=1`。

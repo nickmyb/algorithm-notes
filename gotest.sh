@@ -21,6 +21,12 @@ GO="${GO:-go}"
 # 题解根目录。以后新增 lcp/ 这类同级目录，在这里加一项即可。
 ROOTS=(./leetcode/...)
 
+# 骨架目录 leetcode/0000.Template 默认不测。它是 ctl new 的复制源，属于工具链而不是
+# 题解，日常 make test 里只会贡献一条 SKIP 和几行噪音。但它坏了每次 make new 都会
+# 产出坏目录，所以不能完全不验：make init 和 CI 设 TEST_TEMPLATE=1 把它带上。
+# 显式指定目录时（make test ID=0）始终尊重用户的选择。
+TEST_TEMPLATE="${TEST_TEMPLATE:-0}"
+
 if [ $# -gt 0 ]; then
     # 单题模式：挑出确实有 Go 文件的目录。那道题没写 Go 题解不算失败，
     # 直接跳过——否则 go test 会报 "no Go files" 让整条命令变红。
@@ -52,6 +58,8 @@ pkgs=()
 while IFS= read -r package; do
     case "$package" in
         '' | */out/*) continue ;;
+        */leetcode/0000.Template)
+            [ "$TEST_TEMPLATE" = 1 ] || continue ;;
     esac
     pkgs+=("$package")
 done <<< "$package_list"

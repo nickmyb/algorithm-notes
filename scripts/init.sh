@@ -82,17 +82,19 @@ if [ "$has_python" = 1 ]; then
     echo "  $("$VENV/bin/pytest" --version)"
 fi
 
+# 这三处带 TEST_TEMPLATE=1：初始化要连 0000.Template 一起验，确认骨架本身
+# 能编译能跑。日常 make test 不测它，免得每次都多出一条 SKIP 和几行噪音。
 step "跑 Go 题解测试"
-bash ./gotest.sh || die "Go 测试失败"
+TEST_TEMPLATE=1 bash ./gotest.sh || die "Go 测试失败"
 
 if [ "$has_python" = 1 ]; then
     step "跑 Python 题解测试"
-    PYTEST="$VENV/bin/pytest" bash ./pytest.sh || die "Python 测试失败"
+    TEST_TEMPLATE=1 PYTEST="$VENV/bin/pytest" bash ./pytest.sh || die "Python 测试失败"
 fi
 
 if [ "$has_java" = 1 ]; then
     step "跑 Java 题解测试"
-    bash ./javatest.sh || die "Java 测试失败"
+    TEST_TEMPLATE=1 bash ./javatest.sh || die "Java 测试失败"
 fi
 
 step "生成 README.md"

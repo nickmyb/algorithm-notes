@@ -21,7 +21,7 @@ jobs:
         run: go vet ./...
 
       - name: Test with coverage
-        run: bash ./gotest.sh
+        run: TEST_TEMPLATE=1 bash ./gotest.sh
 
       - name: Show coverage gaps # 打印总覆盖率和未达 100% 的函数，方便定位
         if: always()
@@ -59,7 +59,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Test
-        run: PYTEST=pytest bash ./pytest.sh
+        run: TEST_TEMPLATE=1 PYTEST=pytest bash ./pytest.sh
 
   java:
     name: Java
@@ -79,4 +79,4 @@ jobs:
           java-version: ${{ steps.java-version.outputs.version }}
 
       - name: Test
-        run: bash ./javatest.sh
+        run: TEST_TEMPLATE=1 bash ./javatest.sh
