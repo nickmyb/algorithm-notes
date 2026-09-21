@@ -504,3 +504,29 @@ def test_init_stops_when_version_floor_cannot_be_parsed(init_repo, tmp_path, cle
     result = run_init_sh(init_repo, home, clean_path)
     assert result.returncode != 0
     assert "没能从 go.mod 解析出" in result.stdout, result.stdout
+
+
+def test_empty_repo_is_not_a_failure(repo, tmp_path):
+    """一道题都没有时，全量 make test 不能报错。
+
+    这是从 init 标签起步的第一现场：make init 成功，紧接着 make test
+    就该是绿的。pytest 在"没收集到用例"时返回 5，题解那一段收到 5 是
+    正常状态（还没写题），工具链那一段收到 5 才是真坏了。
+    """
+    calls = tmp_path / "calls"
+    pytest_cmd = executable(
+        repo, "fake-pytest",
+        f'echo "$@" >> {calls}\n'
+        # 第一次调用（题解）返回 5，第二次（工具链）返回 0
+        f'[ "$(wc -l < {calls})" = 1 ] && exit 5\nexit 0\n')
+    result = run(repo, "pytest.sh", env={"PYTEST": pytest_cmd, "TEST_TEMPLATE": "0"})
+    assert result.returncode == 0, result.stdout
+    assert "还没有 Python 题解" in result.stdout
+    assert "structures/python" in calls.read_text(), "工具链那一段仍然要跑"
+
+
+def test_broken_tooling_collection_still_fails(repo, tmp_path):
+    """反过来：工具链那一段收不到用例说明环境或配置坏了，必须报错。"""
+    pytest_cmd = executable(repo, "fake-pytest", "exit 5\n")
+    result = run(repo, "pytest.sh", env={"PYTEST": pytest_cmd, "TEST_TEMPLATE": "0"})
+    assert result.returncode != 0, result.stdout
