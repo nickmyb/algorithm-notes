@@ -44,6 +44,14 @@ else
     [ "$TEST_TEMPLATE" = 1 ] || solution_args+=(--ignore=leetcode/0000.Template)
     "$PYTEST" -v --no-header "${solution_args[@]}"
     rc=$?
+    # 题解那一段收不到用例是正常状态，不是故障：刚从 init 标签起步时一道题都还
+    # 没有，日常 make test 又不测骨架目录，收集结果就是空的。这里不放过的话，
+    # 新用户 make init 成功之后第一次 make test 就是一片红。
+    if [ "$rc" -eq 5 ]; then
+        echo "还没有 Python 题解，跳过（make new 建一道题试试）"
+        rc=0
+    fi
+    # 工具链那一段收不到用例则确实是坏了——structures 和 scripts 一直都在。
     "$PYTEST" -q --no-header structures/python scripts
     tooling_rc=$?
     [ "$rc" -eq 0 ] && rc=$tooling_rc
