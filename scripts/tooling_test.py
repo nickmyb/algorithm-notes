@@ -114,7 +114,7 @@ def test_template_is_skipped_by_default(repo, script):
     go = executable(repo, "fake-go", 'if [ "$1" = list ]; then\n'
                     'printf "%s\\n" example/leetcode/0000.Template example/leetcode/0094.Example\n'
                     'else printf "%s\\n" "$@"; fi\n')
-    result = run(repo, script, env={"GO": go})
+    result = run(repo, script, env={"GO": go, "TEST_TEMPLATE": "0"})
     assert result.returncode == 0, result.stdout
     assert "0000.Template" not in result.stdout
 
@@ -137,7 +137,8 @@ def test_template_runs_when_named_explicitly(repo):
     """显式 make test ID=0 时始终尊重用户的选择，不受默认排除影响。"""
     (repo / "leetcode/0000.Template/Solution.go").write_text("package leetcode\n")
     go = executable(repo, "fake-go", 'printf "%s\\n" "$@"\n')
-    result = run(repo, "gotest.sh", repo / "leetcode/0000.Template", env={"GO": go})
+    result = run(repo, "gotest.sh", repo / "leetcode/0000.Template",
+                 env={"GO": go, "TEST_TEMPLATE": "0"})
     assert result.returncode == 0, result.stdout
     assert "0000.Template" in result.stdout
 
