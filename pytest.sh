@@ -23,7 +23,14 @@ if ! command -v "$PYTEST" >/dev/null 2>&1; then
     exit 1
 fi
 
-"$PYTEST" -v "${test_dirs[@]}"
+# 单题模式用 -v：那时你在反复改一道题，想看到每个 Example 的名字和通过与否。
+# 全量模式用 -q：几十上百个用例逐条刷屏会把真正要看的结论淹掉（make init 里
+# 尤其明显）。失败详情两种模式都会打印，安静的只是通过的那些。
+if [ $# -gt 0 ]; then
+    "$PYTEST" -v "${test_dirs[@]}"
+else
+    "$PYTEST" -q "${test_dirs[@]}"
+fi
 rc=$?
 
 # 5 = no tests collected。只有在指定了目录时才当作"这题没有 Python 题解"放过；

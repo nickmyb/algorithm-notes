@@ -11,6 +11,12 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIGS = [("goland", "Go", "go"), ("pycharm", "Python", "python"), ("idea", "Java", "java")]
+# 每个 IDE 的提示里必须出现的内容：选 SDK 的入口 + 指定题目的入口 + 一个具体示例路径。
+NEXT_STEP_MARKERS = {
+    "goland": ("GOROOT", "Package path", "leetcode/0001.Two-Sum"),
+    "pycharm": ("Python Interpreter", "Script path", "leetcode/0001.Two-Sum/solution_test.py"),
+    "idea": ("Project Structure", "Mark Directory as", "leetcode/0001.Two-Sum"),
+}
 
 
 @pytest.fixture
@@ -43,7 +49,12 @@ def test_complete_project_without_problem_or_sdk(repo, ide, language, suffix):
     assert result.returncode == 0, result.stdout
     project = repo / ".ide" / ide
     assert str(project) in result.stdout
-    assert "尚未选择 SDK/解释器和题目" in result.stdout
+    assert "下面两步必须在 IDE 里手工完成一次" in result.stdout
+    # 提示必须给出可照抄的 SDK 入口和题目示例。只说"替换 __PROBLEM_DIR__" 等于让用户猜
+    # 该填目录、绝对路径还是包名。
+    for marker in NEXT_STEP_MARKERS[ide]:
+        assert marker in result.stdout, f"提示里缺少 {marker}：\n{result.stdout}"
+    assert "__PROBLEM_DIR__" not in result.stdout
     assert sorted(path.name for path in (repo / ".ide").iterdir()) == [ide]
 
     modules = ET.parse(project / ".idea/modules.xml")

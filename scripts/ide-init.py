@@ -122,11 +122,66 @@ def initialize(ides):
             with path.open("x", encoding="utf-8") as stream:
                 stream.write(body)
         print(f"{CONFIGS[ide][0]} 项目已创建。用 IDE 的 File → Open 打开文件夹：\n  {target}")
+
     print("\n不要打开 .idea、.iml 或 current_problem.xml 文件；请打开上面列出的文件夹。")
-    print("尚未选择 SDK/解释器和题目。首次打开后先完成这两项，再运行 Current Problem。")
-    print("Go/Python：在 Edit Configurations 中替换 __PROBLEM_DIR__ 目标。")
-    print("Java：将当前一道题标为 Sources Root，然后 Rebuild Project。")
-    print("详细步骤：ide-templates/README.md。换题无须再次执行 make ide。")
+    print("项目文件不含 SDK 和题目，下面两步必须在 IDE 里手工完成一次。")
+    for ide in ides:
+        print()
+        for line in next_steps(ide):
+            print(line)
+    print("\n详细步骤：ide-templates/README.md。换题只改运行配置，无须再次执行 make ide。")
+
+
+def example_problem_dir():
+    """挑一个真实的题目目录当示例，没有题解时退回一个明显是占位的名字。
+
+    提示里给具体路径而不是 __PROBLEM_DIR__ 本身，是因为占位符不告诉用户该填
+    "leetcode/0094.Binary-Tree-Inorder-Traversal" 还是绝对路径还是包名，只能猜。
+    """
+    problems = sorted(
+        p.name for p in (ROOT / "leetcode").glob("[0-9][0-9][0-9][0-9].*")
+        if p.is_dir() and p.name != "0000.Template"
+    )
+    return f"leetcode/{problems[0]}" if problems else "leetcode/0001.Two-Sum"
+
+
+def go_module_path():
+    match = re.search(r"^module\s+(\S+)$", (ROOT / "go.mod").read_text(encoding="utf-8"), re.M)
+    return match[1] if match else "github.com/you/your-repo"
+
+
+def next_steps(ide):
+    problem = example_problem_dir()
+    if ide == "goland":
+        return [
+            "GoLand：",
+            "  1. Settings → Go → GOROOT 选一个不低于 go.mod 要求的 Go SDK",
+            "  2. Run → Edit Configurations → Go - Current Problem：",
+            "     Test kind 选 Package，Pattern 留空，Package path 填当前题目，例如",
+            f"       {go_module_path()}/{problem}",
+            f"     Directory 同步改成 {ROOT / problem}",
+        ]
+    if ide == "pycharm":
+        return [
+            "PyCharm：",
+            "  1. Settings → Project → Python Interpreter → Add → Existing，选",
+            f"       {ROOT / '.venv' / 'bin' / 'python'}",
+            "     （这个虚拟环境由 make init 创建，没有就先跑一次 make init）",
+            "  2. Run → Edit Configurations → Python - Current Problem：",
+            "     Target 选 Script path，填当前题目的测试文件，例如",
+            f"       {ROOT / problem / 'solution_test.py'}",
+            "     注意选 Script path 而不是同名的 Module name。",
+        ]
+    return [
+        "IntelliJ IDEA：",
+        "  1. File → Project Structure → Project → SDK 选 JDK 17（语言级别已按 javatest.sh 设好）",
+        "  2. 在项目树里右键当前这一道题的目录 → Mark Directory as → Sources Root，例如",
+        f"       {problem}",
+        "     structures/java 已经标好了，不用动；标完 Build → Rebuild Project。",
+        "  换题时先右键上一题 → Unmark as Sources Root，再标新的那道：同一时刻只能有",
+        "  一个题目目录是 Sources Root，多于一个会撞 Duplicate class Solution。",
+        "  IDEA 有时会自己把含 .java 的题目目录标成 Sources Root，留意别同时标上多道。",
+    ]
 
 
 def main():

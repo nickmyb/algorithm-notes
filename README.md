@@ -21,10 +21,20 @@ git clone git@github.com:nickmyb/algorithm-notes.git
 cd algorithm-notes
 git switch -c my-solutions init  # 从干净的骨架创建自己的分支
 make init             # 检查工具链、装依赖、跑通测试、生成 README
+make ide              # 可选：用 JetBrains IDE 写题才需要
 make new ID=1         # 开始第一题
 ```
 
-`make init` 需要 Go（`ctl` 是 Go 写的，必需）；Python 和 Java 缺了只会警告并跳过对应的测试链路，不写那门语言就不受影响。
+**动手前先确认 `go` 和 `python3` 在 `PATH` 里。** `make init` 第一步就是检查工具链，找不到会直接退出。已经装了但没进 `PATH` 的话，两种办法：
+
+```sh
+export PATH=/path/to/go/bin:$PATH     # 导出后重跑
+make init GO=/path/to/go/bin/go       # 或直接指定，PYTHON= 同理
+```
+
+Go 是必需的（`ctl` 用 Go 写的）；Python 和 Java 缺了只会警告并跳过对应的测试链路，不写那门语言就不受影响。
+
+`make ide` 不是必须的——用编辑器写题、靠 `make test` 验证完全可以。只有要在 IntelliJ IDEA / PyCharm / GoLand 里跑题解时才需要，它会为三个 IDE 各建一个独立项目。跑完还要在 IDE 里选一次 SDK/解释器并指定当前题目，命令结束时会把每个 IDE 的具体步骤和示例路径打出来，详见 [ide-templates/README.md](./ide-templates/README.md)。
 
 ## 写一道题
 

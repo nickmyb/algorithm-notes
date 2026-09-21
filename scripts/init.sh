@@ -33,7 +33,15 @@ die() {
 }
 
 step "检查工具链"
-command -v "$GO" >/dev/null 2>&1 || die "找不到 go。ctl 工具用 Go 写的，这个是必需的。装好后重跑 make init。"
+if ! command -v "$GO" >/dev/null 2>&1; then
+    # 装了 Go 但没进 PATH 是最常见的情况（比如装在 ~/go/go1.26.4/bin 却没导出），
+    # 所以除了"去装"还要给出"已经装了怎么办"的两条出路。
+    printf '\033[31m[error] 找不到 go。ctl 工具是 Go 写的，这一项必需。\033[0m\n'
+    echo "  没装：      https://go.dev/dl/ ，版本见 go.mod（当前 $(grep -m1 '^go ' "$ROOT/go.mod" | awk '{print $2}')）"
+    echo "  装了没进 PATH：export PATH=/path/to/go/bin:\$PATH 后重跑，或直接指定："
+    echo "                 make init GO=/path/to/go/bin/go"
+    exit 1
+fi
 echo "  go      $($GO version | awk '{print $3}')"
 
 has_python=1
@@ -45,7 +53,7 @@ if command -v "$PYTHON" >/dev/null 2>&1; then
     fi
 else
     has_python=0
-    warn "找不到 $PYTHON，跳过 Python 题解的环境准备"
+    warn "找不到 $PYTHON，跳过 Python 题解的环境准备（装了但不在 PATH 时用 make init PYTHON=/path/to/python3）"
 fi
 
 has_java=1
@@ -105,9 +113,13 @@ cat <<'EOF'
 
 下一步：
   make new ID=1        新开一题（会去 LeetCode 查标题并建好目录）
-  make test            跑三门语言的全部测试
+  make test ID=1       只测这一道；不带 ID 则跑三门语言的全部测试
   make readme          刷新 README 的题目表格
   make help            看全部命令
+
+用 JetBrains IDE 的话，先跑一次 make ide 创建独立项目（只在 IDE 里写题才需要，
+用编辑器 + make test 的话可以跳过）。之后还要在 IDE 里选 SDK/解释器并指定当前题目，
+步骤见 ide-templates/README.md。
 
 可选：想让 README 的「个人数据」表格有内容，按 ctl/README.md 配好 ctl/config.toml。
 EOF
