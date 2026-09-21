@@ -9,6 +9,9 @@ PYTEST := $(VENV)/bin/pytest
 # make new 默认生成三门语言的骨架，用 LANGS=go,python 可以只要其中几门
 LANGS ?= go,python,java
 
+# IDE 项目只初始化一次，不绑定题号；单独初始化可指定 IDE=idea/pycharm/goland。
+IDE ?= all
+
 # 给了 ID 就只测那一道题，没给就全量。
 # 解析失败（题号不存在）直接报错，免得静默退化成"测了全部"。
 ifneq ($(origin ID),undefined)
@@ -30,6 +33,10 @@ help: ## 列出所有命令
 .PHONY: init
 init: ## 初始化仓库：检查工具链、装依赖、跑通测试、生成 README
 	GO="$(GO)" PYTHON="$(PYTHON)" bash ./scripts/init.sh
+
+.PHONY: ide
+ide: ## 初始化独立 IDE 项目（无须 ID）；可选 IDE=idea/pycharm/goland
+	$(PYTHON) ./scripts/ide-init.py --ide "$(IDE)"
 
 ## ---------- 写题 ----------
 

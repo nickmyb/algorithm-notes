@@ -105,6 +105,7 @@ tests.finish();
 ```sh
 make help                        # 列出所有命令
 make init                        # 初始化：检查工具链、装依赖、跑测试、生成 README
+make ide [IDE=idea]              # 首次创建独立 IDE 项目，不需要 ID；默认三门语言
 make new ID=1 [LANGS=go,python]  # 新开一题，自动抓题目描述填进 README
 make test [ID=94]                # 跑测试，带 ID 只测一道
 make test-go / test-python / test-java   # 单语言，同样支持 ID=94
@@ -273,93 +274,40 @@ algorithm-notes/
 
 ## IDE 配置
 
-### 多个 JetBrains IDE 要分开保存项目配置
+首次配置只需：**执行 `make ide` → 用 IDE 打开指定文件夹 → 选择 SDK 和当前题目**。
 
-IDEA、PyCharm、GoLand 都把项目配置写进项目目录的 `.idea/`，其中 `misc.xml` 的 Project SDK 和 `.iml` 的 Module SDK 会互相覆盖。把同一个仓库根分别作为它们的项目打开，会出现「在 IDEA 运行后 PyCharm 丢失 interpreter，反过来 Java SDK 又丢失」；解释器本身没有被删掉。
+在当前仓库根目录运行（不需要题号）：
 
-为每个 IDE 建一个独立的项目目录，再把同一个仓库根加为 **Content Root**。源码仍然只有一份，`.idea` 各自独立：
+```sh
+make ide
+```
 
-| IDE | 项目目录（打开这个目录） | Content Root |
+默认创建三个独立项目；只用一个 IDE 时，改用 `make ide IDE=idea`、`make ide IDE=pycharm` 或 `make ide IDE=goland`。命令会创建完整项目文件，不需要手工新建空项目或复制 XML。已有目标目录会拒绝覆盖。
+
+然后使用 **File → Open** 打开命令打印的文件夹：
+
+| IDE | 打开的文件夹 | 首次选择的 SDK / 解释器 |
 |:---|:---|:---|
-| IntelliJ IDEA | `<仓库根>/.ide/idea` | `<仓库根>` |
-| PyCharm | `<仓库根>/.ide/pycharm` | `<仓库根>` |
-| GoLand | `<仓库根>/.ide/goland` | `<仓库根>` |
+| IntelliJ IDEA | `<当前仓库>/.ide/idea` | Project SDK：JDK 17；模块继承项目 SDK |
+| PyCharm | `<当前仓库>/.ide/pycharm` | 已有解释器 `<当前仓库>/.venv/bin/python` |
+| GoLand | `<当前仓库>/.ide/goland` | GOROOT：`go.mod` 要求的版本 |
 
-`.ide/` 已被 Git 忽略。仅首次配置时，在上表对应位置新建空项目，不新建 Git 仓库、不生成示例代码；移除默认的空 Content Root，再添加仓库根，并将 `.ide`、`.ide-backups`、`.venv`、`out` 标记为 Excluded。PyCharm/GoLand 在 Settings → Project Structure 中添加 Content Root；IDEA 在 Project Structure → Modules → 新建模块 → Sources 中添加，模块文件放在自己的项目目录中。模块名分别设为 `algorithm-notes-go`、`algorithm-notes-python`、`algorithm-notes-java`，与运行模板一致。
+**不要打开 `current_problem.xml`、`.iml`、内部 `.idea` 或仓库根。** 如果窗口里只有一个 XML 文件，就不是完整项目。初始化命令不安装 SDK；`.venv` 由 `make init` 创建。
 
-参考 JetBrains 的 [IDEA Content roots](https://www.jetbrains.com/help/idea/content-roots.html)、[PyCharm Project Structure](https://www.jetbrains.com/help/pycharm/configuring-project-structure.html) 和 [GoLand Content root](https://www.jetbrains.com/help/go/content-root.html)。之后始终打开各自的项目目录，不再共同打开仓库根的旧项目。
+项目文件已经接好源码目录、共享结构、排除项和 Java 输出目录，但**还没有选择题目**。首次运行前：
 
-迁移时先关闭旧项目窗口，再在新项目中选择原来的 SDK/解释器。无需删除 `.venv` 或反复重建解释器。旧根目录 `.idea` 和 `structures/java/structures.iml` 不再使用，需要保留的旧配置移入 `.ide-backups/`，不要继续作为项目打开。
+- GoLand：编辑 `Go - Current Problem`，Test kind 为 Package，填写当前题目的完整 Package path，Pattern 留空。
+- PyCharm：编辑 `Python - Current Problem`，Target 选 Script path，选择当前题目的 `solution_test.py`，不要选同名模块。
+- IDEA：只将当前一道题标为 Sources Root，保持 `structures/java` 的标记，然后 Rebuild，运行 `Java - Current Problem`。
 
-下面的「仓库根」指 Content Root。测试脚本内部会切到仓库根，从其他目录调用要给出脚本路径；`make` 则需在仓库根运行，或使用 `make -C <仓库根> test ID=94`。
+`__PROBLEM_DIR__` 是待选题标记，不能原样运行；不会默认跑第 94 题或 `0000.Template`。以后换题只改现有目标（Java 切换 Sources Root），不改配置名称、SDK，也不重新执行 `make ide`。
 
-### 一份固定模板 + 一份当前题目配置
+逐项操作、固定模板及安全恢复命令见 **[IDE 首次配置与换题](./ide-templates/README.md)**。
 
-每个 IDE 只有一份日常使用的运行配置。名称固定，不写题号，避免换了目标却忘记同步显示名称：
+<details>
+<summary>为什么要独立项目，以及编译输出注意事项</summary>
 
-| IDE | 运行配置名称 | 固定模板 |
-|:---|:---|:---|
-| GoLand | `Go - Current Problem` | [Go 模板](./ide-templates/goland/current_problem.xml.tpl) |
-| PyCharm | `Python - Current Problem` | [Python 模板](./ide-templates/pycharm/current_problem.xml.tpl) |
-| IDEA | `Java - Current Problem` | [Java 模板](./ide-templates/idea/current_problem.xml.tpl) |
-
-当前题目配置统一保存为 `.ide/<IDE>/.idea/runConfigurations/current_problem.xml`；模板留在 `ide-templates/`，纳入版本管理但不出现在 IDE 的运行列表里。首次创建或恢复时复制模板并填写路径，正常换题只在 **Run → Edit Configurations** 中编辑已有配置。具体占位符、目标路径和 Java 源码根修改步骤见 [IDE 模板与换题说明](./ide-templates/README.md)。
-
-SDK、模块、Content Root 等项目设置只配置一次，`.iml`、`misc.xml`、`modules.xml`、`vcs.xml`、`workspace.xml` 等必要文件继续保留。`make new` 只生成题解，不重建 IDE 项目。如果从代码旁的运行箭头生成了临时配置，可在 Edit Configurations 中删除重复项，日常从下拉框运行 `Current Problem`。
-
-### GoLand
-
-| 配置项 | 值 |
-|:---|:---|
-| GOROOT | 指向 `go.mod` 要求的版本（当前 1.26.4） |
-| Go Modules | 自动从 `go.mod` 识别，不用动 |
-
-打开 `<仓库根>/.ide/goland`，不要继续使用仓库根的旧项目。Go 模块的 Content Root 和测试配置的 Working directory 都指向仓库根；GoLand 的模块不需要 Java SDK，也不用照搬 IDEA 的 Java Sources Root。
-
-把 `out` 标记为 Excluded，避免 IDE 把 IDEA 复制的 `.go` 文件也索引成题解。`Go - Current Problem` 的 Test kind 固定为 Package，换题只修改 Package path（如 `github.com/nickmyb/algorithm-notes/leetcode/0094.Binary-Tree-Inorder-Traversal`）；Pattern 保持空白，以免仍筛选上一题的测试函数。全量测试仍用 `make test-go`，它包含共享结构、工具链测试及 `out/` 过滤。
-
-`ctl/` 下 7 个带 `//go:build ignore` 的文件会被标成排除在构建外、灰掉，这是故意的（见 [ctl/README.md](./ctl/README.md) 的「已停用的功能」），不要去"修"。
-
-### PyCharm
-
-| 配置项 | 值 |
-|:---|:---|
-| Python Interpreter | `<仓库根>/.venv/bin/python`（`make init` 建的） |
-| **`structures/python`** | 目录树右键 → **Mark Directory as → Sources Root** |
-| 测试框架 | pytest，自动读 `pytest.ini` |
-
-标记 Sources Root 那步是关键：运行时是 `conftest.py` 把这个目录加进 `sys.path` 的，属于运行期行为，IDE 的静态分析看不到，不标记的话 `from tree_node import TreeNode` 会一直标红。
-
-**单题测试用文件路径，不用同名模块名。** 每题的测试都叫 `solution_test.py`，自动生成的 `solution_test.test_inorder_traversal` 这类模块目标可能解析到另一题，甚至 `0000.Template`。运行配置的名字不是实际测试目标，以控制台的 `Launching pytest with arguments ...` 为准。
-
-首次按模板建立配置后，在 **Run → Edit Configurations** 中修改已有的 `Python - Current Problem`：
-
-| 配置项 | 第 94 题示例 |
-|:---|:---|
-| Name | `Python - Current Problem`（固定不改） |
-| Target 类型 | **Script path / script**，不要选 Module name |
-| Target 路径 | `<仓库根>/leetcode/0094.Binary-Tree-Inorder-Traversal/solution_test.py`（填完整路径） |
-| Working directory | `<仓库根>`，不是 `.ide/pycharm` |
-| Python Interpreter | 当前模块的 `<仓库根>/.venv/bin/python` |
-
-参见 JetBrains 的 [pytest 运行配置说明](https://www.jetbrains.com/help/pycharm/run-debug-configuration-py-test.html)。保存后从运行配置下拉框选择 `Python - Current Problem`；旧 Run 窗口的 **Rerun** 可能仍使用旧配置。换题只修改 Target 路径，不复制配置、不改名称。
-
-第 94 题应收集 **4 个用例并全部通过**。如果控制台目标是 `leetcode/0000.Template/solution_test.py`，并显示 `test_solve[NOTSET] SKIPPED`，说明跑到了骨架，不能当成第 94 题通过；也不要删掉模板的跳过逻辑来“修复”。
-
-### IntelliJ IDEA
-
-Java 侧的约束：每道题都是 default package 里的 `class Solution`，**同一个编译范围里只能有一个**，否则撞成一片 `Duplicate class Solution`（`javac` 同理，所以 `javatest.sh` 才逐目录编译）。
-
-统一使用独立项目引用仓库根。Project SDK / Module SDK 都选 **17**（和 `javatest.sh` 的 `JAVA_RELEASE` 一致），运行配置固定为 `Java - Current Problem`，入口始终是 `SolutionTest`。
-
-**首次配置及换题**
-
-1. 打开上面独立创建的 IDEA 项目，Content Root 指向仓库根，设好 Project SDK 17
-2. 目录树上把**当前在写的那道题的目录**和 `structures/java` 都标记为 **Mark Directory as → Sources Root**
-3. Project → Compiler output 设为 `<仓库根>/out/idea`；Modules → Paths 使用项目输出路径
-4. 换题时取消上一题的标记，标到新的题目目录上，再执行 **Build → Rebuild Project**
-
-一个窗口和一个模块即可，换题只切换源码根，SDK、运行配置名称和主类都不变。**只修改显示名称不会切换题目**，实际运行对象由模块源码根决定。
+IDEA、PyCharm、GoLand 共用仓库根的 `.idea` 时，Project SDK / Module SDK 会相互覆盖。现在各自的项目文件保存在 `.ide/<IDE>`，Content Root 引用同一份仓库源码，互不改写 SDK。`.ide/` 不提交；迁移时无需删除或重建 `.venv`。
 
 编译输出集中放在仓库根的 `out/`，避免在题目目录里出现复制的 Go/Python 源码和测试。
 
@@ -382,15 +330,19 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 配好之后 `TreeNode` / `TreeNodes` 在题解里能正常补全和跳转。嫌配置麻烦的话，IDE 只当编辑器用，验证一律走 `make test-java ID=94`。
 
+</details>
+
 ## 分支与标签
 
 | 引用 | 内容 |
 |:---|:---|
-| `main` | 我的题解 |
-| `template` | 干净的骨架 + 工具链，不含任何题解，随工具链演进往前走 |
-| `init` 标签 | 始终指向 `template` 的最新提交，新用户从这里起步 |
+| `main` | 我的个人题解及个人 README |
+| `feature/*` | 从 `dev` 派生的工具链开发分支 |
+| `dev` | 工具链集成与验证 |
+| `template` | 经确认发布的干净骨架和工具链，不含个人题解或数据 |
+| `init` 标签 | 用户初始化仓库的稳定起点，指向已确认发布的 `template` 提交 |
 
-工具链更新后用 `git tag -f init template && git push -f origin init` 把标签移到最新。
+开发、集成、发布和推送分别确认：不直接在 `main` 开发工具链，不因开发提交自动更新 `template` / `init`，不自动推送。完整规范见 [AGENTS.md](./AGENTS.md#分支与标签)。
 
 ## 数据来源
 

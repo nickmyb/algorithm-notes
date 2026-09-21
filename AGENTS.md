@@ -17,6 +17,7 @@
 ```sh
 make help                        # 列出所有命令
 make init                        # 初始化：检查工具链、装依赖、跑测试、生成 README
+make ide [IDE=idea]              # 首次创建独立 IDE 项目，无须题号；默认三个 IDE
 make new ID=1                    # 新开一题（三门语言）
 make new ID=15 LANGS=go          # 只要某一门或某几门语言
 make test                        # 三门语言全跑
@@ -32,6 +33,8 @@ make fmt / vet / tidy / clean
 
 三门语言的 IDE 配置写在根 README 的「IDE 配置」一节。容易被问到的点：
 
+- **首次创建用 `make ide`，不要求 ID，也不手工只复制运行 XML**。`scripts/ide-init.py` 创建完整的独立项目（`.idea`、`.iml`、运行配置），`IDE=idea/pycharm/goland` 可只建一个。用 IDE 打开命令打印的 `.ide/<IDE>` 文件夹，不打开 `current_problem.xml` 单文件。已有目录一律拒绝覆盖；不要新增默认覆盖或自动删除旧配置的行为。回归测试在 `scripts/ide_init_test.py`，在临时仓库验证首次创建和防覆盖。
+- **初始化与选题分开**：Go/Python 的 `__PROBLEM_DIR__` 保留为待配置目标，不能留空后退化成全量测试；Java 初始只接入共享结构，由用户标记当前一道题的 Sources Root。不要把第 94 题或 `0000.Template` 当默认目标。SDK/解释器在 IDE 中由用户选择，不写入机器特定的 SDK 名或绝对路径；Java 语言级别从 `javatest.sh` 读取。
 - **多个 JetBrains IDE 不能共用同一个项目目录的 `.idea`**。Project SDK 和 Module SDK 会互相覆盖，表现为 IDEA 跑完后 PyCharm 丢失 interpreter，反过来也一样。各自在 `.ide/idea`、`.ide/pycharm`、`.ide/goland` 保存独立项目配置，再把同一个仓库根加为 Content Root。`.ide/` 不提交。不要通过反复重建 `.venv` 来处理这个问题。
 - **每个 IDE 只有一个可编辑的当前题目运行配置，项目只初始化一次**。固定模板在 `ide-templates/<IDE>/current_problem.xml.tpl`，当前配置在 `.ide/<IDE>/.idea/runConfigurations/current_problem.xml`，名称固定为 `Go - Current Problem`、`Python - Current Problem`、`Java - Current Problem`，不带题号。换题修改实际目标，不改名称和模板、不重建项目、不让 `make new` 自动复制一批配置。SDK 和必要的项目文件保留；迁移备份放在被忽略的 `.ide-backups/`。
 
@@ -324,6 +327,16 @@ README 里 `## 题目` 一节本来就是英文版（中文折叠在 `<details>`
 题目自带的大树已经覆盖全部顺序错误，自行添加的两条链各自还**漏掉一种**，严格更弱——给测试增重却没增强。而题目自带的空树是唯一能发现「只判了一边的空」的用例，那种写法在所有非空树上都正确。
 
 所以：**通用的"补边界"直觉不能当依据**。要么能具体说出抓什么错，要么像上面这样实测对拍，否则就只转录题目示例。
+
+### 偏离骨架时，改骨架而不是另写一套
+
+写题解或测试时如果觉得 `leetcode/0000.Template` 的骨架不好用、于是自己另写了一种形式，**那是骨架的问题，去改骨架**，不要让两套形式并存。
+
+骨架的唯一作用是给出可照抄的示范。**没人照抄的骨架是坏的**——它不但没省事，还制造了"仓库里有两种写法"的分裂，后来的人不知道该跟哪个。
+
+这条是有教训的。第 94 题的测试当初没按骨架写，而是另起了一套（匿名 struct + 用例名，而不是骨架里的具名 `question`/`para`/`ans`）。后来第 104 题照着 94 写，于是两道真实题目都偏离了骨架，只有骨架自己是孤例。复盘下来骨架那套确实更差：用例无名，失败时报不出是哪个 Example；Python 更把所有用例塞在一个函数里，第一个 `assert` 挂了后面就不跑。
+
+**判据很简单：实际写出来的东西和骨架不一样时，先问"哪个更好"，然后让两者一致。** 两道题都自发偏离同一个方向，基本可以断定是骨架错了。
 
 ### 不要"随机生成"用例
 
