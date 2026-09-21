@@ -518,7 +518,25 @@ README 的渲染逻辑不用动，`Solution` 列会自动多出这门语言的�
 - 切换分支时保留未提交修改和未跟踪文件，不能用 `reset --hard`、`clean` 或覆盖文件来消除阻碍。存在冲突时先询问，或在不改动原工作区的独立 worktree 中处理。
 - 若误提交到 `main` / `template`，先核实推送情况，将待保留提交保存到开发分支，再经用户确认修正相关引用；只处理本次误操作，不回退无关历史，不擅自强制推送。
 - 只有得到推送授权后才执行 `git push`，并明确指定远端及目标分支或标签，不使用 `--all`、`--mirror`、`--tags` 批量扩大范围。移动已发布的 `init` 或其他历史需要单独说明影响并获得确认。
-- **提交尾部的 Co-Authored-By 按本次实际动手的助手写**，不要照抄上一条提交。Claude Code 用 `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`，ChatGPT / Codex 用 `Co-Authored-By: ChatGPT (Codex) <noreply@openai.com>`；一次提交里两边都参与了就两行都写。已经出现过 Codex 完成的提交署成 Claude 的情况——署名是给后来查 blame 的人看的，写错等于把线索指错方向。
+- **提交尾部的 Co-Authored-By 按本次实际动手的助手写**，不要照抄上一条提交：
+
+  | 助手 | 尾注 | 解析到的 GitHub 账号 |
+  |:---|:---|:---|
+  | Claude Code | `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` | User `claude` |
+  | ChatGPT / Codex | `Co-Authored-By: Codex <codex@openai.com>` | User `codex` |
+
+  **这一行决定 GitHub 仓库首页的 Contributors 列表**，不只是 blame 线索。两个账号都是 User 类型，都能被解析成贡献者。`b0692bd` 和 `1ad221a` 由 Codex 完成，正文写了协作说明但没带尾注，所以 ChatGPT 至今不在本仓库的列表上——等它下次提交带上尾注就会出现。
+
+  **查证这类问题时别用错方法**，这里连着踩过三次：
+
+  - ❌ `/search/users?q=<邮箱>+in:email` —— 只索引**公开**邮箱。`claude` 和 `codex` 都把邮箱设为私有，这个搜索对两者都返回"无匹配"；同时它会捞出 `oai-codex`（一个碰巧公开了 `noreply@openai.com` 的 **Organization**，组织不能当 co-author）。一个假阴性加一个假阳性，足够把结论带偏。
+  - ❌ REST `/repos/{owner}/{repo}/contributors` —— **不含 co-author**。本仓库它返回 1，网页侧边栏是 2。
+  - ✅ 找一个真实用过该尾注的公开提交，抓它的 HTML 页面看头像栈解析成了哪个 `login`。这是唯一直接的证据。
+
+  邮箱也别自己推断：`noreply@openai.com` 曾被 Claude 按 `noreply@anthropic.com` 的形状类推出来写进本文件，是错的。`codex@openai.com` 是 Codex 在外部仓库里实际发出的地址。
+
+  **因用量限制交替执行时，谁提交谁把两行都写上。** 一方写到一半耗尽额度、另一方接手收尾是常态，这时提交里两边都有份。不要去判断"谁干得多"——Contributors 是一个集合，不是比例，进去了就没人关心占比；漏掉才不可逆。判据：**拿不准就两行都写**，多写一行代价为零，少写一行是把人从贡献者里抹掉。只有一方全程没参与，才只写一行。
+
 - 完成后报告当前分支、提交号、实际发生的合并或标签变动，以及是否推送。明确区分「本地提交」「本地合并」「更新标签」和「远端推送」。
 
 ## README 生成与个人数据
