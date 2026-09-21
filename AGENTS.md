@@ -86,6 +86,8 @@ CI（`.github/workflows/test.yml`）跟着这三处走，不要在 CI 里另写�
 
 - **工具路径一律加引号**（`"$GO" mod tidy`、`"$(GO)" run .`）。探测出来的路径可能带空格（macOS 的 Application Support、挂载的 Windows 盘），不加引号会被拆成两半，而且探测阶段一切正常，炸在后面第一条真正调用它的命令上。
 
+- **测 `init.sh` 一律在临时仓库里跑，不要拿真实仓库当 cwd。** `init.sh` 通过了工具链检查就会一路往下执行——`go mod tidy`、建 venv、跑测试、写 `local.mk`、重新生成 README。样本数据一旦意外通过检查，它就会真的动这个仓库（发生过：`local.mk` 被写成一个 pytest 临时路径）。用 `init_repo` fixture。
+
 回归测试见 `scripts/tooling_test.py` 的「工具链探测」和「init.sh 真的跑一遍」两组。后一组是补课：早先只测「手工造出 local.mk 后 Makefile 认不认」，漏掉了「init.sh 到底写没写」，结果一轮重构把写入步骤连同 `export` 和两道版本解析保护一起删掉，`make init` 照样报成功，下一条 `make new` 才炸。**改 `init.sh` 的大段结构时，注意 `step` 之间的块很容易被整段吞掉。**
 
 ## 目录结构

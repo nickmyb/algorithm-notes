@@ -371,52 +371,6 @@ def test_init_can_read_java_minimum():
     assert got and got[0].isdigit(), "没能从 javatest.sh 解析出 JAVA_RELEASE"
 
 
-# ---------- 显式指定优先于探测 ----------
-
-
-def run_init(repo, env):
-    """只跑到"检查工具链"这一步就够了，后面要联网和装依赖。"""
-    return subprocess.run(
-        ["bash", str(ROOT / "scripts/init.sh")], cwd=ROOT,
-        env={"HOME": os.environ["HOME"], "PATH": os.environ["PATH"], **env},
-        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60,
-    )
-
-
-def test_explicit_tool_is_never_silently_replaced(repo, tmp_path):
-    """指定了就得用指定的那个。
-
-    早先的实现在指定的版本不够时会静默回退去搜索，挑一个别的用还不吭声——
-    用户写了路径就是要用那个，换掉必须说。
-    """
-    old_go = fake_go(tmp_path / "old/go", "1.21.0")
-    result = run_init(repo, {"GO": str(old_go)})
-    assert result.returncode != 0, result.stdout
-    assert "1.21.0" in result.stdout and "低于" in result.stdout
-    # 关键：没有换成本机真实的那个 go 接着跑下去
-    assert "整理 Go 依赖" not in result.stdout
-
-
-def test_explicit_missing_tool_reports_instead_of_searching(repo):
-    result = run_init(repo, {"JAVAC": "/nope/javac"})
-    assert result.returncode != 0, result.stdout
-    assert "找不到或跑不起来" in result.stdout
-
-
-def test_default_still_auto_detects(repo, tmp_path):
-    """没显式指定时，探测照常工作——上一条不能把自动探测一起关掉。"""
-    home = tmp_path / "home"
-    expected = fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
-    assert find(repo, home, "go", "1.26.4", "go") == str(expected)
-
-
-# ---------- init.sh 真的跑一遍 ----------
-#
-# 上面那些 local.mk 的测试是手工造出 local.mk 再看 Makefile 认不认，
-# 漏掉了"init.sh 到底写没写"这一环。实测漏过一次：一轮重构把写入步骤
-# 连同 export 一起删掉了，init 照样报成功，下一条 make new 才炸。
-
-
 @pytest.fixture
 def init_repo(tmp_path):
     """够 init.sh 跑到 local.mk 那一步的最小仓库。
@@ -438,6 +392,56 @@ def run_init_sh(init_repo, home, clean_path, **env):
         env={"HOME": str(home), "PATH": clean_path, **env},
         text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60,
     )
+
+
+# ---------- 显式指定优先于探测 ----------
+
+
+def test_explicit_tool_is_never_silently_replaced(init_repo, tmp_path, clean_path):
+    """指定了就得用指定的那个。
+
+    早先的实现在指定的版本不够时会静默回退去搜索，挑一个别的用还不吭声——
+    用户写了路径就是要用那个，换掉必须说。
+
+    两个细节都是踩出来的：
+
+    跑在隔离的临时仓库里，不能用真实仓库当 cwd。这条测试原先直接对着
+    ROOT 跑 init.sh——只要样本版本意外通过了检查，init.sh 就会一路往下
+    执行，把真实仓库的 local.mk 写成一个 pytest 临时路径（发生过）。
+
+    样本版本用 1.11.0 这种早于 Go modules 的号，不写成"比当前下限低一点"：
+    下限是会调的，写得太近，哪天调到那个数，这条测试就从"验证拒绝"
+    悄悄变成"验证接受"。
+    """
+    home = tmp_path / "home"
+    old_go = fake_go(tmp_path / "old/go", "1.11.0")
+    result = run_init_sh(init_repo, home, clean_path, GO=str(old_go))
+    assert result.returncode != 0, result.stdout
+    assert "1.11.0" in result.stdout and "低于" in result.stdout
+    # 关键：没有换成别的 go 接着往下跑
+    assert "整理 Go 依赖" not in result.stdout
+
+
+def test_explicit_missing_tool_reports_instead_of_searching(init_repo, tmp_path, clean_path):
+    home = tmp_path / "home"
+    fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
+    result = run_init_sh(init_repo, home, clean_path, JAVAC="/nope/javac")
+    assert result.returncode != 0, result.stdout
+    assert "找不到或跑不起来" in result.stdout
+
+
+def test_default_still_auto_detects(repo, tmp_path):
+    """没显式指定时，探测照常工作——上一条不能把自动探测一起关掉。"""
+    home = tmp_path / "home"
+    expected = fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
+    assert find(repo, home, "go", "1.26.4", "go") == str(expected)
+
+
+# ---------- init.sh 真的跑一遍 ----------
+#
+# 上面那些 local.mk 的测试是手工造出 local.mk 再看 Makefile 认不认，
+# 漏掉了"init.sh 到底写没写"这一环。实测漏过一次：一轮重构把写入步骤
+# 连同 export 一起删掉了，init 照样报成功，下一条 make new 才炸。
 
 
 def test_init_actually_writes_local_mk(init_repo, tmp_path, clean_path):
