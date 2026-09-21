@@ -50,14 +50,15 @@ make ide              # 可选：用 JetBrains IDE 写题才需要
 make new ID=1         # 开始第一题
 ```
 
-**动手前先确认 `go` 和 `python3` 在 `PATH` 里。** `make init` 第一步就是检查工具链，找不到会直接退出。已经装了但没进 `PATH` 的话，两种办法：
+**不用先折腾环境变量。** 装了但没进 `PATH` 是最常见的卡点，所以 `make init` 会先自己找一遍：Go 翻 `/usr/local/go`、`~/go/go*`、`~/sdk/go*`、`/usr/lib/go-*`、`/opt/homebrew`，Python 翻 `/usr/bin`、pyenv，JDK 翻 `$JAVA_HOME`、`/usr/lib/jvm`、SDKMAN、macOS 的 `JavaVirtualMachines`。找到就记进 `local.mk`（本机配置，不进版本库），后面的 `make new` / `make test` 自动跟着用。
+
+只有真的没装才会停下来，这时按它给的链接装完重跑即可。装在冷门位置的话仍可以手动指定：
 
 ```sh
-export PATH=/path/to/go/bin:$PATH     # 导出后重跑
-make init GO=/path/to/go/bin/go       # 或直接指定，PYTHON= 同理
+make init GO=/path/to/go/bin/go       # PYTHON= / JAVAC= 同理，优先级高于 local.mk
 ```
 
-Go 是必需的（`ctl` 用 Go 写的）；Python 和 Java 缺了只会警告并跳过对应的测试链路，不写那门语言就不受影响。
+Go 是必需的（`ctl` 用 Go 写的），版本下限跟着 `go.mod` 走；Python 和 Java 缺了只会警告并跳过对应的测试链路，不写那门语言就不受影响。
 
 `make ide` 不是必须的——用编辑器写题、靠 `make test` 验证完全可以。只有要在 IntelliJ IDEA / PyCharm / GoLand 里跑题解时才需要，它会为三个 IDE 各建一个独立项目。跑完还要在 IDE 里选一次 SDK/解释器并指定当前题目，命令结束时会把每个 IDE 的具体步骤和示例路径打出来，详见 [ide-templates/README.md](./ide-templates/README.md)。
 
@@ -271,19 +272,21 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 | 语言 | 版本 | 版本来源 | 说明 |
 |:---|:---|:---|:---|
 | Go | **1.26.4** | `go.mod` 的 `go` 指令 | Go 没有 LTS，官方只维护最近两个大版本。CI 用 `go-version-file: go.mod`，和本地同一个来源 |
-| Python | **3.12** | `scripts/init.sh` 的版本检查 | Python 没有 LTS，每个小版本一律 5 年支持期。低于 3.12 时 `make init` 会直接报错退出 |
+| Python | **3.12** | `scripts/init.sh` 的版本检查 | Python 没有 LTS，每个小版本一律 5 年支持期。低于 3.12 且找不到更高版本时，`make init` 会跳过 Python 并给出提醒 |
 | Java | **17**（LTS） | `javatest.sh` 的 `--release` | Java 的 LTS 每两年一个：8 / 11 / 17 / 21 / 25 |
 
 三者都只有一个声明来源，CI 跟着本地走，不会各说各的。
 
-这三个命令要在 `PATH` 里能找到（`go`、`python3`、`javac`/`java`）。装了但没进 `PATH` 时，
-不用改全局环境，直接在命令行覆盖即可：
+三者都不在 `PATH` 里也没关系，`make init` 会去常见安装位置找（见[快速开始](#快速开始)），
+探测结果写进 `local.mk` 供后续命令复用。装在冷门位置时手动指定，优先级高于 `local.mk`：
 
 ```sh
-make init GO=/path/to/go/bin/go PYTHON=/path/to/python3
+make init GO=/path/to/go/bin/go PYTHON=/path/to/python3 JAVAC=/path/to/javac
 make test GO=/path/to/go/bin/go        # 其他 make 目标同样接受
 JAVA_RELEASE=21 make test-java         # 临时换 Java 目标版本
 ```
+
+JDK 只需指定 `JAVAC`，配套的 `java` 取同目录的那个——两者必须来自同一个 JDK，否则编译产物跑起来会报 `class file has wrong version`。
 
 Java 的 `--release 17` 同时约束语言特性和可用 API：即使本地装的是 JDK 21，使用 Java 21 的 switch 模式匹配也会在本地编译失败；record 已在 Java 16 正式支持，可以使用。要换目标版本改 `javatest.sh` 里的 `JAVA_RELEASE`，或临时 `JAVA_RELEASE=21 make test-java`。
 

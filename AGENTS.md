@@ -65,10 +65,26 @@ IDEA 按「按题打开」那种配法工作时，会在题目目录里建 `out/
 | 语言 | 版本 | 声明位置 |
 |:---|:---|:---|
 | Go | 1.26.4 | `go.mod` 的 `go` 指令 |
-| Python | 3.12 | `scripts/init.sh` 的 `PYTHON_MIN_MAJOR/MINOR` |
-| Java | 17 | `javatest.sh` 的 `JAVA_RELEASE`（传给 `javac --release`） |
+| Python | 3.12 | `scripts/init.sh` 的 `PYTHON_MIN` |
+| Java | 17 | `javatest.sh` 的 `JAVA_RELEASE`（传给 `javac --release`，同时被 `scripts/init.sh` 当作 JDK 版本下限解析） |
 
-CI（`.github/workflows/test.yml`）跟着这三处走，不要在 CI 里另写一套版本。
+CI（`.github/workflows/test.yml`）跟着这三处走，不要在 CI 里另写一套版本。CI 用 `sed -n 's/^PYTHON_MIN=//p' scripts/init.sh` 取 Python 版本，改这个变量名要同步改 CI —— `scripts/tooling_test.py` 里有两条测试钉住这个契约。
+
+### 工具链位置靠探测，不靠用户配 `PATH`
+
+`go` / `python3` / `javac` 装了但没进 `PATH` 是新手跑 `make init` 最常见的失败。所以：
+
+- **显式指定永远优先，且绝不被静默替换。** `make init GO=...`（或 `local.mk` 里记着的路径）表示用户点名要这一个，此时只验这一个（`check_tool`），不合用就报错退出并说清是「找不到」还是「版本不够」。只有还是默认的 `go` / `python3` / `javac` 时才去搜索（`find_tool`）。早先的实现在指定的版本不够时会静默回退去搜索、挑一个别的接着跑——那不是「用户优先」，是工具替用户改主意。
+- `resolve` / `check_tool` 的结果用**退出码**回传（0 可用 / 2 版本不够 / 1 找不到），不要改成写全局变量：它们总是在 `$(...)` 里调用，子 shell 里的赋值传不回父进程（踩过）。
+- `scripts/find-tool.sh` 在 `PATH` 和常见安装位置（Go：`/usr/local/go`、`~/go/go*`、`~/sdk/go*`、`/usr/lib/go-*`；Python：`/usr/bin`、pyenv；JDK：`$JAVA_HOME`、`/usr/lib/jvm`、SDKMAN、macOS 的 `JavaVirtualMachines`）里找满足版本下限的可执行文件。**`PATH` 里的优先**，不满足下限时才翻别处，翻到多个取版本最高的（用 `sort -V`，不能按字符串比，`1.9.7` 的字典序大于 `1.26.4`）。
+- 候选列表里有 glob，必须显式开 `nullglob`：默认行为下不匹配的 glob 会原样留下（bash）甚至中断函数（zsh），两种都会漏掉后面的候选。
+- 探测结果写进 **`local.mk`**（本机配置，已在 `.gitignore`）。**这一步不能省**：只在 `init.sh` 里解析出路径的话，这次 `make init` 能跑通，下一条 `make new` 又回到 `Makefile` 的 `GO ?= go`，等于白找。
+- `Makefile` 的 `-include local.mk` 必须在 `GO ?= go` **之前**：`local.mk` 用 `:=` 赋值，赋过就轮不到默认值。命令行的 `make xxx GO=...` 优先级高于两者。
+- **JDK 只探测 `javac`，`java` 一律取它同目录的那个**，不对 `java` 单独探测。两者来自不同 JDK 时编译产物跑起来会报 `class file has wrong version`。`java_candidates` 里那条 `[ -x "${p%/javac}/java" ]` 就是为此，不要删。写进 `local.mk` 时 `JAVAC` 和 `JAVA` 必须成对写，只写一个的话另一个还是会从 `PATH` 取。
+- Go 找不到才是硬失败（`ctl` 是 Go 写的）；Python 和 Java 找不到或版本不够只警告并跳过，不写那门语言的人不该被挡住。
+- 探测测试必须在 `clean_path` fixture 给的干净 `PATH` 下跑，否则本机真实的 `/usr/bin/javac` 会被「`PATH` 优先」先命中，候选目录那段逻辑根本测不到。断言写成「坏候选没被选中」而不是「什么都没找到」——跑测试的机器上 `/usr/lib/jvm` 里可能真装着合规 JDK。
+
+回归测试见 `scripts/tooling_test.py` 的「工具链探测」一组。
 
 ## 目录结构
 

@@ -16,6 +16,9 @@ id_rsa*
 cookies.txt
 
 # ========== 构建产物 ==========
+# make init 探测到的本机 go / python3 位置，每台机器都不一样
+local.mk
+
 out/
 coverage.txt
 

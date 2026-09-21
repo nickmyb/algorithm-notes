@@ -18,6 +18,7 @@ def repo(tmp_path):
     for name in (
         "Makefile", "gotest.sh", "pytest.sh", "javatest.sh",
         "scripts/test.sh", "scripts/test-common.sh", "scripts/problem-dir.sh",
+        "scripts/find-tool.sh",
     ):
         shutil.copy2(ROOT / name, root / name)
     for name in ("0000.Template", "0094.Example", "0104.Example"):
@@ -183,3 +184,227 @@ def test_java_failure_propagates(repo):
     result = run(repo, "javatest.sh", problem)
     assert result.returncode != 0
     assert "\n  Java: FAIL\n" in result.stdout
+
+
+# ---------- 工具链探测 ----------
+#
+# 这组测试盯的是同一个卡点：go / python3 装了但没进 PATH。它是新手跑 make init
+# 时最常见的失败，而 README 承诺"三条命令开始刷题"，探测不到就等于承诺落空。
+
+
+def fake_go(path, version):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f'#!/usr/bin/env bash\necho "go version go{version} linux/amd64"\n')
+    path.chmod(0o755)
+    return path
+
+
+def find(repo, home, kind, minimum, name, path="/usr/bin:/bin", **extra):
+    """在受控的 HOME / PATH / JAVA_HOME 下跑 find_tool，返回选中的路径（找不到则为空串）。"""
+    result = subprocess.run(
+        ["bash", "-c", f'source "$1"; find_tool {kind} {minimum} {name}',
+         "_", str(repo / "scripts/find-tool.sh")],
+        env={"HOME": str(home), "PATH": path, **extra},
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=30,
+    )
+    return result.stdout.strip()
+
+
+def test_finds_go_installed_outside_path(repo, tmp_path):
+    """~/go/goX/bin 是官方下载器和手动解压最常见的落点，都不会自动进 PATH。"""
+    home = tmp_path / "home"
+    expected = fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
+    assert find(repo, home, "go", "1.26.4", "go") == str(expected)
+
+
+def test_ignores_go_below_minimum(repo, tmp_path):
+    """版本不够的 go 要当作没有：让 make init 直接说清楚，
+    好过放过去在 go mod tidy 里炸出一句看不懂的报错。"""
+    home = tmp_path / "home"
+    fake_go(home / "go/go1.21.0/bin/go", "1.21.0")
+    assert find(repo, home, "go", "1.26.4", "go") == ""
+
+
+def test_picks_newest_when_several_are_installed(repo, tmp_path):
+    home = tmp_path / "home"
+    fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
+    fake_go(home / "sdk/go1.9.7/bin/go", "1.9.7")
+    # 1.9.7 的字典序比 1.26.4 大，按字符串比会选错
+    assert find(repo, home, "go", "1.2", "go").endswith("go1.26.4/bin/go")
+
+
+def test_path_wins_when_it_satisfies_minimum(repo, tmp_path):
+    """用户自己配好的 PATH 优先，哪怕别处装着更新的版本。"""
+    home = tmp_path / "home"
+    fake_go(home / "go/go1.99.0/bin/go", "1.99.0")
+    on_path = fake_go(tmp_path / "bin/go", "1.26.4")
+    got = find(repo, home, "go", "1.26.4", "go", path=f"{tmp_path / 'bin'}:/usr/bin:/bin")
+    assert got == str(on_path)
+
+
+def test_local_mk_supplies_go_to_later_commands(repo):
+    """探测的结果必须落到 local.mk：否则 make init 能跑通，
+    下一条 make new 又回到 Makefile 的 GO ?= go，等于没找。"""
+    (repo / "local.mk").write_text("GO := /opt/custom/go\n")
+    result = subprocess.run(
+        ["make", "-n", "test-go"], cwd=repo,
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=10,
+    )
+    assert result.returncode == 0, result.stdout
+    assert "/opt/custom/go" in result.stdout
+
+
+def test_command_line_go_overrides_local_mk(repo):
+    (repo / "local.mk").write_text("GO := /opt/custom/go\n")
+    result = subprocess.run(
+        ["make", "-n", "test-go", "GO=/opt/explicit/go"], cwd=repo,
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=10,
+    )
+    assert result.returncode == 0, result.stdout
+    assert "/opt/explicit/go" in result.stdout
+    assert "/opt/custom/go" not in result.stdout
+
+
+def test_ci_can_read_python_minimum():
+    """CI 用 sed 从 init.sh 抠 PYTHON_MIN 来选 setup-python 的版本。
+    改这个变量名会让 CI 静默拿到空串，错误要等到 setup-python 才暴露。"""
+    init = (ROOT / "scripts/init.sh").read_text()
+    version = [ln.split("=", 1)[1] for ln in init.splitlines()
+               if ln.startswith("PYTHON_MIN=")]
+    assert len(version) == 1, "scripts/init.sh 必须有且只有一行 PYTHON_MIN=<版本>"
+    assert version[0].count(".") == 1 and all(x.isdigit() for x in version[0].split("."))
+
+
+def test_ci_python_version_matches_init():
+    workflow = next((ROOT / ".github/workflows").glob("*.yml")).read_text()
+    assert "s/^PYTHON_MIN=//p" in workflow, "CI 的解析表达式和 scripts/init.sh 对不上了"
+
+
+@pytest.fixture
+def clean_path(tmp_path):
+    """只含 find-tool.sh 所需工具的 PATH，不含 go / python3 / javac。
+
+    探测测试必须在这种 PATH 下跑：否则本机真实的 /usr/bin/javac 会先被
+    "PATH 优先" 那条规则命中，测不到候选目录那段逻辑。
+    """
+    binx = tmp_path / "cleanbin"
+    binx.mkdir()
+    for name in ("bash", "sh", "awk", "sed", "sort", "head"):
+        src = shutil.which(name)
+        assert src, f"本机没有 {name}，测试无法构造干净 PATH"
+        (binx / name).symlink_to(src)
+    return str(binx)
+
+
+def fake_jdk(home, version, with_java=True):
+    """造一个假 JDK，返回它的 bin 目录。"""
+    binx = home / "jdk/bin"
+    binx.mkdir(parents=True, exist_ok=True)
+    (binx / "javac").write_text(f'#!/usr/bin/env bash\necho "javac {version}" >&2\n')
+    (binx / "javac").chmod(0o755)
+    if with_java:
+        (binx / "java").write_text('#!/usr/bin/env bash\nexit 0\n')
+        (binx / "java").chmod(0o755)
+    return binx
+
+
+def test_finds_jdk_via_java_home(repo, tmp_path, clean_path):
+    """JAVA_HOME 设了但 bin 没进 PATH 是 JDK 最常见的装法。"""
+    home = tmp_path / "home"
+    binx = fake_jdk(home, "21.0.1")
+    got = find(repo, home, "java", "17", "javac", path=clean_path, JAVA_HOME=str(binx.parent))
+    assert got == str(binx / "javac")
+
+
+def test_ignores_jdk_below_minimum(repo, tmp_path, clean_path):
+    """JDK 8 打印 "javac 1.8.0_432"，按字符串比会误判成大于 17。
+
+    断言的是"这个候选没被选中"而不是"什么都没找到"：跑测试的机器上
+    /usr/lib/jvm 里可能真装着合规的 JDK，那是正确行为，不该让测试变红。
+    """
+    home = tmp_path / "home"
+    binx = fake_jdk(home, "1.8.0_432")
+    got = find(repo, home, "java", "17", "javac", path=clean_path,
+               JAVA_HOME=str(binx.parent))
+    assert got != str(binx / "javac")
+
+
+def test_rejects_javac_without_matching_java(repo, tmp_path, clean_path):
+    """javac 和 java 必须同一个 JDK，否则跑测试时会撞上 class file has wrong version。
+    只有 javac 的目录（比如只装了 jdk-headless 的残缺安装）不能算数。"""
+    home = tmp_path / "home"
+    binx = fake_jdk(home, "21.0.1", with_java=False)
+    got = find(repo, home, "java", "17", "javac", path=clean_path,
+               JAVA_HOME=str(binx.parent))
+    assert got != str(binx / "javac")
+
+
+def test_javatest_honours_javac_and_java_overrides(repo):
+    """探测到的 JDK 要真能传进 javatest.sh，否则探测了也白搭。"""
+    problem = repo / "leetcode/0094.Example"
+    (problem / "Solution.java").write_text("class Solution {}\n")
+    javac = executable(repo, "fake-javac", 'echo "FAKE_JAVAC $*"\nexit 1\n')
+    result = run(repo, "javatest.sh", problem, env={"JAVAC": javac, "JAVA": "/bin/false"})
+    assert "FAKE_JAVAC" in result.stdout, result.stdout
+
+
+def test_local_mk_supplies_jdk_to_later_commands(repo):
+    (repo / "local.mk").write_text("JAVAC := /opt/jdk/bin/javac\nJAVA := /opt/jdk/bin/java\n")
+    result = subprocess.run(
+        ["make", "-n", "test-java"], cwd=repo,
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=10,
+    )
+    assert result.returncode == 0, result.stdout
+    assert "/opt/jdk/bin/javac" in result.stdout
+    assert "/opt/jdk/bin/java" in result.stdout
+
+
+def test_init_can_read_java_minimum():
+    """init.sh 用 sed 从 javatest.sh 抠 JAVA_RELEASE 当 JDK 版本下限，
+    抠不到会 die。改 javatest.sh 里那行的写法要同步改 init.sh。"""
+    import re
+    init = (ROOT / "scripts/init.sh").read_text()
+    expr = re.search(r"JAVA_MIN=\"\$\(sed -n '([^']+)'", init)
+    assert expr, "scripts/init.sh 里找不到 JAVA_MIN 的解析表达式"
+    got = subprocess.run(["sed", "-n", expr.group(1), str(ROOT / "javatest.sh")],
+                         text=True, stdout=subprocess.PIPE, timeout=10).stdout.split()
+    assert got and got[0].isdigit(), "没能从 javatest.sh 解析出 JAVA_RELEASE"
+
+
+# ---------- 显式指定优先于探测 ----------
+
+
+def run_init(repo, env):
+    """只跑到"检查工具链"这一步就够了，后面要联网和装依赖。"""
+    return subprocess.run(
+        ["bash", str(ROOT / "scripts/init.sh")], cwd=ROOT,
+        env={"HOME": os.environ["HOME"], "PATH": os.environ["PATH"], **env},
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60,
+    )
+
+
+def test_explicit_tool_is_never_silently_replaced(repo, tmp_path):
+    """指定了就得用指定的那个。
+
+    早先的实现在指定的版本不够时会静默回退去搜索，挑一个别的用还不吭声——
+    用户写了路径就是要用那个，换掉必须说。
+    """
+    old_go = fake_go(tmp_path / "old/go", "1.21.0")
+    result = run_init(repo, {"GO": str(old_go)})
+    assert result.returncode != 0, result.stdout
+    assert "1.21.0" in result.stdout and "低于" in result.stdout
+    # 关键：没有换成本机真实的那个 go 接着跑下去
+    assert "整理 Go 依赖" not in result.stdout
+
+
+def test_explicit_missing_tool_reports_instead_of_searching(repo):
+    result = run_init(repo, {"JAVAC": "/nope/javac"})
+    assert result.returncode != 0, result.stdout
+    assert "找不到或跑不起来" in result.stdout
+
+
+def test_default_still_auto_detects(repo, tmp_path):
+    """没显式指定时，探测照常工作——上一条不能把自动探测一起关掉。"""
+    home = tmp_path / "home"
+    expected = fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
+    assert find(repo, home, "go", "1.26.4", "go") == str(expected)

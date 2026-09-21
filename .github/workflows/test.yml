@@ -47,9 +47,11 @@ jobs:
       - name: Read Python version
         id: python-version
         run: |
-          major="$(sed -n 's/^PYTHON_MIN_MAJOR=//p' scripts/init.sh)"
-          minor="$(sed -n 's/^PYTHON_MIN_MINOR=//p' scripts/init.sh)"
-          echo "version=$major.$minor" >> "$GITHUB_OUTPUT"
+          version="$(sed -n 's/^PYTHON_MIN=//p' scripts/init.sh)"
+          # 解析不到就直接失败。上一版没有这道检查，改了 init.sh 的变量名之后
+          # 它静默产出 "."，错误要等到 setup-python 才暴露出来。
+          test -n "$version" || { echo "没能从 scripts/init.sh 解析出 PYTHON_MIN"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-python@v7
         with:

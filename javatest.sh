@@ -26,6 +26,9 @@ ROOTS=(leetcode)
 # JDK 21，写了 Java 21 的 switch 模式匹配也会在本地就报错，而不是推上去才被 CI 拦下。
 # 这里是版本的唯一来源，CI 只要装的 JDK 不低于它即可。
 JAVA_RELEASE="${JAVA_RELEASE:-17}"
+# 由 make init 探测后经 local.mk 传进来；没探测时退回 PATH
+JAVAC="${JAVAC:-javac}"
+JAVA="${JAVA:-java}"
 
 # 共享数据结构（TreeNode、ListNode 等），编译每个题目目录时一并加进源文件列表，
 # 这样题解里直接用 TreeNode 就行，不用每道树的题重抄一遍。
@@ -88,7 +91,7 @@ for dir in "${dirs[@]}"; do
     mkdir -p "$classes"
     total=$((total + 1))
 
-    if ! javac --release "$JAVA_RELEASE" -encoding UTF-8 -d "$classes" \
+    if ! "$JAVAC" --release "$JAVA_RELEASE" -encoding UTF-8 -d "$classes" \
         "${sources[@]}" ${shared[@]+"${shared[@]}"}; then
         echo "COMPILE FAIL  $name"
         failed=$((failed + 1))
@@ -102,7 +105,7 @@ for dir in "${dirs[@]}"; do
         continue
     fi
 
-    if java -cp "$classes" SolutionTest; then
+    if "$JAVA" -cp "$classes" SolutionTest; then
         echo "PASS          $name"
     else
         echo "TEST FAIL     $name"
@@ -117,9 +120,9 @@ if [ $# -eq 0 ] && [ -f "$SHARED_DIR/test/StructuresTest.java" ]; then
     total=$((total + 1))
     classes="$build_dir/structures"
     mkdir -p "$classes"
-    if javac --release "$JAVA_RELEASE" -encoding UTF-8 -d "$classes" \
+    if "$JAVAC" --release "$JAVA_RELEASE" -encoding UTF-8 -d "$classes" \
         ${shared[@]+"${shared[@]}"} "$SHARED_DIR/test/StructuresTest.java" \
-        && java -cp "$classes" StructuresTest; then
+        && "$JAVA" -cp "$classes" StructuresTest; then
         echo "PASS          structures/java"
     else
         echo "TEST FAIL     structures/java"

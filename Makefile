@@ -1,7 +1,14 @@
 .DEFAULT_GOAL := help
 
+# make init 探测到的本机工具链位置（go / python3 装了但没进 PATH 时才会有这个文件）。
+# 必须在下面的 ?= 之前 include：local.mk 用 := 赋值，赋过就轮不到默认值了。
+# 命令行的 make xxx GO=... 依然优先于这里的一切。
+-include local.mk
+
 GO     ?= go
 PYTHON ?= python3
+JAVAC  ?= javac
+JAVA   ?= java
 
 VENV   := .venv
 PYTEST := $(VENV)/bin/pytest
@@ -32,7 +39,7 @@ help: ## 列出所有命令
 
 .PHONY: init
 init: ## 初始化仓库：检查工具链、装依赖、跑通测试、生成 README
-	GO="$(GO)" PYTHON="$(PYTHON)" bash ./scripts/init.sh
+	GO="$(GO)" PYTHON="$(PYTHON)" JAVAC="$(JAVAC)" bash ./scripts/init.sh
 
 .PHONY: ide
 ide: ## 初始化独立 IDE 项目（无须 ID）；可选 IDE=idea/pycharm/goland
@@ -57,7 +64,7 @@ readme-anon: ## 生成不含个人数据的 README，给 template 分支用
 
 .PHONY: test
 test: $(PYTEST) ## 跑测试，加 ID=94 只测一道题
-	GO="$(GO)" PYTEST="$(PYTEST)" bash ./scripts/test.sh $(PROBLEM_DIR)
+	GO="$(GO)" PYTEST="$(PYTEST)" JAVAC="$(JAVAC)" JAVA="$(JAVA)" bash ./scripts/test.sh $(PROBLEM_DIR)
 
 .PHONY: test-go
 test-go: ## 跑 Go 题解测试并生成覆盖率，加 ID=94 只测一道题
@@ -69,7 +76,7 @@ test-python: $(PYTEST) ## 跑 Python 题解测试，加 ID=94 只测一道题
 
 .PHONY: test-java
 test-java: ## 编译并跑 Java 题解测试，加 ID=94 只测一道题
-	bash ./javatest.sh $(PROBLEM_DIR)
+	JAVAC="$(JAVAC)" JAVA="$(JAVA)" bash ./javatest.sh $(PROBLEM_DIR)
 
 # 只在缺失或依赖清单变动时重建虚拟环境，避免每次跑测试都重装
 $(PYTEST): requirements-dev.txt
