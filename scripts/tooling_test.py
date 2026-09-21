@@ -289,7 +289,7 @@ def clean_path(tmp_path):
     """
     binx = tmp_path / "cleanbin"
     binx.mkdir()
-    for name in ("bash", "sh", "awk", "sed", "sort", "head"):
+    for name in ("bash", "sh", "awk", "sed", "sort", "head", "rm", "env", "cat", "dirname"):
         src = shutil.which(name)
         assert src, f"本机没有 {name}，测试无法构造干净 PATH"
         (binx / name).symlink_to(src)
@@ -408,3 +408,95 @@ def test_default_still_auto_detects(repo, tmp_path):
     home = tmp_path / "home"
     expected = fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
     assert find(repo, home, "go", "1.26.4", "go") == str(expected)
+
+
+# ---------- init.sh 真的跑一遍 ----------
+#
+# 上面那些 local.mk 的测试是手工造出 local.mk 再看 Makefile 认不认，
+# 漏掉了"init.sh 到底写没写"这一环。实测漏过一次：一轮重构把写入步骤
+# 连同 export 一起删掉了，init 照样报成功，下一条 make new 才炸。
+
+
+@pytest.fixture
+def init_repo(tmp_path):
+    """够 init.sh 跑到 local.mk 那一步的最小仓库。
+
+    再往后它会在"编译 ctl"失败（没有 ctl/），这正好——local.mk 是在那之前
+    写的，用这个失败点就能验证顺序，不用给 init.sh 加测试专用的开关。
+    """
+    root = tmp_path / "initrepo"
+    (root / "scripts").mkdir(parents=True)
+    for name in ("scripts/init.sh", "scripts/find-tool.sh", "javatest.sh"):
+        shutil.copy2(ROOT / name, root / name)
+    (root / "go.mod").write_text("module example\n\ngo 1.26.4\n")
+    return root
+
+
+def run_init_sh(init_repo, home, clean_path, **env):
+    return subprocess.run(
+        ["bash", str(init_repo / "scripts/init.sh")], cwd=init_repo,
+        env={"HOME": str(home), "PATH": clean_path, **env},
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60,
+    )
+
+
+def test_init_actually_writes_local_mk(init_repo, tmp_path, clean_path):
+    """探测到 PATH 外的 go 之后，必须把它记下来。
+
+    只在 init.sh 里解析出路径是不够的：那样 make init 报成功，
+    下一条 make new 回到 Makefile 的 GO ?= go，直接 go: not found。
+    """
+    home = tmp_path / "home"
+    go = fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
+    result = run_init_sh(init_repo, home, clean_path)
+
+    local_mk = init_repo / "local.mk"
+    assert local_mk.exists(), f"init.sh 没有生成 local.mk\n{result.stdout}"
+    assert f"GO := {go}" in local_mk.read_text()
+
+
+def test_init_omits_tools_already_on_path(init_repo, tmp_path, clean_path):
+    """在 PATH 里的就别记进 local.mk。
+
+    记一份没用的绝对路径，将来换版本反而会被这条陈旧记录钉住——而且按
+    "显式指定优先"的规则，陈旧路径会被当成用户点名，直接报错而不是重新探测。
+
+    只断言 GO 那一行不在：跑测试的机器上 python3 / JDK 装在 PATH 之外是
+    正常的，它们被探测到并记下来是正确行为。
+    """
+    home = tmp_path / "home"
+    binx = tmp_path / "onpath"
+    binx.mkdir()
+    fake_go(tmp_path / "src/go", "1.26.4").replace(binx / "go")
+    run_init_sh(init_repo, home, f"{binx}:{clean_path}")
+    local_mk = init_repo / "local.mk"
+    text = local_mk.read_text() if local_mk.exists() else ""
+    assert "GO :=" not in text, text
+
+
+def test_tool_path_with_spaces_survives(init_repo, tmp_path, clean_path):
+    """工具装在带空格的路径下（macOS 的 Application Support、Windows 挂载盘常见）。
+
+    探测阶段本来就过得去，炸在后面没加引号的 $GO mod tidy 上——路径被拆成两半。
+    """
+    home = tmp_path / "home"
+    go = fake_go(tmp_path / "my tools/go/bin/go", "1.26.4")
+    result = run_init_sh(init_repo, home, clean_path, GO=str(go))
+
+    assert "go mod tidy 失败" not in result.stdout, result.stdout
+    assert (init_repo / "local.mk").exists(), result.stdout
+    assert f"GO := {go}" in (init_repo / "local.mk").read_text()
+
+
+def test_init_stops_when_version_floor_cannot_be_parsed(init_repo, tmp_path, clean_path):
+    """go.mod 解析不出版本下限时必须停，不能带着空下限往下跑。
+
+    空下限会让版本比较失去意义，而报错写成"没找到 go  或更高版本"——
+    中间空着的正是版本号，看着像工具坏了而不是仓库坏了。
+    """
+    home = tmp_path / "home"
+    fake_go(home / "go/go1.26.4/bin/go", "1.26.4")
+    (init_repo / "go.mod").write_text("module example\n")
+    result = run_init_sh(init_repo, home, clean_path)
+    assert result.returncode != 0
+    assert "没能从 go.mod 解析出" in result.stdout, result.stdout

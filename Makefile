@@ -43,22 +43,22 @@ init: ## 初始化仓库：检查工具链、装依赖、跑通测试、生成 R
 
 .PHONY: ide
 ide: ## 初始化独立 IDE 项目（无须 ID）；可选 IDE=idea/pycharm/goland
-	$(PYTHON) ./scripts/ide-init.py --ide "$(IDE)"
+	"$(PYTHON)" ./scripts/ide-init.py --ide "$(IDE)"
 
 ## ---------- 写题 ----------
 
 .PHONY: new
 new: ## 新开一题，如 make new ID=1 [LANGS=go,python]
 	@test -n "$(ID)" || { echo "用法: make new ID=1 [LANGS=go,python,java]"; exit 1; }
-	cd ctl && $(GO) run . new "$(ID)" --langs "$(LANGS)"
+	cd ctl && "$(GO)" run . new "$(ID)" --langs "$(LANGS)"
 
 .PHONY: readme
 readme: ## 重新生成仓库根 README.md
-	cd ctl && $(GO) run . build readme
+	cd ctl && "$(GO)" run . build readme
 
 .PHONY: readme-anon
 readme-anon: ## 生成不含个人数据的 README，给 template 分支用
-	cd ctl && $(GO) run . build readme --anonymous
+	cd ctl && "$(GO)" run . build readme --anonymous
 
 ## ---------- 测试 ----------
 
@@ -72,7 +72,7 @@ test-go: ## 跑 Go 题解测试并生成覆盖率，加 ID=94 只测一道题
 
 .PHONY: test-python
 test-python: $(PYTEST) ## 跑 Python 题解测试，加 ID=94 只测一道题
-	PYTEST=$(PYTEST) bash ./pytest.sh $(PROBLEM_DIR)
+	PYTEST="$(PYTEST)" bash ./pytest.sh $(PROBLEM_DIR)
 
 .PHONY: test-java
 test-java: ## 编译并跑 Java 题解测试，加 ID=94 只测一道题
@@ -80,7 +80,7 @@ test-java: ## 编译并跑 Java 题解测试，加 ID=94 只测一道题
 
 # 只在缺失或依赖清单变动时重建虚拟环境，避免每次跑测试都重装
 $(PYTEST): requirements-dev.txt
-	$(PYTHON) -m venv $(VENV)
+	"$(PYTHON)" -m venv $(VENV)
 	$(VENV)/bin/pip install --quiet --upgrade pip
 	$(VENV)/bin/pip install --quiet -r requirements-dev.txt
 	@touch $(PYTEST)
@@ -89,15 +89,15 @@ $(PYTEST): requirements-dev.txt
 
 .PHONY: fmt
 fmt: ## 格式化 Go 代码
-	$(GO) fmt ./...
+	"$(GO)" fmt ./...
 
 .PHONY: vet
 vet: ## 静态检查 Go 代码
-	$(GO) vet ./...
+	"$(GO)" vet ./...
 
 .PHONY: tidy
 tidy: ## 整理 go.mod / go.sum
-	$(GO) mod tidy
+	"$(GO)" mod tidy
 
 .PHONY: clean
 clean: ## 清掉构建产物和缓存，不碰题解

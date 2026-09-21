@@ -72,6 +72,12 @@ die_explicit() {
     exit 1
 }
 
+# 解析不到就直接停。空的下限会让后面的版本比较失去意义——要么放过太旧的，
+# 要么一个都不认（实测是后者，报出来的是"没找到 go  或更高版本"，两个空格
+# 中间该有版本号，看着像工具坏了而不是配置坏了）。
+[ -n "$GO_MIN" ]   || die "没能从 go.mod 解析出 Go 版本下限"
+[ -n "$JAVA_MIN" ] || die "没能从 javatest.sh 解析出 JAVA_RELEASE"
+
 step "检查工具链"
 
 if resolved_go="$(resolve go "$GO_MIN" "$GO" go)"; then
@@ -120,17 +126,45 @@ else
     warn "没找到 JDK $JAVA_MIN 或更高版本（PATH、\$JAVA_HOME、/usr/lib/jvm、sdkman 都找过了），跳过 Java 题解；装好后重跑 make init，或 make init JAVAC=/path/to/javac"
 fi
 
+# 把不在 PATH 里的那几个写进 local.mk，让后续的 make new / make test 也能用上。
+# 少了这一步，这次 init 能跑通，下一条 make new 又回到 Makefile 的 GO ?= go。
+# local.mk 是本机配置，不进版本库（见 .gitignore）；命令行的 make init GO=... 仍然优先。
+step "记录工具链位置（local.mk）"
+mk_lines=()
+[ "$GO" = "$(command -v go 2>/dev/null || true)" ] || mk_lines+=("GO := $GO")
+if [ "$has_python" = 1 ]; then
+    [ "$PYTHON" = "$(command -v python3 2>/dev/null || true)" ] || mk_lines+=("PYTHON := $PYTHON")
+fi
+if [ "$has_java" = 1 ] && [ "$JAVAC" != "$(command -v javac 2>/dev/null || true)" ]; then
+    # 成对写入：只记 JAVAC 的话 java 还是会从 PATH 取，两者可能不是同一个 JDK
+    mk_lines+=("JAVAC := $JAVAC" "JAVA := $JAVA")
+fi
+if [ ${#mk_lines[@]} -gt 0 ]; then
+    {
+        echo "# 由 make init 生成，记录本机工具链的位置，不进版本库。"
+        echo "# 删掉它重跑 make init 即可重新探测。"
+        printf '%s\n' "${mk_lines[@]}"
+    } > "$LOCAL_MK"
+    printf '  写入 %s：\n' "${LOCAL_MK#"$ROOT"/}"
+    printf '    %s\n' "${mk_lines[@]}"
+else
+    rm -f "$LOCAL_MK"
+    echo "  都在 PATH 里，无需记录"
+fi
+
+export GO PYTHON JAVAC JAVA
+
 step "整理 Go 依赖"
-$GO mod tidy || die "go mod tidy 失败"
+"$GO" mod tidy || die "go mod tidy 失败"
 
 step "编译 ctl"
-(cd ctl && $GO build -o /dev/null .) || die "ctl 编译失败"
+(cd ctl && "$GO" build -o /dev/null .) || die "ctl 编译失败"
 echo "  ok"
 
 if [ "$has_python" = 1 ]; then
     step "准备 Python 虚拟环境（$VENV）"
     if [ ! -x "$VENV/bin/pytest" ]; then
-        $PYTHON -m venv "$VENV" || die "创建虚拟环境失败"
+        "$PYTHON" -m venv "$VENV" || die "创建虚拟环境失败"
         "$VENV/bin/pip" install --quiet --upgrade pip
         "$VENV/bin/pip" install --quiet -r requirements-dev.txt || die "安装 Python 依赖失败"
     fi
@@ -154,7 +188,7 @@ fi
 
 step "生成 README.md"
 # 需要联网拉 LeetCode 题库；拉不到就跳过，不影响本地开发
-if (cd ctl && $GO run . build readme); then
+if (cd ctl && "$GO" run . build readme); then
     echo "  ok"
 else
     warn "生成 README 失败（多半是网络不通），联网后跑 make readme 补上"

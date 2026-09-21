@@ -84,7 +84,9 @@ CI（`.github/workflows/test.yml`）跟着这三处走，不要在 CI 里另写�
 - Go 找不到才是硬失败（`ctl` 是 Go 写的）；Python 和 Java 找不到或版本不够只警告并跳过，不写那门语言的人不该被挡住。
 - 探测测试必须在 `clean_path` fixture 给的干净 `PATH` 下跑，否则本机真实的 `/usr/bin/javac` 会被「`PATH` 优先」先命中，候选目录那段逻辑根本测不到。断言写成「坏候选没被选中」而不是「什么都没找到」——跑测试的机器上 `/usr/lib/jvm` 里可能真装着合规 JDK。
 
-回归测试见 `scripts/tooling_test.py` 的「工具链探测」一组。
+- **工具路径一律加引号**（`"$GO" mod tidy`、`"$(GO)" run .`）。探测出来的路径可能带空格（macOS 的 Application Support、挂载的 Windows 盘），不加引号会被拆成两半，而且探测阶段一切正常，炸在后面第一条真正调用它的命令上。
+
+回归测试见 `scripts/tooling_test.py` 的「工具链探测」和「init.sh 真的跑一遍」两组。后一组是补课：早先只测「手工造出 local.mk 后 Makefile 认不认」，漏掉了「init.sh 到底写没写」，结果一轮重构把写入步骤连同 `export` 和两道版本解析保护一起删掉，`make init` 照样报成功，下一条 `make new` 才炸。**改 `init.sh` 的大段结构时，注意 `step` 之间的块很容易被整段吞掉。**
 
 ## 目录结构
 
