@@ -36,3 +36,5 @@ ctl/.cache/
 *.iml
 .vscode/
 .DS_Store
+# IDEA 写在项目里的本机辅助目录（MCP 配置等），属于本机状态不入库
+.ai/

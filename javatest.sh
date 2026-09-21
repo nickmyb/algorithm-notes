@@ -125,8 +125,10 @@ if [ "$total" -eq 0 ] && [ "$failed" -eq 0 ]; then
     exit 0
 fi
 
-echo "Java: $total 个测试/编译目录，$failed 个失败"
+# 成功时不再单独汇总：逐目录的 PASS 行已经列全，整体结论由 test-common.sh 统一打印。
+# 失败时才需要这一行，它后面紧跟失败目录清单。
 if [ "$failed" -gt 0 ]; then
+    echo "Java: $total 个测试/编译目录，$failed 个失败"
     printf '  %s\n' "${failed_dirs[@]}"
     exit 1
 fi

@@ -61,14 +61,14 @@ def test_bad_id_never_falls_back_to_all_tests(repo, number):
 def test_missing_go_is_failure(repo):
     result = run(repo, "gotest.sh", env={"GO": str(repo / "missing-go")})
     assert result.returncode != 0
-    assert "===== Go: FAIL =====" in result.stdout
+    assert "\n  Go: FAIL\n" in result.stdout
 
 
 def test_partial_go_list_failure_is_not_swallowed(repo):
     go = executable(repo, "fake-go", 'echo example/leetcode/0094.Example\nexit 2\n')
     result = run(repo, "gotest.sh", env={"GO": go})
     assert result.returncode != 0
-    assert "===== Go: FAIL =====" in result.stdout
+    assert "\n  Go: FAIL\n" in result.stdout
 
 
 def test_go_filters_ide_copies_and_runs_tool_tests(repo):
@@ -91,7 +91,7 @@ fi
 def test_missing_directory_is_failure(repo, script):
     result = run(repo, script, "leetcode/does-not-exist")
     assert result.returncode != 0
-    assert ": FAIL =====" in result.stdout
+    assert ": FAIL\n" in result.stdout
 
 
 @pytest.mark.parametrize("script", ["gotest.sh", "pytest.sh", "javatest.sh"])
@@ -100,7 +100,7 @@ def test_unwritten_language_is_skipped(repo, script):
     result = run(repo, script, repo / "leetcode/0094.Example", env={"PYTEST": pytest_cmd},
                  cwd=repo / "scripts")
     assert result.returncode == 0, result.stdout
-    assert ": SKIP =====" in result.stdout
+    assert ": SKIP\n" in result.stdout
 
 
 def test_all_runs_remaining_languages_after_failure(repo):
@@ -109,10 +109,12 @@ def test_all_runs_remaining_languages_after_failure(repo):
     result = run(repo, "scripts/test.sh", "leetcode/0094.Example",
                  env={"GO": str(repo / "missing-go"), "PYTEST": pytest_cmd})
     assert result.returncode != 0
-    assert "===== Go: FAIL =====" in result.stdout
+    assert "\n  Go: FAIL\n" in result.stdout
     assert "PYTHON_RAN" in result.stdout
-    assert "===== Java: SKIP =====" in result.stdout
-    assert result.stdout.rstrip().endswith("===== All: FAIL =====")
+    assert "\n  Java: SKIP\n" in result.stdout
+    assert "  All: FAIL\n" in result.stdout
+    # 总结论用更重的横线框住，和单门语言的结论区分开
+    assert result.stdout.rstrip().endswith("═" * 56)
 
 
 @pytest.mark.skipif(not shutil.which("javac") or not shutil.which("java"), reason="需要 JDK")
@@ -140,4 +142,4 @@ def test_java_failure_propagates(repo):
         'throw new AssertionError("expected failure"); }}\n')
     result = run(repo, "javatest.sh", problem)
     assert result.returncode != 0
-    assert "===== Java: FAIL =====" in result.stdout
+    assert "\n  Java: FAIL\n" in result.stdout

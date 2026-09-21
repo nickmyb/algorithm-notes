@@ -43,7 +43,7 @@ public final class ExampleTests {
     /** 失败时在汇总之后抛异常，保证 IDE 和脚本都得到非零退出码。 */
     public void finish() {
         String status = failed > 0 ? "FAIL" : passed > 0 ? "PASS" : "SKIP";
-        out.printf("===== %s: %d passed, %d failed, %d skipped =====%n",
+        out.printf("  %s: %d passed, %d failed, %d skipped%n",
                 status, passed, failed, skipped);
         if (failed > 0) {
             throw new AssertionError(failed + " test(s) failed");

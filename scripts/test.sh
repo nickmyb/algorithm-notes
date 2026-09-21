@@ -3,6 +3,7 @@
 set -eu
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 TEST_LANGUAGE=All
+TEST_BANNER=0
 source ./scripts/test-common.sh
 
 failed=0

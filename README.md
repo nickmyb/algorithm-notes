@@ -237,7 +237,7 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 
 ## 环境要求
 
-**项目只在下面这三个版本上测试过**，其他版本不保证可用：
+开发和验证都在 **Ubuntu 24.04** 上进行，**语言版本也只测过下面这三个**，别的系统和版本不保证可用：
 
 | 语言 | 版本 | 版本来源 | 说明 |
 |:---|:---|:---|:---|
@@ -246,6 +246,15 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 | Java | **17**（LTS） | `javatest.sh` 的 `--release` | Java 的 LTS 每两年一个：8 / 11 / 17 / 21 / 25 |
 
 三者都只有一个声明来源，CI 跟着本地走，不会各说各的。
+
+这三个命令要在 `PATH` 里能找到（`go`、`python3`、`javac`/`java`）。装了但没进 `PATH` 时，
+不用改全局环境，直接在命令行覆盖即可：
+
+```sh
+make init GO=/path/to/go/bin/go PYTHON=/path/to/python3
+make test GO=/path/to/go/bin/go        # 其他 make 目标同样接受
+JAVA_RELEASE=21 make test-java         # 临时换 Java 目标版本
+```
 
 Java 的 `--release 17` 同时约束语言特性和可用 API：即使本地装的是 JDK 21，使用 Java 21 的 switch 模式匹配也会在本地编译失败；record 已在 Java 16 正式支持，可以使用。要换目标版本改 `javatest.sh` 里的 `JAVA_RELEASE`，或临时 `JAVA_RELEASE=21 make test-java`。
 

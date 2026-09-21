@@ -180,7 +180,6 @@ def next_steps(ide):
         "     structures/java 已经标好了，不用动；标完 Build → Rebuild Project。",
         "  换题时先右键上一题 → Unmark as Sources Root，再标新的那道：同一时刻只能有",
         "  一个题目目录是 Sources Root，多于一个会撞 Duplicate class Solution。",
-        "  IDEA 有时会自己把含 .java 的题目目录标成 Sources Root，留意别同时标上多道。",
     ]
 
 
