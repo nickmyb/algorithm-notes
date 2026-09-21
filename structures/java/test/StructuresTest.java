@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,6 +20,7 @@ public class StructuresTest {
     public static void main(String[] args) {
         testTreeNodes();
         testListNodes();
+        testExampleTests();
         System.out.println("  structures/java 全部通过");
     }
 
@@ -66,6 +69,10 @@ public class StructuresTest {
         eq("链表往返", ListNodes.toList(ListNodes.of(1, 2, 3)), Arrays.asList(1, 2, 3));
         eq("空链表", ListNodes.toList(ListNodes.of()), Arrays.asList());
 
+        // 超过旧上限 100 的正常链表必须可展开；重复值不代表环。
+        eq("101 个重复值节点", ListNodes.toList(ListNodes.of(new int[101])),
+                java.util.Collections.nCopies(101, 0));
+
         if (ListNodes.find(ListNodes.of(1, 2, 3), 2).val != 2) {
             throw new AssertionError("find 没找到存在的值");
         }
@@ -87,6 +94,42 @@ public class StructuresTest {
         }
         if (ListNodes.withCycle(new int[] {}, 0) != null) {
             throw new AssertionError("空数组应返回 null");
+        }
+    }
+
+    static void testExampleTests() {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        ExampleTests passing = new ExampleTests(new PrintStream(buffer));
+        passing.check("数组按值比较", () -> new int[] {1, 2}, new int[] {1, 2});
+        passing.check("列表", () -> Arrays.asList(1, 2), Arrays.asList(1, 2));
+        passing.check("整数", () -> 3, 3);
+        passing.check("null", () -> null, null);
+        passing.finish();
+        if (!buffer.toString().contains("PASS: 4 passed, 0 failed, 0 skipped")) {
+            throw new AssertionError("成功汇总错误: " + buffer);
+        }
+
+        buffer.reset();
+        ExampleTests failing = new ExampleTests(new PrintStream(buffer));
+        failing.check("值不同", () -> new int[] {1}, new int[] {2});
+        failing.check("题解抛异常", () -> { throw new IllegalStateException("boom"); }, 0);
+        failing.check("失败之后继续跑", () -> 1, 1);
+        boolean rejected = false;
+        try {
+            failing.finish();
+        } catch (AssertionError expected) {
+            rejected = true;
+        }
+        if (!rejected || !buffer.toString().contains("FAIL: 1 passed, 2 failed, 0 skipped")) {
+            throw new AssertionError("失败不能被报成通过: " + buffer);
+        }
+
+        buffer.reset();
+        ExampleTests skeleton = new ExampleTests(new PrintStream(buffer));
+        skeleton.skip("骨架");
+        skeleton.finish();
+        if (!buffer.toString().contains("SKIP: 0 passed, 0 failed, 1 skipped")) {
+            throw new AssertionError("骨架不能被报成用例通过: " + buffer);
         }
     }
 

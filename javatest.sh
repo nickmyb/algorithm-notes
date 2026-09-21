@@ -11,16 +11,19 @@
 #
 # 测试没有引入 JUnit，就是一个 main：断言不成立抛 AssertionError，
 # 进程非零退出，这里据此判失败。
-set -u
+set -eu
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT="$ROOT/out/java"
+cd "$ROOT"
+TEST_LANGUAGE=Java
+source ./scripts/test-common.sh
 
 # 题解根目录。以后新增 lcp/ 这类同级目录，在这里加一项即可。
 ROOTS=(leetcode)
 
 # 目标 Java 版本。--release 同时约束语言特性和可用 API，所以哪怕本地装的是
-# JDK 21，写了 record 或 switch 模式匹配也会在本地就报错，而不是推上去才被 CI 拦下。
+# JDK 21，写了 Java 21 的 switch 模式匹配也会在本地就报错，而不是推上去才被 CI 拦下。
 # 这里是版本的唯一来源，CI 只要装的 JDK 不低于它即可。
 JAVA_RELEASE="${JAVA_RELEASE:-17}"
 
@@ -39,11 +42,8 @@ fi
 # 要测哪些目录：给了参数就只测这些，否则遍历所有题解根目录
 dirs=()
 if [ $# -gt 0 ]; then
-    for d in "$@"; do
-        dirs+=("$ROOT/${d#./}")
-    done
+    dirs=("${test_dirs[@]}")
 else
-    rm -rf "$OUT"
     for root in "${ROOTS[@]}"; do
         for dir in "$ROOT/$root"/*/; do
             [ -d "$dir" ] || continue
@@ -51,6 +51,17 @@ else
         done
     done
 fi
+
+# 每次用独立的编译目录，单题模式也不能复用上次的 SolutionTest.class。
+# 否则删掉或改名后的测试仍会运行，甚至与另一次并行测试串在一起。
+mkdir -p "$OUT"
+build_dir="$(mktemp -d "$OUT/run.XXXXXX")"
+finish_java() {
+    local rc=$?
+    rm -rf -- "$build_dir"
+    test_summary "$rc"
+}
+trap finish_java EXIT
 
 total=0
 failed=0
@@ -64,7 +75,7 @@ for dir in "${dirs[@]}"; do
     [ -e "${sources[0]}" ] || continue
 
     name="${dir#"$ROOT"/}"
-    classes="$OUT/$name"
+    classes="$build_dir/$total"
     mkdir -p "$classes"
     total=$((total + 1))
 
@@ -94,7 +105,8 @@ done
 # 共享结构自己的测试。这些辅助方法是所有树/链表题的地基，写错了会让题解测试给出
 # 假结果，所以必须跟着跑。只在全量模式下跑——单题模式的目的是快速迭代一道题。
 if [ $# -eq 0 ] && [ -f "$SHARED_DIR/test/StructuresTest.java" ]; then
-    classes="$OUT/structures"
+    total=$((total + 1))
+    classes="$build_dir/structures"
     mkdir -p "$classes"
     if javac --release "$JAVA_RELEASE" -encoding UTF-8 -d "$classes" \
         ${shared[@]+"${shared[@]}"} "$SHARED_DIR/test/StructuresTest.java" \
@@ -109,10 +121,11 @@ fi
 
 if [ "$total" -eq 0 ] && [ "$failed" -eq 0 ]; then
     echo "跳过 Java：指定的题目没有 Java 题解"
+    TEST_STATUS=SKIP
     exit 0
 fi
 
-echo "===== Java: $total 个目录，$failed 个失败 ====="
+echo "Java: $total 个测试/编译目录，$failed 个失败"
 if [ "$failed" -gt 0 ]; then
     printf '  %s\n' "${failed_dirs[@]}"
     exit 1

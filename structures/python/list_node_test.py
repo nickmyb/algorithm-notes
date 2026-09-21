@@ -13,6 +13,12 @@ def test_build_empty():
     assert build_list([]) is None
 
 
+def test_long_list_with_repeated_values():
+    # 抓住旧的 100 节点上限；同时防止把值相等误当成访问了同一个节点。
+    vals = [0] * 101
+    assert list_to_values(build_list(vals)) == vals
+
+
 def test_find():
     head = build_list([1, 2, 3])
     assert find(head, 2).val == 2

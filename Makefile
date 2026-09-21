@@ -11,9 +11,9 @@ LANGS ?= go,python,java
 
 # 给了 ID 就只测那一道题，没给就全量。
 # 解析失败（题号不存在）直接报错，免得静默退化成"测了全部"。
-ifdef ID
+ifneq ($(origin ID),undefined)
 ifneq ($(filter test test-go test-python test-java,$(MAKECMDGOALS)),)
-PROBLEM_DIR := $(shell bash ./scripts/problem-dir.sh $(ID) 2>/dev/null)
+PROBLEM_DIR := $(shell bash ./scripts/problem-dir.sh "$(ID)")
 ifeq ($(PROBLEM_DIR),)
 $(error 找不到题号 $(ID) 对应的目录，先跑 make new ID=$(ID))
 endif
@@ -29,31 +29,32 @@ help: ## 列出所有命令
 
 .PHONY: init
 init: ## 初始化仓库：检查工具链、装依赖、跑通测试、生成 README
-	bash ./scripts/init.sh
+	GO="$(GO)" PYTHON="$(PYTHON)" bash ./scripts/init.sh
 
 ## ---------- 写题 ----------
 
 .PHONY: new
 new: ## 新开一题，如 make new ID=1 [LANGS=go,python]
 	@test -n "$(ID)" || { echo "用法: make new ID=1 [LANGS=go,python,java]"; exit 1; }
-	cd ctl && $(GO) run . new $(ID) --langs $(LANGS)
+	cd ctl && $(GO) run . new "$(ID)" --langs "$(LANGS)"
 
 .PHONY: readme
 readme: ## 重新生成仓库根 README.md
 	cd ctl && $(GO) run . build readme
 
 .PHONY: readme-anon
-readme-anon: ## 生成匿名版 README（个人数据全为 0），给 template 分支用
+readme-anon: ## 生成不含个人数据的 README，给 template 分支用
 	cd ctl && $(GO) run . build readme --anonymous
 
 ## ---------- 测试 ----------
 
 .PHONY: test
-test: test-go test-python test-java ## 跑测试，加 ID=94 只测一道题
+test: $(PYTEST) ## 跑测试，加 ID=94 只测一道题
+	GO="$(GO)" PYTEST="$(PYTEST)" bash ./scripts/test.sh $(PROBLEM_DIR)
 
 .PHONY: test-go
 test-go: ## 跑 Go 题解测试并生成覆盖率，加 ID=94 只测一道题
-	bash ./gotest.sh $(PROBLEM_DIR)
+	GO="$(GO)" bash ./gotest.sh $(PROBLEM_DIR)
 
 .PHONY: test-python
 test-python: $(PYTEST) ## 跑 Python 题解测试，加 ID=94 只测一道题

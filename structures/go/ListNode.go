@@ -1,9 +1,5 @@
 package structures
 
-import (
-	"fmt"
-)
-
 // ListNode 是链接节点
 // 这个不能复制到*_test.go文件中。会导致Travis失败
 type ListNode struct {
@@ -13,18 +9,14 @@ type ListNode struct {
 
 // List2Ints convert List to []int
 func List2Ints(head *ListNode) []int {
-	// 链条深度限制，链条深度超出此限制，会 panic
-	limit := 100
-
-	times := 0
-
+	// 按节点身份判环，正常长链表不能因为超过固定长度而失败。
+	seen := make(map[*ListNode]struct{})
 	res := []int{}
 	for head != nil {
-		times++
-		if times > limit {
-			msg := fmt.Sprintf("链条深度超过%d，可能出现环状链条。请检查错误，或者放宽 l2s 函数中 limit 的限制。", limit)
-			panic(msg)
+		if _, ok := seen[head]; ok {
+			panic("链表有环，无法展开")
 		}
+		seen[head] = struct{}{}
 
 		res = append(res, head.Val)
 		head = head.Next

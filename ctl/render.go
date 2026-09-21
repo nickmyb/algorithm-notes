@@ -32,29 +32,32 @@ func newBuildCommand() *cobra.Command {
 
 func newBuildREADME() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "readme",
-		Short: "Build readme.md commands",
-		Run: func(cmd *cobra.Command, args []string) {
-			buildREADME()
+		Use:          "readme",
+		Short:        "Build readme.md commands",
+		Args:         cobra.NoArgs,
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return buildREADME()
 		},
 	}
 	cmd.Flags().BoolVar(&anonymous, "anonymous", false,
-		"忽略 config.toml，以未登录身份请求，个人数据全为 0（生成 template 分支的 README 时用）")
+		"忽略 config.toml，以未登录身份请求，不渲染个人数据（生成 template 分支的 README 时用）")
 	return cmd
 }
 
-func buildREADME() {
+func buildREADME() error {
 	var lpa m.LeetCodeProblemAll
 
 	// 请求所有题目信息
 	body := getProblemAllList()
 	if len(body) == 0 {
-		fmt.Println("拉取 LeetCode 题库失败（网络不通或被限流），README 未改动")
-		return
+		return fmt.Errorf("拉取 LeetCode 题库失败（网络不通或被限流），README 未改动")
 	}
 	if err := json.Unmarshal(body, &lpa); err != nil {
-		fmt.Printf("解析题库数据失败: %v\n", err)
-		return
+		return fmt.Errorf("解析题库数据失败，README 未改动: %w", err)
+	}
+	if len(lpa.StatStatusPairs) == 0 {
+		return fmt.Errorf("题库数据为空，README 未改动")
 	}
 
 	// 拼凑 README 需要渲染的数据
@@ -87,18 +90,20 @@ func buildREADME() {
 	res, err := renderReadme(readmeTemplate, solutions, pending,
 		m.Mdrows{Mdrows: mdrows}, m.Mdrows{Mdrows: omdrows}, info)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
-	util.WriteFile("../README.md", res)
+	if err := util.WriteFile("../README.md", res); err != nil {
+		return fmt.Errorf("写入 README 失败: %w", err)
+	}
 	fmt.Println("write file successful")
 	reportPersonalData(info)
+	return nil
 }
 
-// reportPersonalData 在写完 README 之后说清楚「个人数据」那张表里是真实数据还是全 0。
+// reportPersonalData 在写完 README 之后说明个人数据是否可用。
 //
-// 未登录时接口不报错，只是所有 AC 计数都返回 0，README 里就是一张全 0 的表——
-// 看起来像"一道题都没做"而不是"没拿到数据"，很容易误判，所以这里明确讲一句。
+// 未登录时接口不报错，只是所有 AC 计数都返回 0，所以不渲染个人数据，
+// 避免把"没拿到数据"误读成"一道题都没做"。
 //
 // 用两个信号区分三种状态：sentCookie 是本地事实（发没发凭据），info.UserName
 // 是服务器的判断（认不认）。发了但服务器不认，就是 Cookie 过期——这种情况接口

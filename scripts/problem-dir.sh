@@ -21,7 +21,12 @@ case "$id" in
         ;;
 esac
 
-padded="$(printf '%04d' "$id")"
+# 题号是十进制文本。printf %d 会把 0094 当八进制，报错后甚至得到 0000。
+# 用字符串补齐宽度，同时避免超长数字的整数溢出。
+id="${id#"${id%%[!0]*}"}"
+id="${id:-0}"
+padded="$(printf '%4s' "$id")"
+padded="${padded// /0}"
 
 # 题解根目录，和 gotest.sh / javatest.sh / pytest.ini 保持一致。
 # 以后新增 lcp/ 这类同级目录，在这里加一项。

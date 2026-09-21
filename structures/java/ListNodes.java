@@ -1,5 +1,8 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 单链表的测试辅助方法，对应 structures/go/ListNode.go 里的同名函数：
@@ -13,12 +16,6 @@ import java.util.List;
  * </pre>
  */
 public final class ListNodes {
-
-    /**
-     * toList 的遍历上限。链表成环时不加限制会死循环；这里照搬 Go 版的做法，
-     * 超出就抛异常，把"测试挂住"变成"测试报错"。
-     */
-    private static final int LIMIT = 100;
 
     private ListNodes() {}
 
@@ -36,11 +33,10 @@ public final class ListNodes {
     /** 链表展开成列表。遇到环会抛异常而不是死循环。 */
     public static List<Integer> toList(ListNode head) {
         List<Integer> out = new ArrayList<>();
-        int times = 0;
+        Set<ListNode> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         while (head != null) {
-            if (++times > LIMIT) {
-                throw new IllegalStateException(
-                        "链条深度超过 " + LIMIT + "，可能有环。检查题解，或放宽 ListNodes.LIMIT。");
+            if (!seen.add(head)) {
+                throw new IllegalStateException("链表有环，无法展开");
             }
             out.add(head.val);
             head = head.next;

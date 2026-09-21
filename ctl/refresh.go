@@ -6,19 +6,21 @@ import (
 
 func newRefresh() *cobra.Command {
 	return &cobra.Command{
-		Use:   "refresh",
-		Short: "Refresh all document",
-		Run: func(cmd *cobra.Command, args []string) {
-			refresh()
+		Use:          "refresh",
+		Short:        "Refresh all document",
+		Args:         cobra.NoArgs,
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return refresh()
 		},
 	}
 }
 
-func refresh() {
+func refresh() error {
 	// 站点相关的两步（渲染第二章、拷题解进第四章）依赖 website/ 目录，
 	// 已随 ctl/render_website.go 一起停用，现在 refresh 只重建 README。
 	// copyLackFile()
 	// buildBookMenu()
-	buildREADME()
+	return buildREADME()
 	// buildChapterTwo(true)
 }

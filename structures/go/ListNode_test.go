@@ -21,9 +21,9 @@ func Test_l2s(t *testing.T) {
 	}
 	ast.Equal([]int{1, 2, 3}, List2Ints(one2three), "没有成功地转换成[]int")
 
-	limit := 100
-	overLimitList := Ints2List(make([]int, limit+1))
-	ast.Panics(func() { List2Ints(overLimitList) }, "转换深度超过 %d 限制的链条，没有 panic", limit)
+	// 超过旧上限 100 的正常链表仍应往返；重复值也不能被误判为同一个节点。
+	longList := make([]int, 101)
+	ast.Equal(longList, List2Ints(Ints2List(longList)))
 }
 
 func Test_s2l(t *testing.T) {

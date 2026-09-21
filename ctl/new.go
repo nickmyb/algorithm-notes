@@ -115,8 +115,10 @@ func scaffold(id int, langNames []string) error {
 	if detail == nil {
 		fmt.Println("【没取到题目描述，README 的题目小节留空，自己补一下】")
 	}
-	util.WriteFile(filepath.Join(dir, "README.md"), []byte(problemReadme(
-		id, title, slug, m.DifficultyMap[problem.Difficulty.Level], detail)))
+	if err := util.WriteFile(filepath.Join(dir, "README.md"), []byte(problemReadme(
+		id, title, slug, m.DifficultyMap[problem.Difficulty.Level], detail))); err != nil {
+		return fmt.Errorf("写入题目 README 失败: %w", err)
+	}
 
 	for _, lang := range langs {
 		files, err := templateFiles(lang)
@@ -230,7 +232,9 @@ func loadProblems() ([]m.StatStatusPairs, error) {
 		return nil, fmt.Errorf("解析题库数据失败: %w", err)
 	}
 	if err := os.MkdirAll(filepath.Dir(problemsCache), 0755); err == nil {
-		util.WriteFile(problemsCache, body)
+		if err := util.WriteFile(problemsCache, body); err != nil {
+			fmt.Printf("写入题库缓存失败: %v\n", err)
+		}
 	}
 	return lpa.StatStatusPairs, nil
 }

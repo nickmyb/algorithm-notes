@@ -10,13 +10,16 @@
 
 - **题解代码**（`leetcode/` 下各题的 `Solution.*`）由我本人编写。卡住的题会参考 [halfrost/LeetCode-Go](https://github.com/halfrost/LeetCode-Go) 的实现，思路借鉴自那里。
 - **仓库初始化代码**（`ctl/` 工具链改造、`Makefile`、`conftest.py`、各测试脚本、CI 配置和本 README 模板）由 [Claude Code](https://claude.com/claude-code) 生成。
+- **后续工程协作**：ChatGPT（Codex）参与工具链问题排查、多语言测试汇总与回归检查、共享结构修复、IDE 项目隔离、运行配置模板和文档完善。
+
+感谢 ChatGPT 和 Claude 在仓库搭建、排错和维护中的协助。题解代码仍由我本人编写；项目方案与变更由我确认和维护。
 
 ## 快速开始
 
 ```sh
 git clone git@github.com:nickmyb/algorithm-notes.git
 cd algorithm-notes
-git checkout init     # 干净的起点：只有工具链和题解骨架
+git switch -c my-solutions init  # 从干净的骨架创建自己的分支
 make init             # 检查工具链、装依赖、跑通测试、生成 README
 make new ID=1         # 开始第一题
 ```
@@ -29,8 +32,8 @@ make new ID=1         # 开始第一题
 
 ```sh
 make new ID=1                    # 1. 建目录，题目描述自动填好
-make new ID=1 LANGS=go,python    #    只写某几门语言就带 LANGS
-                                 # 2. 写题解（见下），删掉测试骨架里的 t.Skip / pytest.skip
+# 或：make new ID=1 LANGS=go,python  # 只选一种建题方式，不要重复创建同一题
+                                 # 2. 写题解（见下），删掉测试骨架里的 skip
                                  # 3. 照着题目 README 里的 Example 写测试用例
 make test ID=1                   # 4. 只测这一道，反复改的时候快得多
 make readme                      # 5. 刷新本 README 的题目表格
@@ -41,6 +44,8 @@ git add . && git commit          # 7. 提交
 ### 1. 建目录
 
 `make new ID=1` 会去 LeetCode 按题号查标题，建出 `leetcode/0001.Two-Sum/`，把**英文题目描述和折叠的官方中文翻译**写进该题的 `README.md`，再从 `leetcode/0000.Template/` 复制各语言的骨架。
+
+使用 IDE 时，项目只需初始化一次。换题后按 [IDE 模板与换题说明](./ide-templates/README.md)修改已有的 `Current Problem` 目标，不重建 `.ide` 项目，也不用新增运行配置。
 
 **只打算写一门语言时记得带 `LANGS=`。** 三门全生成却只写一门的话，下面的题目表格会显示三个链接、语言统计三门都算 1，而点进去另外两个是空骨架——ctl 判断"有没有题解"看的是**文件存不存在，不看内容**。事后想补语言，把文件放进目录再 `make readme` 即可，不用重建。
 
@@ -61,11 +66,26 @@ git add . && git commit          # 7. 提交
 
 想加题目没给的边界用例，先想清楚它能抓到题目示例抓不到的什么错误；说不出来就别加，那只会给测试增重而不增强。
 
+Java 用共享的 `ExampleTests` 报告每个用例和最终汇总。删除 `tests.skip(...)`，按下面的形式转录示例，并保留最后的 `tests.finish()`：
+
+```java
+ExampleTests tests = new ExampleTests();
+Solution s = new Solution();
+tests.check("Example 1", () -> s.twoSum(new int[] {2, 7, 11, 15}, 9), new int[] {0, 1});
+tests.finish();
+```
+
+`check` 会记录断言失败和题解抛出的异常，继续跑后面的用例；`finish` 汇总后在有失败时抛出 `AssertionError`，IDE 和命令行都会正确报错。新建的骨架仍然是跳过状态。
+
 ### 4. 跑测试
 
 `make test ID=1` 按题号找目录（`94` → `leetcode/0094.*`），**那道题没写的语言会安静跳过**——只写了 Java 的题，Go 和 Python 不会因为"没有测试"而报错。题号不存在时直接报错退出，不会静默退化成全量。
 
 单题模式不跑 `structures/` 的测试，改了共享结构记得跑一次全量 `make test`。
+
+三门语言保留各自的用例明细，脚本最后统一输出 `===== Go/Python/Java: PASS/FAIL/SKIP =====`。`make test` 会跑完三门语言，再输出 `===== All: PASS =====` 或 `FAIL`；任意一门失败，整条命令返回非零。`PASS` 表示本次运行没有失败，骨架的跳过数仍应查看用例明细。
+
+在 IDE 的原生运行按钮里，Go 和 Python 的格式由 IDE/测试框架决定；Java 直接运行 `SolutionTest.main` 也会输出用例数及总结果。需要相同的语言汇总格式时，从 IDE 终端运行 `make test ID=1`。
 
 ### 5. 填题解 README
 
@@ -143,7 +163,7 @@ make clean                       # 清构建产物，不碰题解
 
 ```python
 def test_two_sum(solution):
-    assert solution.twoSum([2, 7, 11, 15], 9) == [0, 1]
+    assert solution.Solution().twoSum([2, 7, 11, 15], 9) == [0, 1]
 ```
 
 ### 同一语言的多种解法
@@ -202,7 +222,7 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 - **Python** 的文件名就是模块名，别起 `queue.py`、`heapq.py` 这种和标准库重名的
 - 节点类型照搬 LeetCode 的定义不要改，测试辅助另外放（`TreeNode` / `TreeNodes` 分开就是为此）
 
-只在真用到时加。halfrost 的 Go 版有 13 个树相关函数，Java / Python 侧目前只移植了建树和层序展开两个。
+只在真用到时加。Java / Python 侧目前提供建树、层序展开、三种遍历、查找和比较，其他辅助用到再补。Java 另外提供测试报告器 `ExampleTests`，供题目测试使用。
 
 ## 环境要求
 
@@ -216,7 +236,7 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 
 三者都只有一个声明来源，CI 跟着本地走，不会各说各的。
 
-Java 的 `--release 17` 同时约束语言特性和可用 API：即使本地装的是 JDK 21，写了 record 或 switch 模式匹配也会在本地就编译失败，而不是推上去才被 CI 拦下。要换目标版本改 `javatest.sh` 里的 `JAVA_RELEASE`，或临时 `JAVA_RELEASE=21 make test-java`。
+Java 的 `--release 17` 同时约束语言特性和可用 API：即使本地装的是 JDK 21，使用 Java 21 的 switch 模式匹配也会在本地编译失败；record 已在 Java 16 正式支持，可以使用。要换目标版本改 `javatest.sh` 里的 `JAVA_RELEASE`，或临时 `JAVA_RELEASE=21 make test-java`。
 
 ## 目录结构
 
@@ -253,18 +273,54 @@ algorithm-notes/
 
 ## IDE 配置
 
-测试脚本内部会切到仓库根，所以 Run Configuration 的 working directory 设成哪里都不影响结果。
+### 多个 JetBrains IDE 要分开保存项目配置
 
-### GoLand —— 打开仓库根
+IDEA、PyCharm、GoLand 都把项目配置写进项目目录的 `.idea/`，其中 `misc.xml` 的 Project SDK 和 `.iml` 的 Module SDK 会互相覆盖。把同一个仓库根分别作为它们的项目打开，会出现「在 IDEA 运行后 PyCharm 丢失 interpreter，反过来 Java SDK 又丢失」；解释器本身没有被删掉。
+
+为每个 IDE 建一个独立的项目目录，再把同一个仓库根加为 **Content Root**。源码仍然只有一份，`.idea` 各自独立：
+
+| IDE | 项目目录（打开这个目录） | Content Root |
+|:---|:---|:---|
+| IntelliJ IDEA | `<仓库根>/.ide/idea` | `<仓库根>` |
+| PyCharm | `<仓库根>/.ide/pycharm` | `<仓库根>` |
+| GoLand | `<仓库根>/.ide/goland` | `<仓库根>` |
+
+`.ide/` 已被 Git 忽略。仅首次配置时，在上表对应位置新建空项目，不新建 Git 仓库、不生成示例代码；移除默认的空 Content Root，再添加仓库根，并将 `.ide`、`.ide-backups`、`.venv`、`out` 标记为 Excluded。PyCharm/GoLand 在 Settings → Project Structure 中添加 Content Root；IDEA 在 Project Structure → Modules → 新建模块 → Sources 中添加，模块文件放在自己的项目目录中。模块名分别设为 `algorithm-notes-go`、`algorithm-notes-python`、`algorithm-notes-java`，与运行模板一致。
+
+参考 JetBrains 的 [IDEA Content roots](https://www.jetbrains.com/help/idea/content-roots.html)、[PyCharm Project Structure](https://www.jetbrains.com/help/pycharm/configuring-project-structure.html) 和 [GoLand Content root](https://www.jetbrains.com/help/go/content-root.html)。之后始终打开各自的项目目录，不再共同打开仓库根的旧项目。
+
+迁移时先关闭旧项目窗口，再在新项目中选择原来的 SDK/解释器。无需删除 `.venv` 或反复重建解释器。旧根目录 `.idea` 和 `structures/java/structures.iml` 不再使用，需要保留的旧配置移入 `.ide-backups/`，不要继续作为项目打开。
+
+下面的「仓库根」指 Content Root。测试脚本内部会切到仓库根，从其他目录调用要给出脚本路径；`make` 则需在仓库根运行，或使用 `make -C <仓库根> test ID=94`。
+
+### 一份固定模板 + 一份当前题目配置
+
+每个 IDE 只有一份日常使用的运行配置。名称固定，不写题号，避免换了目标却忘记同步显示名称：
+
+| IDE | 运行配置名称 | 固定模板 |
+|:---|:---|:---|
+| GoLand | `Go - Current Problem` | [Go 模板](./ide-templates/goland/current_problem.xml.tpl) |
+| PyCharm | `Python - Current Problem` | [Python 模板](./ide-templates/pycharm/current_problem.xml.tpl) |
+| IDEA | `Java - Current Problem` | [Java 模板](./ide-templates/idea/current_problem.xml.tpl) |
+
+当前题目配置统一保存为 `.ide/<IDE>/.idea/runConfigurations/current_problem.xml`；模板留在 `ide-templates/`，纳入版本管理但不出现在 IDE 的运行列表里。首次创建或恢复时复制模板并填写路径，正常换题只在 **Run → Edit Configurations** 中编辑已有配置。具体占位符、目标路径和 Java 源码根修改步骤见 [IDE 模板与换题说明](./ide-templates/README.md)。
+
+SDK、模块、Content Root 等项目设置只配置一次，`.iml`、`misc.xml`、`modules.xml`、`vcs.xml`、`workspace.xml` 等必要文件继续保留。`make new` 只生成题解，不重建 IDE 项目。如果从代码旁的运行箭头生成了临时配置，可在 Edit Configurations 中删除重复项，日常从下拉框运行 `Current Problem`。
+
+### GoLand
 
 | 配置项 | 值 |
 |:---|:---|
 | GOROOT | 指向 `go.mod` 要求的版本（当前 1.26.4） |
 | Go Modules | 自动从 `go.mod` 识别，不用动 |
 
+打开 `<仓库根>/.ide/goland`，不要继续使用仓库根的旧项目。Go 模块的 Content Root 和测试配置的 Working directory 都指向仓库根；GoLand 的模块不需要 Java SDK，也不用照搬 IDEA 的 Java Sources Root。
+
+把 `out` 标记为 Excluded，避免 IDE 把 IDEA 复制的 `.go` 文件也索引成题解。`Go - Current Problem` 的 Test kind 固定为 Package，换题只修改 Package path（如 `github.com/nickmyb/algorithm-notes/leetcode/0094.Binary-Tree-Inorder-Traversal`）；Pattern 保持空白，以免仍筛选上一题的测试函数。全量测试仍用 `make test-go`，它包含共享结构、工具链测试及 `out/` 过滤。
+
 `ctl/` 下 7 个带 `//go:build ignore` 的文件会被标成排除在构建外、灰掉，这是故意的（见 [ctl/README.md](./ctl/README.md) 的「已停用的功能」），不要去"修"。
 
-### PyCharm —— 打开仓库根
+### PyCharm
 
 | 配置项 | 值 |
 |:---|:---|
@@ -274,31 +330,50 @@ algorithm-notes/
 
 标记 Sources Root 那步是关键：运行时是 `conftest.py` 把这个目录加进 `sys.path` 的，属于运行期行为，IDE 的静态分析看不到，不标记的话 `from tree_node import TreeNode` 会一直标红。
 
+**单题测试用文件路径，不用同名模块名。** 每题的测试都叫 `solution_test.py`，自动生成的 `solution_test.test_inorder_traversal` 这类模块目标可能解析到另一题，甚至 `0000.Template`。运行配置的名字不是实际测试目标，以控制台的 `Launching pytest with arguments ...` 为准。
+
+首次按模板建立配置后，在 **Run → Edit Configurations** 中修改已有的 `Python - Current Problem`：
+
+| 配置项 | 第 94 题示例 |
+|:---|:---|
+| Name | `Python - Current Problem`（固定不改） |
+| Target 类型 | **Script path / script**，不要选 Module name |
+| Target 路径 | `<仓库根>/leetcode/0094.Binary-Tree-Inorder-Traversal/solution_test.py`（填完整路径） |
+| Working directory | `<仓库根>`，不是 `.ide/pycharm` |
+| Python Interpreter | 当前模块的 `<仓库根>/.venv/bin/python` |
+
+参见 JetBrains 的 [pytest 运行配置说明](https://www.jetbrains.com/help/pycharm/run-debug-configuration-py-test.html)。保存后从运行配置下拉框选择 `Python - Current Problem`；旧 Run 窗口的 **Rerun** 可能仍使用旧配置。换题只修改 Target 路径，不复制配置、不改名称。
+
+第 94 题应收集 **4 个用例并全部通过**。如果控制台目标是 `leetcode/0000.Template/solution_test.py`，并显示 `test_solve[NOTSET] SKIPPED`，说明跑到了骨架，不能当成第 94 题通过；也不要删掉模板的跳过逻辑来“修复”。
+
 ### IntelliJ IDEA
 
 Java 侧的约束：每道题都是 default package 里的 `class Solution`，**同一个编译范围里只能有一个**，否则撞成一片 `Duplicate class Solution`（`javac` 同理，所以 `javatest.sh` 才逐目录编译）。
 
-两种配法，都是让同一时刻只有一个题目目录进入 Java 的编译范围。Project SDK / Module SDK 都选 **17**（和 `javatest.sh` 的 `JAVA_RELEASE` 一致）。
+统一使用独立项目引用仓库根。Project SDK / Module SDK 都选 **17**（和 `javatest.sh` 的 `JAVA_RELEASE` 一致），运行配置固定为 `Java - Current Problem`，入口始终是 `SolutionTest`。
 
-**推荐：打开仓库根 + 标记 Sources Root**
+**首次配置及换题**
 
-1. 打开仓库根，设好 Project SDK 17
+1. 打开上面独立创建的 IDEA 项目，Content Root 指向仓库根，设好 Project SDK 17
 2. 目录树上把**当前在写的那道题的目录**和 `structures/java` 都标记为 **Mark Directory as → Sources Root**
-3. 换题时取消上一题的标记，标到新的题目目录上
+3. Project → Compiler output 设为 `<仓库根>/out/idea`；Modules → Paths 使用项目输出路径
+4. 换题时取消上一题的标记，标到新的题目目录上，再执行 **Build → Rebuild Project**
 
-一个窗口搞定，换题只要改两次标记，不用建模块。代价是同一时刻只有一道题被索引。
+一个窗口和一个模块即可，换题只切换源码根，SDK、运行配置名称和主类都不变。**只修改显示名称不会切换题目**，实际运行对象由模块源码根决定。
 
-推荐它还有一个更实际的理由：**IDEA 的编译输出会落在仓库根的 `out/`**，而 `go list ./leetcode/...` 和 pytest 的 `testpaths` 都够不到那里，不会污染测试。下面那种配法就没这个好处。
+编译输出集中放在仓库根的 `out/`，避免在题目目录里出现复制的 Go/Python 源码和测试。
 
-**备选：按题打开 + 模块依赖**
+`out/` 按生成工具分开，IDEA 和命令行测试不共用 classpath：
 
-1. 直接把题目目录作为项目打开，如 `leetcode/0094.Binary-Tree-Inorder-Traversal`
-2. `Project Structure` → `Modules` → `+` 添加 `structures/java`，命名为 `structures`
-3. 选中题目模块 → **`Dependencies`** 标签 → `+` → **Module Dependency** → 选 `structures`，Scope 为 `Compile`
+| 路径 | 来源和生命周期 |
+|:---|:---|
+| `out/idea/production/<模块名>/` | 当前 IDEA 项目的编译结果，供 IDE 运行；可保留直到下次清理 |
+| `out/java/run.XXXXXX/` | `javatest.sh` 每次新建的临时目录，结束时自动删除，不复用旧 `.class` |
+| `out/production/`、`out/java/leetcode/`、`out/java/structures/` | 旧 IDEA 配置或旧脚本的遗留目录；当前配置不使用，可随构建产物一起清理 |
 
-模块关系明确，但换题要重开窗口重配一次。
+IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 决定哪些非 Java 文件作为资源复制，所以 `out/idea` 中出现 `.go`、`.py`、README 或 `.iml` 不代表源文件放错了位置。它们不是题解来源，不要编辑或运行这些副本；三个 IDE 都应排除 `out/`，测试脚本里的过滤也必须保留。需要减少资源副本时，可在 Settings → Build, Execution, Deployment → Compiler → Resource patterns 中追加 `!*.go;!*.py;!*.pyc;!*.md;!*.iml`，保留原有排除项；之后在没有测试运行时清理并重新构建。
 
-> **这种配法有个坑**：IDEA 会把编译输出建在**题目目录里面**（`leetcode/0094.xxx/out/`），而且把所有非 `.java` 文件**当资源复制进去**——`solution.py`、`solution_test.py`、`Solution.go`、`Solution_test.go` 全都有一份副本。这些副本会随着你改代码而过时，而**测试工具不看 `.gitignore`**：
+> **旧的按题打开配置可能留下题内 `out/`**：IDEA 会把编译输出建在题目目录里面（`leetcode/0094.xxx/out/`），而且把非 `.java` 文件作为资源复制进去。这些副本会随着改代码而过时，而测试工具不看 `.gitignore`：
 >
 > - `go list ./leetcode/...` 把 `out/production/<题目>/` 当成一个真实的包编译测试
 > - pytest 把 `out/` 里那份旧 `solution_test.py` 也收集了
@@ -327,7 +402,7 @@ Java 侧的约束：每道题都是 default package 里的 `class Solution`，**
 
 | 需要登录 | 不登录的表现 |
 |:---|:---|
-| 下面的「个人数据」表格 | AC 数全是 0，Perfection Rate 显示 `-` |
+| 下面的「个人数据」表格 | 整节不显示；配置有效 Cookie 后自动出现 |
 | 「已 AC 但还没写题解」的列表 | 为空（模板里默认没启用这块） |
 
 另有一个例外：**会员题**未登录时拿不到题目描述，`make new` 会建好目录但「题目」小节是空的，需要自己登录后复制；而且账号得真有 LeetCode 会员，光登录不够。

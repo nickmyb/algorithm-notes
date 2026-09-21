@@ -2,6 +2,8 @@
 
 题解仓库的命令行工具，从 [halfrost/LeetCode-Go](https://github.com/halfrost/LeetCode-Go) 的 ctl 改造而来。所有命令都在 `ctl/` 目录下执行，仓库根的 `Makefile` 只是它的薄封装。
 
+感谢 Claude（Claude Code）协助初始工具链搭建，以及 ChatGPT（Codex）参与后续错误处理、工作流回归检查和文档完善。方案与变更由仓库作者确认和维护。
+
 ```sh
 cd ctl && go run . <command>
 ```
@@ -10,7 +12,7 @@ cd ctl && go run . <command>
 |:---|:---|:---|
 | `new <题号>` | `make new ID=1` | 按题号建题目目录，抓题目描述写进 README，复制各语言骨架 |
 | `build readme` | `make readme` | 重新生成仓库根 `README.md` |
-| `build readme --anonymous` | `make readme-anon` | 同上，但跳过 `config.toml` 强制匿名，个人数据全为 0 |
+| `build readme --anonymous` | `make readme-anon` | 同上，但跳过 `config.toml` 强制匿名，不渲染个人数据 |
 | `refresh` | — | 目前等同于 `build readme` |
 | `version` | — | 打印版本 |
 
@@ -34,7 +36,7 @@ cd ctl && go run . <command>
 | `new <免费题>` | 否 | 完全正常，中英文题目描述都能拿到 |
 | `new <会员题>` | 否 | 目录、标题、难度都正常，但**题目描述是空的**，要自己登录后复制进去 |
 | `build readme` 的题目表格 | 否 | 完全正常 |
-| `build readme` 的「个人数据」 | **是** | AC 数全是 0，Perfection Rate 显示 `-` |
+| `build readme` 的「个人数据」 | **是** | 整节不显示 |
 | `build readme` 的「已 AC 但未收录」 | **是** | 列表为空 |
 
 会员题（`paid_only`）比较特殊：`new` 会先提示「第 N 题是会员题，题目描述需要登录后自己复制」。而且**光登录还不够，账号得真有 LeetCode 会员**，否则接口照样返回空描述。

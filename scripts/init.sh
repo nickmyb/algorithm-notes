@@ -79,7 +79,7 @@ bash ./gotest.sh || die "Go 测试失败"
 
 if [ "$has_python" = 1 ]; then
     step "跑 Python 题解测试"
-    "$VENV/bin/pytest" -q || die "Python 测试失败"
+    PYTEST="$VENV/bin/pytest" bash ./pytest.sh || die "Python 测试失败"
 fi
 
 if [ "$has_java" = 1 ]; then

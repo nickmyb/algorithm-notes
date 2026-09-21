@@ -8,7 +8,7 @@
 
 个人算法题解仓库，一道题一个目录，同时支持 Go / Python / Java 三门语言的题解。
 
-仓库结构和 `ctl` 工具链以 [halfrost/LeetCode-Go](https://github.com/halfrost/LeetCode-Go) 为模板，改造点见下文「相对上游的修改」。题解代码由仓库作者本人编写，初始化代码由 Claude Code 生成。
+仓库结构和 `ctl` 工具链以 [halfrost/LeetCode-Go](https://github.com/halfrost/LeetCode-Go) 为模板，改造点见下文「相对上游的修改」。题解代码由仓库作者本人编写，初始化代码由 Claude Code 生成；ChatGPT（Codex）参与后续工具链检查、测试修复、IDE 配置与文档完善，方案和变更由作者确认。
 
 ## 常用命令
 
@@ -28,10 +28,14 @@ make fmt / vet / tidy / clean
 
 ## IDE
 
-三门语言的 IDE 配置写在根 README 的「IDE 配置」一节。两个容易被问到的点：
+三门语言的 IDE 配置写在根 README 的「IDE 配置」一节。容易被问到的点：
+
+- **多个 JetBrains IDE 不能共用同一个项目目录的 `.idea`**。Project SDK 和 Module SDK 会互相覆盖，表现为 IDEA 跑完后 PyCharm 丢失 interpreter，反过来也一样。各自在 `.ide/idea`、`.ide/pycharm`、`.ide/goland` 保存独立项目配置，再把同一个仓库根加为 Content Root。`.ide/` 不提交。不要通过反复重建 `.venv` 来处理这个问题。
+- **每个 IDE 只有一个可编辑的当前题目运行配置，项目只初始化一次**。固定模板在 `ide-templates/<IDE>/current_problem.xml.tpl`，当前配置在 `.ide/<IDE>/.idea/runConfigurations/current_problem.xml`，名称固定为 `Go - Current Problem`、`Python - Current Problem`、`Java - Current Problem`，不带题号。换题修改实际目标，不改名称和模板、不重建项目、不让 `make new` 自动复制一批配置。SDK 和必要的项目文件保留；迁移备份放在被忽略的 `.ide-backups/`。
 
 - **PyCharm 必须把 `structures/python` 标记为 Sources Root** —— 运行时是 `conftest.py` 把它加进 `sys.path` 的，属于运行期行为，IDE 静态分析看不到，不标记则 `from tree_node import ...` 一直标红。这不是配置错误，也别为了"修"它去改 `conftest.py`。
-- **IDEA 同一时刻只能让一个题目目录进入 Java 编译范围** —— 每题都是 default package 的 `class Solution`，多个一起索引会撞成 `Duplicate class`。推荐的配法是开仓库根 + 逐题标记 Sources Root；另一种是按题开窗口 + 模块依赖，但那样 IDEA 会把编译输出建在题目目录**里面**，见下。
+- **PyCharm 单题 pytest 配置使用 Script path，不使用同名模块目标**。每题都叫 `solution_test.py`，`solution_test.test_inorder_traversal` 可能被 IDE 解析到 `0000.Template`。以控制台 `Launching pytest with arguments ...` 的路径为准，而不是运行配置名称；工作目录设为仓库根。模板显示 `test_solve[NOTSET] SKIPPED` 是预期行为，不能靠删除模板的 skip 来修复选错文件。
+- **IDEA 同一时刻只能让一个题目目录进入 Java 编译范围** —— 每题都是 default package 的 `class Solution`，多个一起索引会撞成 `Duplicate class`。统一使用独立项目引用仓库根 + 逐题标记 Sources Root，编译输出设为仓库根的 `out/idea`。换题只改运行配置名称不够，还须切换 Sources Root 并 Rebuild；入口始终是 `SolutionTest`。旧的按题打开配置可能仍有题内 `out/`，下面的过滤必须保留。
 
 ### 不要去掉测试脚本里对 `out/` 的过滤
 
@@ -42,7 +46,7 @@ IDEA 按「按题打开」那种配法工作时，会在题目目录里建 `out/
 
 旧题解配旧测试永远是绿的，**这种"测试说谎"比测试失败危险得多**。所以：
 
-- `gotest.sh` 先 `go list ... | grep -v '/out/'` 过滤再测
+- `gotest.sh` 先单独检查 `go list` 是否成功，再过滤带 `/out/` 的包路径。不能把 `go list` 放回进程替换：其中的失败不会触发外层 `set -e`，曾导致没有 Go 时测试仍报成功
 - `pytest.ini` 的 `norecursedirs` 里有 `out`。**一旦设了 `norecursedirs` 就会整个覆盖 pytest 的默认值**，所以那一行把 `*.egg .* build dist` 这些默认项也显式写了出来，删掉任何一个都等于把对应的默认排除关掉
 
 改这两处时不要"简化"掉过滤。
@@ -93,6 +97,10 @@ Makefile
 
 题号解析失败时 Makefile 用 `$(error ...)` 直接中止，**不能**静默退化成全量测试——那会让你以为测了单题，实际跑了整个仓库。
 
+题号用十进制文本解析并补零，`0094` 和 `94` 必须等价。不要直接用 `printf '%04d' "$id"`：它把前导零当八进制，`0094` 报错后曾误匹配到 `0000.Template`。
+
+测试脚本通过 `scripts/test-common.sh` 统一输出 `PASS / FAIL / SKIP` 汇总；`make test` 由 `scripts/test.sh` 跑完三门语言再汇总，任一失败都必须非零退出。脚本回归测试在 `scripts/tooling_test.py`，跟随全量 Python 测试运行。单题模式仍不跑共享结构和工具链回归测试。
+
 ## 共享数据结构
 
 `TreeNode`、`ListNode` 这些在 LeetCode 上是平台提供的，本仓库由 `structures/` 扮演这个角色，**不要在题目目录里重复定义**（Java 会直接撞类名编译失败）。
@@ -128,6 +136,8 @@ Go 那边带着 halfrost 的 9 个文件，但它们不是一类东西，**不�
 Java 的测试放在 `test/` **子目录**是必须的：`javatest.sh` 取共享结构用的是 `structures/java/*.java` 这个非递归 glob，放同级的话这个测试类会被编进每一道题的产物里。
 
 单题模式（`make test ID=94`）**不跑**共享结构的测试——那个模式是为了快速迭代一道题。改了 `structures/` 记得跑一次全量 `make test`。
+
+链表展开按节点身份检测环。不要恢复上游的 100 节点限制：它会把正常长链表误判成可能有环。三门语言的测试都覆盖 101 个重复值节点，防止长度限制和按值判环两类错误。
 
 Go 的目录叫 `go` 但包名是 `structures`（`go` 是关键字，不能当包名），所以 import 路径末段和包名不一致——这是刻意的，为了和 `java/`、`python/` 对称。实测 `build`/`vet`/`gofmt`/`test` 全部正常。题解里用显式别名 `import structures ".../structures/go"` 让它更好读。
 
@@ -185,9 +195,11 @@ def test_two_sum(solution):
 
 ### 3. Java 必须逐目录编译
 
-每道题的题解类都叫 `Solution`（default package）。`javac leetcode/*/*.java` 一次性编译会报 `duplicate class: Solution`。`javatest.sh` 按目录分别编译到各自的 `out/java/<题目>/`，不要合并成一次编译。
+每道题的题解类都叫 `Solution`（default package）。`javac leetcode/*/*.java` 一次性编译会报 `duplicate class: Solution`。`javatest.sh` 每次在 `out/java/` 下建立独立的临时目录，再按题目分别编译，结束后清理。不要合并编译，也不要复用旧 `.class`：删除测试源码后，旧 `SolutionTest.class` 仍可能被当成当前测试运行。
 
 Java 测试没有引入 JUnit，就是一个 `main` + 断言抛 `AssertionError`。
+
+题目测试用 `structures/java/ExampleTests.java` 记录用例，`check(name, () -> 题解调用, want)` 接受延迟求值，题解异常也会计入失败。末尾的 `finish()` 必须保留，它输出总计，并在失败时抛异常。骨架只调用 `skip` 和 `finish`，仍须保持跳过状态。报告器的测试放在已有的 `structures/java/test/StructuresTest.java` 中。
 
 ### 4. 题号可能不是数字
 
@@ -427,7 +439,7 @@ README 的渲染逻辑不用动，`Solution` 列会自动多出这门语言的�
 make readme-anon        # 等价于 cd ctl && go run . build readme --anonymous
 ```
 
-`--anonymous` 会直接跳过 `config.toml`，强制匿名请求，个人数据全为 0。
+`--anonymous` 会直接跳过 `config.toml`，强制匿名请求，不渲染个人数据一节。
 
 这条是踩过坑才加的：作者配好 Cookie 之后，有两个提交把 `Accepted|**1**|...` 写进了本该通用的 README，后来用 rebase 重写历史才清掉。
 

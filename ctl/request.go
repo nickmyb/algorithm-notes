@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/mozillazg/request"
 	"github.com/nickmyb/algorithm-notes/ctl/util"
@@ -40,7 +41,7 @@ func newReq() *request.Request {
 func signin() *request.Request {
 	cfg := getConfig()
 	sentCookie = cfg.Cookie != ""
-	req := request.NewRequest(new(http.Client))
+	req := request.NewRequest(&http.Client{Timeout: 30 * time.Second})
 	req.Headers = map[string]string{
 		"Content-Type":    "application/json",
 		"Accept-Encoding": "",

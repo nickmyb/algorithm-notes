@@ -31,5 +31,8 @@ ctl/.cache/
 
 # ========== 编辑器 ==========
 .idea/
+.ide/
+.ide-backups/
+*.iml
 .vscode/
 .DS_Store

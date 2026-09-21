@@ -25,14 +25,14 @@ func (c config) String() string {
 // anonymous 为 true 时忽略 config.toml，强制以未登录身份请求 LeetCode。
 //
 // 存在的理由：template 分支和 init 标签是给任何人当起点用的干净状态，
-// README 里的「个人数据」必须全是 0。但只要 config.toml 存在，build readme
+// README 里不能出现作者的个人数据。但只要 config.toml 存在，build readme
 // 就会带上 Cookie 拿到本人的 AC 数据，把个人统计写进那份本该通用的 README。
 var anonymous bool
 
 // getConfig 读取 ctl/config.toml。
 //
 // 这个文件是可选的：没有它也能跑 build readme，只是 LeetCode 接口会以未登录身份返回数据，
-// README 里的"个人数据"表格全是 0，"已 AC 但未收录"的列表也会是空的。
+// README 不渲染"个人数据"一节，"已 AC 但未收录"的列表也会是空的。
 // 想要这两块有内容，按 ctl/README.md 的说明配上 Cookie。
 // 原版在文件缺失时直接 log.Panic，这里改成返回空配置并提示一句。
 func getConfig() *config {
@@ -42,7 +42,7 @@ func getConfig() *config {
 		return cfg
 	}
 	if _, err := os.Stat(configTOML); os.IsNotExist(err) {
-		fmt.Println("未找到 ctl/config.toml，以未登录身份请求 LeetCode（个人数据统计会是 0）")
+		fmt.Println("未找到 ctl/config.toml，以未登录身份请求 LeetCode（不渲染个人数据）")
 		return cfg
 	}
 	if _, err := toml.DecodeFile(configTOML, cfg); err != nil {

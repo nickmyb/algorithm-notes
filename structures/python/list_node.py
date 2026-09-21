@@ -14,11 +14,6 @@ conftest.py 已经把本目录加进 sys.path，题解里直接 import 即可：
     from list_node import ListNode, build_list
 """
 
-# list_to_values 的遍历上限。链表成环时不加限制会死循环；这里照搬 Go 版的做法，
-# 超出就抛异常，把"测试挂住"变成"测试报错"。
-LIMIT = 100
-
-
 class ListNode:
     """LeetCode 的单链表节点定义。"""
 
@@ -40,13 +35,11 @@ def build_list(vals):
 def list_to_values(head):
     """链表展开成列表。遇到环会抛异常而不是死循环。"""
     out = []
-    times = 0
+    seen = set()
     while head is not None:
-        times += 1
-        if times > LIMIT:
-            raise RuntimeError(
-                f"链条深度超过 {LIMIT}，可能有环。检查题解，或放宽 list_node.LIMIT。"
-            )
+        if head in seen:
+            raise RuntimeError("链表有环，无法展开")
+        seen.add(head)
         out.append(head.val)
         head = head.next
     return out

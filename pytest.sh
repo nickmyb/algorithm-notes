@@ -15,19 +15,22 @@ PYTEST="${PYTEST:-$ROOT/.venv/bin/pytest}"
 # 切到仓库根再干活。pytest 的 rootdir 和 pytest.ini 的 testpaths 都跟着 cwd 走，
 # 从子目录启动会静默缩小测试范围（只跑当前目录那几个），看起来还是绿的。
 cd "$ROOT"
+TEST_LANGUAGE=Python
+source ./scripts/test-common.sh
 
-if [ ! -x "$PYTEST" ]; then
+if ! command -v "$PYTEST" >/dev/null 2>&1; then
     echo "找不到 pytest（$PYTEST），先跑 make init" >&2
     exit 1
 fi
 
-"$PYTEST" -q "$@"
+"$PYTEST" -v "${test_dirs[@]}"
 rc=$?
 
 # 5 = no tests collected。只有在指定了目录时才当作"这题没有 Python 题解"放过；
 # 全量模式下一个测试都收不到说明环境或配置坏了，照常报错。
 if [ "$rc" -eq 5 ] && [ $# -gt 0 ]; then
     echo "跳过 Python：指定的题目没有 Python 题解"
+    TEST_STATUS=SKIP
     exit 0
 fi
 

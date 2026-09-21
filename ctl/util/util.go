@@ -160,20 +160,9 @@ func CountByLanguage(solutions []Solution) map[string]int {
 }
 
 // WriteFile define
-func WriteFile(fileName string, content []byte) {
-	// 原版用 O_RDWR|O_CREATE，写入比原文件短的内容时会残留旧文件的尾巴，
-	// 这里补上 O_TRUNC。
-	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-
-	_, err = file.Write(content)
-	if err != nil {
-		fmt.Println(err)
-	}
+func WriteFile(fileName string, content []byte) error {
+	// os.WriteFile 会截断旧内容，并把打开、写入、关闭文件的错误传回调用方。
+	return os.WriteFile(fileName, content, 0644)
 }
 
 // LoadFile define

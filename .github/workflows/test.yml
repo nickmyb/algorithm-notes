@@ -44,16 +44,22 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Read Python version
+        id: python-version
+        run: |
+          major="$(sed -n 's/^PYTHON_MIN_MAJOR=//p' scripts/init.sh)"
+          minor="$(sed -n 's/^PYTHON_MIN_MINOR=//p' scripts/init.sh)"
+          echo "version=$major.$minor" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-python@v7
         with:
-          # 与 scripts/init.sh 里检查的下限一致，见 README 的「环境要求」
-          python-version: "3.12"
+          python-version: ${{ steps.python-version.outputs.version }}
 
       - name: Install deps
         run: pip install -r requirements-dev.txt
 
       - name: Test
-        run: pytest -q
+        run: PYTEST=pytest bash ./pytest.sh
 
   java:
     name: Java
@@ -61,11 +67,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Read Java version
+        id: java-version
+        run: |
+          version="$(sed -n 's/^JAVA_RELEASE="${JAVA_RELEASE:-\([0-9]*\)}"/\1/p' javatest.sh)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          # 实际的语言版本由 javatest.sh 的 --release 约束，这里只要不低于它即可
-          java-version: "17"
+          java-version: ${{ steps.java-version.outputs.version }}
 
       - name: Test
         run: bash ./javatest.sh
