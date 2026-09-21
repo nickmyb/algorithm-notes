@@ -60,13 +60,15 @@ IDEA 按「按题打开」那种配法工作时，会在题目目录里建 `out/
 
 ## 环境版本
 
-只在这三个版本上测试过，各有唯一声明来源，改版本要改对应的那处：
+这是**我们实际在跑的环境**，不是兼容性承诺。各有唯一声明来源，改版本要改对应的那处：
 
 | 语言 | 版本 | 声明位置 |
 |:---|:---|:---|
 | Go | 1.26.4 | `go.mod` 的 `go` 指令 |
 | Python | 3.12 | `scripts/init.sh` 的 `PYTHON_MIN` |
 | Java | 17 | `javatest.sh` 的 `JAVA_RELEASE`（传给 `javac --release`，同时被 `scripts/init.sh` 当作 JDK 版本下限解析） |
+
+**不要为了"提高普适性"去压低这三个数。** 刷题仓库只有作者自己在跑，不需要迁就旧环境；压低版本会连带压低题解能用的语言特性（Go 的 `min`/`max` 要 1.21，Java 的 record 要 16、switch 模式匹配要 21），对刷题是纯亏。读者自己的环境由读者自己解决，README 只陈述我们跑过什么。
 
 CI（`.github/workflows/test.yml`）跟着这三处走，不要在 CI 里另写一套版本。CI 用 `sed -n 's/^PYTHON_MIN=//p' scripts/init.sh` 取 Python 版本，改这个变量名要同步改 CI —— `scripts/tooling_test.py` 里有两条测试钉住这个契约。
 

@@ -271,28 +271,38 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 
 ## 环境要求
 
-开发和验证都在 **Ubuntu 24.04** 上进行，**语言版本也只测过下面这三个**，别的系统和版本不保证可用：
+下面是**我们实际在跑的环境**，不是兼容性承诺：
 
-| 语言 | 版本 | 版本来源 | 说明 |
-|:---|:---|:---|:---|
-| Go | **1.26.4** | `go.mod` 的 `go` 指令 | Go 没有 LTS，官方只维护最近两个大版本。CI 用 `go-version-file: go.mod`，和本地同一个来源 |
-| Python | **3.12** | `scripts/init.sh` 的版本检查 | Python 没有 LTS，每个小版本一律 5 年支持期。低于 3.12 且找不到更高版本时，`make init` 会跳过 Python 并给出提醒 |
-| Java | **17**（LTS） | `javatest.sh` 的 `--release` | Java 的 LTS 每两年一个：8 / 11 / 17 / 21 / 25 |
+| | 版本 | 声明位置 |
+|:---|:---|:---|
+| 系统 | Ubuntu 24.04 | —— |
+| Go | 1.26.4 | `go.mod` 的 `go` 指令 |
+| Python | 3.12 | `scripts/init.sh` 的 `PYTHON_MIN` |
+| Java | 17（LTS） | `javatest.sh` 的 `JAVA_RELEASE`，传给 `javac --release` |
 
-三者都只有一个声明来源，CI 跟着本地走，不会各说各的。
+更旧的版本没试过——不是不能用，是没验证，碰到问题得自己处理。建议直接用 Ubuntu 24.04 或更新的系统，省事。
 
-三者都不在 `PATH` 里也没关系，`make init` 会去常见安装位置找（见[快速开始](#快速开始)），
+**版本定得高是有意的。** 刷题和做产品不一样：产品要迁就用户的运行环境，下限压得越低越好；刷题的仓库只有自己在跑，正好拿来试新语法和新特性。Go 的 `min`/`max`、Python 的 `X | None` 标注、Java 的 record 和 switch 模式匹配，想用就用——本地编得过，LeetCode 那边也收。为了照顾旧环境把版本压低，等于连带压低了题解能用的语言特性，对刷题是纯亏。
+
+三者各有唯一声明来源，CI 跟着本地走，不会各说各的。想试更新的语言特性就抬高对应的那一处：
+
+```sh
+JAVA_RELEASE=21 make test-java         # 临时抬高 Java 语言级
+```
+
+Go 和 Python 分别改 `go.mod` 的 `go` 指令和 `scripts/init.sh` 的 `PYTHON_MIN`。
+
+`javac --release` 同时约束语言特性和可用 API：即使本地装的是 JDK 21，用上 Java 21 的 switch 模式匹配也会在本地编译失败（record 是 16 引入的，当前的 17 可以用）。
+
+`go` / `python3` / `javac` 不在 `PATH` 里也没关系，`make init` 会去常见安装位置找（见[快速开始](#快速开始)），
 探测结果写进 `local.mk` 供后续命令复用。装在冷门位置时手动指定，优先级高于 `local.mk`：
 
 ```sh
 make init GO=/path/to/go/bin/go PYTHON=/path/to/python3 JAVAC=/path/to/javac
 make test GO=/path/to/go/bin/go        # 其他 make 目标同样接受
-JAVA_RELEASE=21 make test-java         # 临时换 Java 目标版本
 ```
 
 JDK 只需指定 `JAVAC`，配套的 `java` 取同目录的那个——两者必须来自同一个 JDK，否则编译产物跑起来会报 `class file has wrong version`。
-
-Java 的 `--release 17` 同时约束语言特性和可用 API：即使本地装的是 JDK 21，使用 Java 21 的 switch 模式匹配也会在本地编译失败；record 已在 Java 16 正式支持，可以使用。要换目标版本改 `javatest.sh` 里的 `JAVA_RELEASE`，或临时 `JAVA_RELEASE=21 make test-java`。
 
 ## 目录结构
 
