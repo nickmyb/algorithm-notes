@@ -31,7 +31,7 @@ func TestTwoSum(t *testing.T) {
 
 	for _, q := range qs {
 		for implName, impl := range impls {
-			t.Run(q.name, func(t *testing.T) {
+			t.Run(q.name+"/"+implName, func(t *testing.T) {
 				got := impl(q.nums, q.target)
 
 				gotSorted := got
