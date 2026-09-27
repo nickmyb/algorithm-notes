@@ -561,16 +561,26 @@ git status --short            # 除新建的题目目录外不应有脏文件
   |:---|:---|:---|
   | Claude Code | `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` | User `claude` |
   | ChatGPT / Codex | `Co-Authored-By: Codex <codex@openai.com>` | User `codex` |
+  | DeepSeek | `Co-Authored-By: DeepSeek <noreply@deepseek.com>` | **无**，只作记录 |
 
-  **这一行决定 GitHub 仓库首页的 Contributors 列表**，不只是 blame 线索。两个账号都是 User 类型，都能被解析成贡献者。`b0692bd` 和 `1ad221a` 由 Codex 完成，正文写了协作说明但没带尾注，所以 ChatGPT 至今不在本仓库的列表上——等它下次提交带上尾注就会出现。
+  **这一行决定 GitHub 仓库首页的 Contributors 列表**，不只是 blame 线索。`claude` 和 `codex` 都是 User 类型，都能被解析成贡献者。`b0692bd` 和 `1ad221a` 由 Codex 完成，正文写了协作说明但没带尾注，所以 ChatGPT 至今不在本仓库的列表上——等它下次提交带上尾注就会出现。
 
   **查证这类问题时别用错方法**，这里连着踩过三次：
 
   - ❌ `/search/users?q=<邮箱>+in:email` —— 只索引**公开**邮箱。`claude` 和 `codex` 都把邮箱设为私有，这个搜索对两者都返回"无匹配"；同时它会捞出 `oai-codex`（一个碰巧公开了 `noreply@openai.com` 的 **Organization**，组织不能当 co-author）。一个假阴性加一个假阳性，足够把结论带偏。
   - ❌ REST `/repos/{owner}/{repo}/contributors` —— **不含 co-author**。本仓库它返回 1，网页侧边栏是 2。
-  - ✅ 找一个真实用过该尾注的公开提交，抓它的 HTML 页面看头像栈解析成了哪个 `login`。这是唯一直接的证据。
+  - ✅ 找一个真实用过该尾注的公开提交，抓它的 HTML 页面看头像栈解析成了哪个 `login`，或者用 GraphQL 查该提交的 `authors { email user { login } }`（`user` 为 `null` 即未解析）。这是唯一直接的证据。
 
   邮箱也别自己推断：`noreply@openai.com` 曾被 Claude 按 `noreply@anthropic.com` 的形状类推出来写进本文件，是错的。`codex@openai.com` 是 Codex 在外部仓库里实际发出的地址。
+
+  **DeepSeek 没有能解析的账号，尾注只留在 git 历史里，不进 Contributors。** 作者在对话里用它检验复杂度分析（第 1 题），它不经手仓库，所以尾注由提交的人代写。2026-09 查证：
+
+  - 公开提交里常见的几种写法——`DeepSeek <noreply@deepseek.com>`、`deepseek-v4-pro <noreply@deepseek.com>`、`DeepSeek <deepseek@users.noreply.github.com>`、`DeepSeek Harness <deepseek-harness@users.noreply.github.com>`——用 GraphQL 查 `Commit.authors.user` 全部为 `null`。
+  - `deepseek`、`deepseek-ai`、`deepseek-harness` 三个 GitHub 账号都是 **Organization**，不能当 co-author；`deepseek-bot` 是一个与官方无关的个人账号。
+  - 官方的 `deepseek-ai/deepseek-harness` 仓库自己的提交也全是员工个人账号，没有任何 AI 尾注可以照抄。
+  - 选 `noreply@deepseek.com` 是因为这个地址 DeepSeek 自己用过（`deepseek-ai/3FS` 的 `Cargo.toml`：`authors = ["dev <noreply@deepseek.com>"]`），不是按别家的形状推断出来的。
+
+  用了这行尾注，提交正文要写明它不会进 Contributors，免得以后有人以为是写错了去"修"。将来 DeepSeek 若有了可解析的账号，按上面 ✅ 的方法重新查证再改表。
 
   **因用量限制交替执行时，谁提交谁把两行都写上。** 一方写到一半耗尽额度、另一方接手收尾是常态，这时提交里两边都有份。不要去判断"谁干得多"——Contributors 是一个集合，不是比例，进去了就没人关心占比；漏掉才不可逆。判据：**拿不准就两行都写**，多写一行代价为零，少写一行是把人从贡献者里抹掉。只有一方全程没参与，才只写一行。
 
