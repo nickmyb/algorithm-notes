@@ -23,17 +23,24 @@ func TestGroupAnagrams(t *testing.T) {
 		{"Example 3", []string{"a"}, [][]string{{"a"}}},
 	}
 
+	impls := map[string]func([]string) [][]string{
+		"groupAnagrams":       groupAnagrams,
+		"groupAnagramsSorted": groupAnagramsSorted,
+	}
+
 	for _, q := range qs {
-		t.Run(q.name, func(t *testing.T) {
-			got := groupAnagrams(q.in)
+		for implName, impl := range impls {
+			t.Run(q.name+"/"+implName, func(t *testing.T) {
+				got := impl(q.in)
 
-			gotSorted := normalize(got)
-			wantSorted := normalize(q.want)
+				gotSorted := normalize(got)
+				wantSorted := normalize(q.want)
 
-			if !reflect.DeepEqual(gotSorted, wantSorted) {
-				t.Fatalf("groupAnagrams(%v) = %v, want %v", q.in, got, q.want)
-			}
-		})
+				if !reflect.DeepEqual(gotSorted, wantSorted) {
+					t.Fatalf("%v(%v) = %v, want %v", implName, q.in, got, q.want)
+				}
+			})
+		}
 	}
 }
 

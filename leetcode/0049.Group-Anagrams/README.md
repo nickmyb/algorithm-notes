@@ -86,5 +86,5 @@ Go无法使用map作为map的key,使用[26]int记录单词的每个字母出现�
 - n = len(strs)
 - k = max(len(s in strs))
 
-- 时间复杂度： O(n*k), 遍历一遍就得到结果。
-- 空间复杂度： O(n*k), n个[26]int, n个map的value, ret是n个str
+- 时间复杂度： groupAnagrams = O(n*k), 遍历一遍就得到结果; groupAnagramsSorted = O(n*k*log(k)), 比较排序的时间复杂度是O(n*log(n));
+- 空间复杂度： groupAnagrams = O(n*k), n个[26]int, n个map的value, ret是n个str; groupAnagramsSorted = O(n*k), n个rune, n个map的key, ret是n个str;
