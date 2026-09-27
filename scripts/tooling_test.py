@@ -59,6 +59,22 @@ def test_bad_id_never_falls_back_to_all_tests(repo, number):
     assert "scripts/test.sh" not in result.stdout
 
 
+@pytest.mark.parametrize("with_local_mk", [False, True])
+def test_help_lists_target_names(repo, with_local_mk):
+    # make init 写出 local.mk 后，MAKEFILE_LIST 变成两个文件，
+    # help 曾把每一行的命令名都显示成 "Makefile"。
+    if with_local_mk:
+        (repo / "local.mk").write_text("GO := /opt/go/bin/go\n")
+    result = subprocess.run(
+        ["make", "-s", "help"], cwd=repo,
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=10,
+    )
+    assert result.returncode == 0, result.stdout
+    names = [line.split()[0] for line in result.stdout.replace("\033[36m", "").splitlines() if line.strip()]
+    assert names[:2] == ["help", "init"], result.stdout
+    assert "Makefile" not in names
+
+
 def test_missing_go_is_failure(repo):
     result = run(repo, "gotest.sh", env={"GO": str(repo / "missing-go")})
     assert result.returncode != 0

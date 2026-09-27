@@ -32,7 +32,9 @@ endif
 
 .PHONY: help
 help: ## 列出所有命令
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+	@# 只扫 Makefile 本身：有 local.mk 时 MAKEFILE_LIST 是两个文件，grep 会给每行
+	@# 加上 "Makefile:" 前缀，awk 的第一列就成了文件名而不是命令名。
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
 ## ---------- 初始化 ----------

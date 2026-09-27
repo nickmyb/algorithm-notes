@@ -4,7 +4,7 @@
 
 `CLAUDE.md` 通过 `@AGENTS.md` 导入本文件，两边共用同一份说明，改这里就够了。
 
-**修改或提交前，先检查当前分支、工作区和暂存区，并遵守下文[「分支与标签」](#分支与标签)。工具链默认在 `feature/*` 开发；当前处于 `main` 不代表允许直接提交，「提交」也不等于授权发布或推送。**
+**修改或提交前，先检查当前分支、工作区和暂存区，并遵守下文[「分支与标签」](#分支与标签)。工具链开发走「稳定分支 → `dev` → `feature/*` → `dev` → 稳定分支」，结束后删掉 `dev` 和 `feature/*`（题解不走这套流程）；当前处于 `main` 不代表允许直接提交，「提交」也不等于授权发布或推送。**
 
 ## 项目概述
 
@@ -511,22 +511,58 @@ README 的渲染逻辑不用动，`Solution` 列会自动多出这门语言的�
 
 | 引用 | 职责 |
 |:---|:---|
-| `main` | 作者的个人题解及个人 README，不是工具链开发分支 |
-| `dev` | 工具链改动的集成与验证分支 |
-| `feature/<任务名>` | 从 `dev` 派生的单项开发分支，如 `feature/toolchain` |
-| `template` | 已验证、可发布的骨架 + 工具链，不含个人题解、个人统计或凭据 |
+| `main` | **稳定分支**。作者的个人题解及个人 README，不是开发分支 |
+| `template` | **稳定分支**。已验证、可发布的骨架 + 工具链，不含个人题解、个人统计或凭据 |
+| `dev` | **临时**。每轮开发从稳定分支新切的集成与验证分支，本轮结束后删除 |
+| `feature/<任务名>` | **临时**。从 `dev` 切出的单项开发分支，如 `feature/make-help`，本轮结束后删除 |
 | `init` 标签 | 用户初始化自己题解仓库的稳定起点，指向已确认发布的 `template` 提交 |
 
 ### 开发与发布流程
 
-1. 工具链、公共模板和维护文档默认在从 `dev` 派生的 `feature/<任务名>` 上修改和提交；用户明确指定时才直接在 `dev` 开发。不要直接在 `main` 或 `template` 上开发。
-2. 按改动范围完成验证，经用户确认后将开发分支合入 `dev`。本地提交完成不代表已合入其他分支。
-3. 只有用户明确要求发布或同步骨架时，才把 `dev` 中已验证的纯工具链改动同步到 `template`，并遵守下文的[骨架 README 生成约束](#骨架-readme-的生成约束)。若来源混有个人内容，只挑选相关提交或差异，不能直接整分支合入。
-4. 发布内容检查、测试通过后，才按用户确认的发布范围更新 `init`；开发提交不得自动移动标签。`main` 也只有在用户明确要求时才接收工具链更新。不要为了「同步」强行把所有分支指向同一提交。
+```
+稳定分支 ──切──→ dev ──切──→ feature/<任务名>
+                  ↑                │ 开发、验证
+                  └─────合并───────┘
+稳定分支 ←──合并── dev            然后删除 dev 和 feature/<任务名>
+```
+
+**这套流程只管工具链、公共模板和维护文档，题解不走。** 题解基本是作者自己写的代码，由作者直接在 `main` 上按「一题一提交」收录（见下文），需要时自行建分支。助手代为提交题解时，照作者当时所在的分支和要求来，不要套用 `dev` / `feature` 流程。
+
+1. **从稳定分支新切 `dev`**。工具链、公共模板和维护文档从 `template` 切——`template` 不含个人内容，从 `main` 切会把个人题解带进后面的 `template`。上一轮的 `dev` 必须已经删掉，不要复用。
+2. **从 `dev` 切 `feature/<任务名>`**，在上面修改和提交。不要直接在 `dev`、`main` 或 `template` 上开发。
+3. **验证后合并到 `dev`**：按改动范围跑完验证，经用户确认后把 `feature/<任务名>` 合入 `dev`。本地提交完成不代表已合入其他分支。
+4. **`dev` 合并到稳定分支**，两个稳定分支各有授权要求：
+   - `template`：只有用户明确要求发布或同步骨架时才合入，并遵守下文的[骨架 README 生成约束](#骨架-readme-的生成约束)。若来源混有个人内容，只挑选相关提交或差异，不能直接整分支合入。
+   - `main`：只有用户明确要求时才接收工具链更新。`main` 与 `template` 已分叉（`main` 有个人题解），所以这里是真合并而不是快进。
+5. **本轮结束后删除 `dev` 和 `feature/<任务名>`**。删除前确认它们的提交都已进入目标稳定分支（`git branch -d` 会拒绝删未合并的分支，不要换成 `-D` 绕过）；远端分支的删除属于推送，需要单独授权。
+6. 发布内容检查、测试通过后，才按用户确认的发布范围更新 `init`（判据见下节）；开发提交不得自动移动标签。不要为了「同步」强行把所有分支指向同一提交。
+
+### 什么时候才推进 `init`
+
+**`init` 不是 `template` 的镜像，落后是正常状态。** `template` 是滚动的开发结果，`init` 是「我敢让别人从这儿开始」的快照。两者若永远相等，这个标签就不提供任何东西——用户直接 `git switch -c my-solutions template` 效果一样，标签唯一的价值恰恰是**不变性**。
+
+所以 **`template` 动了不等于 `init` 要动**。助手**不得**顺手移动它，每次都单独问用户。
+
+推进前必须跑完下面这套端到端验证，**从远端真实 clone**（不是本地 clone，那会漏掉没推上去的东西）：
+
+```sh
+git clone <远端地址> /tmp/relcheck && cd /tmp/relcheck
+git switch -c relcheck init
+ls leetcode/                  # 只能有 0000.Template
+grep -c Accepted README.md    # 必须是 0，骨架不带个人数据
+make init                     # 不能有 error，warn 要能解释
+make test                     # 一道题都没写就跑，必须全绿
+make new ID=1 && make test ID=1   # 三门语言全绿
+git status --short            # 除新建的题目目录外不应有脏文件
+```
+
+**第 5 步（空仓库直接 `make test`）是踩出来的，不能省。** 曾经它是红的：`pytest` 在收不到用例时返回 5，被当成环境坏了——而那正是新用户 `make init` 成功后的第一个动作，最劝退的时刻。当时的发布验证之所以没发现，是因为验证者在 `make new` **之后**才跑全量测试，跳过了空仓库那一刻。
+
+移动标签时保持带注释（`git tag -f -a init template -m "..."`），推送用 `git push origin init --force`，并在报告里明确写出这是 force 更新。
 
 ### AI 助手操作 Git 的硬性要求
 
-- 修改和提交前检查 `git branch --show-current`、`git status --short --branch` 和暂存区。若当前在 `main` / `template`，先按上述流程进入开发分支；分支或范围不明确时先询问，不能以当前 HEAD 作为授权依据。
+- 修改和提交前检查 `git branch --show-current`、`git status --short --branch` 和暂存区。若当前在 `main` / `template`，先按上述流程切出 `dev` 和 `feature/*`；分支或范围不明确时先询问，不能以当前 HEAD 作为授权依据。
 - 用户说「提交」只授权约定开发分支上的本地提交，不等于授权合并其他分支、修改标签、重写历史或推送。发布和推送必须有对应的明确授权。
 - 使用显式文件路径或分块暂存，先检查 `git diff --cached --name-only`，再审查差异。不要用 `git add .` / `git add -A` 笼统带入个人题解、README 个人数据、`.ai/`、本地 IDE 配置、备份或凭据。
 - 切换分支时保留未提交修改和未跟踪文件，不能用 `reset --hard`、`clean` 或覆盖文件来消除阻碍。存在冲突时先询问，或在不改动原工作区的独立 worktree 中处理。
@@ -538,16 +574,26 @@ README 的渲染逻辑不用动，`Solution` 列会自动多出这门语言的�
   |:---|:---|:---|
   | Claude Code | `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` | User `claude` |
   | ChatGPT / Codex | `Co-Authored-By: Codex <codex@openai.com>` | User `codex` |
+  | DeepSeek | `Co-Authored-By: DeepSeek <noreply@deepseek.com>` | **无**，只作记录 |
 
-  **这一行决定 GitHub 仓库首页的 Contributors 列表**，不只是 blame 线索。两个账号都是 User 类型，都能被解析成贡献者。`b0692bd` 和 `1ad221a` 由 Codex 完成，正文写了协作说明但没带尾注，所以 ChatGPT 至今不在本仓库的列表上——等它下次提交带上尾注就会出现。
+  **这一行决定 GitHub 仓库首页的 Contributors 列表**，不只是 blame 线索。`claude` 和 `codex` 都是 User 类型，都能被解析成贡献者。`b0692bd` 和 `1ad221a` 由 Codex 完成，正文写了协作说明但没带尾注，所以 ChatGPT 至今不在本仓库的列表上——等它下次提交带上尾注就会出现。
 
   **查证这类问题时别用错方法**，这里连着踩过三次：
 
   - ❌ `/search/users?q=<邮箱>+in:email` —— 只索引**公开**邮箱。`claude` 和 `codex` 都把邮箱设为私有，这个搜索对两者都返回"无匹配"；同时它会捞出 `oai-codex`（一个碰巧公开了 `noreply@openai.com` 的 **Organization**，组织不能当 co-author）。一个假阴性加一个假阳性，足够把结论带偏。
   - ❌ REST `/repos/{owner}/{repo}/contributors` —— **不含 co-author**。本仓库它返回 1，网页侧边栏是 2。
-  - ✅ 找一个真实用过该尾注的公开提交，抓它的 HTML 页面看头像栈解析成了哪个 `login`。这是唯一直接的证据。
+  - ✅ 找一个真实用过该尾注的公开提交，抓它的 HTML 页面看头像栈解析成了哪个 `login`，或者用 GraphQL 查该提交的 `authors { email user { login } }`（`user` 为 `null` 即未解析）。这是唯一直接的证据。
 
   邮箱也别自己推断：`noreply@openai.com` 曾被 Claude 按 `noreply@anthropic.com` 的形状类推出来写进本文件，是错的。`codex@openai.com` 是 Codex 在外部仓库里实际发出的地址。
+
+  **DeepSeek 没有能解析的账号，尾注只留在 git 历史里，不进 Contributors。** 作者在对话里用它检验复杂度分析（第 1 题），它不经手仓库，所以尾注由提交的人代写。2026-09 查证：
+
+  - 公开提交里常见的几种写法——`DeepSeek <noreply@deepseek.com>`、`deepseek-v4-pro <noreply@deepseek.com>`、`DeepSeek <deepseek@users.noreply.github.com>`、`DeepSeek Harness <deepseek-harness@users.noreply.github.com>`——用 GraphQL 查 `Commit.authors.user` 全部为 `null`。
+  - `deepseek`、`deepseek-ai`、`deepseek-harness` 三个 GitHub 账号都是 **Organization**，不能当 co-author；`deepseek-bot` 是一个与官方无关的个人账号。
+  - 官方的 `deepseek-ai/deepseek-harness` 仓库自己的提交也全是员工个人账号，没有任何 AI 尾注可以照抄。
+  - 选 `noreply@deepseek.com` 是因为这个地址 DeepSeek 自己用过（`deepseek-ai/3FS` 的 `Cargo.toml`：`authors = ["dev <noreply@deepseek.com>"]`），不是按别家的形状推断出来的。
+
+  用了这行尾注，提交正文要写明它不会进 Contributors，免得以后有人以为是写错了去"修"。将来 DeepSeek 若有了可解析的账号，按上面 ✅ 的方法重新查证再改表。
 
   **因用量限制交替执行时，谁提交谁把两行都写上。** 一方写到一半耗尽额度、另一方接手收尾是常态，这时提交里两边都有份。不要去判断"谁干得多"——Contributors 是一个集合，不是比例，进去了就没人关心占比；漏掉才不可逆。判据：**拿不准就两行都写**，多写一行代价为零，少写一行是把人从贡献者里抹掉。只有一方全程没参与，才只写一行。
 
