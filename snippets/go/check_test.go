@@ -21,20 +21,54 @@ import (
 var solutionRoots = []string{"../../leetcode"}
 
 type funcDef struct {
+	file string // 所在文件名，关联关系按它分组
+	line int
 	pos  string // file:line，报错用
 	body string // 从 func 关键字到函数结尾，不含文档注释
 }
 
 // TestSolutionsMatchSnippets 是真正对仓库生效的检查，make snippets 和全量测试都跑它。
+// 通过时打印关联关系：同一个 snippet 文件引出的题目就是代码上相关联的题，
+// 这份清单只从代码推出，不在任何地方手写。
 func TestSolutionsMatchSnippets(t *testing.T) {
 	canon, errs := loadSnippets(".")
 	uses, more := checkSolutions(canon, solutionRoots)
-	for _, u := range uses {
-		t.Log(u)
-	}
 	for _, e := range append(errs, more...) {
 		t.Error(e)
 	}
+	if !t.Failed() {
+		fmt.Print(usageReport(canon, uses))
+	}
+}
+
+// usageReport 按 snippet 文件 → 函数 → 题目分组，函数按在文件里的先后排列。
+func usageReport(canon map[string]funcDef, uses map[string][]string) string {
+	names := make([]string, 0, len(canon))
+	for name := range canon {
+		names = append(names, name)
+	}
+	sort.Slice(names, func(i, j int) bool {
+		a, b := canon[names[i]], canon[names[j]]
+		if a.file != b.file {
+			return a.file < b.file
+		}
+		return a.line < b.line
+	})
+	var b strings.Builder
+	file := ""
+	for _, name := range names {
+		if def := canon[name]; def.file != file {
+			file = def.file
+			fmt.Fprintf(&b, "snippets/go/%s\n", file)
+		}
+		problems := uses[name]
+		if len(problems) == 0 {
+			fmt.Fprintf(&b, "  %s: （还没有题目引用）\n", name)
+			continue
+		}
+		fmt.Fprintf(&b, "  %s: %s\n", name, strings.Join(problems, ", "))
+	}
+	return b.String()
 }
 
 // loadSnippets 读取 dir 下非测试文件的顶层函数，并检查只 import 了标准库。
@@ -69,10 +103,12 @@ func loadSnippets(dir string) (map[string]funcDef, []string) {
 	return canon, errs
 }
 
-// checkSolutions 在题解里找和 snippet 同名的顶层函数，返回引用记录和不一致的报错。
-func checkSolutions(canon map[string]funcDef, roots []string) (uses, errs []string) {
+// checkSolutions 在题解里找和 snippet 同名的顶层函数，
+// 返回每个 snippet 被哪些题目目录引用，以及不一致的报错。
+func checkSolutions(canon map[string]funcDef, roots []string) (uses map[string][]string, errs []string) {
+	uses = map[string][]string{}
 	if len(canon) == 0 {
-		return nil, nil
+		return uses, nil
 	}
 	for _, root := range roots {
 		err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
@@ -100,7 +136,7 @@ func checkSolutions(canon map[string]funcDef, roots []string) (uses, errs []stri
 					continue
 				}
 				if got.body == want.body {
-					uses = append(uses, fmt.Sprintf("%s: %s 与 snippet 一致", got.pos, name))
+					uses[name] = append(uses[name], filepath.Base(filepath.Dir(path)))
 				} else {
 					errs = append(errs, fmt.Sprintf("%s: %s 与 %s 不一致\n%s",
 						got.pos, name, want.pos, firstDiff(want.body, got.body)))
@@ -112,7 +148,9 @@ func checkSolutions(canon map[string]funcDef, roots []string) (uses, errs []stri
 			errs = append(errs, err.Error())
 		}
 	}
-	sort.Strings(uses)
+	for _, problems := range uses {
+		sort.Strings(problems)
+	}
 	sort.Strings(errs)
 	return uses, errs
 }
@@ -138,6 +176,8 @@ func topLevelFuncs(fset *token.FileSet, file *ast.File, src []byte) map[string]f
 		start := fset.Position(fn.Type.Func).Offset
 		end := fset.Position(fn.End()).Offset
 		defs[fn.Name.Name] = funcDef{
+			file: filepath.Base(fset.Position(fn.Pos()).Filename),
+			line: fset.Position(fn.Pos()).Line,
 			pos:  fmt.Sprintf("%s:%d", filepath.ToSlash(fset.Position(fn.Pos()).Filename), fset.Position(fn.Pos()).Line),
 			body: strings.ReplaceAll(string(src[start:end]), "\r\n", "\n"),
 		}
@@ -244,6 +284,28 @@ func TestCheckerSkipsTestsMethodsAndIDECopies(t *testing.T) {
 	uses, errs := checkSolutions(canon, []string{filepath.Join(root, "leetcode")})
 	if len(uses)+len(errs) != 0 {
 		t.Fatalf("uses=%v errs=%v", uses, errs)
+	}
+}
+
+func TestUsageReportGroupsByFile(t *testing.T) {
+	root := writeFiles(t, map[string]string{
+		"snippets/letters.go":         "package snippets\n\nfunc countLetters() {}\n\nfunc anagrammatize() {}\n",
+		"snippets/math.go":            "package snippets\n\nfunc abs() {}\n",
+		"leetcode/0242.B/Solution.go": "package leetcode\n\nfunc countLetters() {}\n",
+		"leetcode/0049.A/Solution.go": "package leetcode\n\nfunc countLetters() {}\n",
+	})
+	canon, _ := loadSnippets(filepath.Join(root, "snippets"))
+	uses, errs := checkSolutions(canon, []string{filepath.Join(root, "leetcode")})
+	if len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	want := "snippets/go/letters.go\n" +
+		"  countLetters: 0049.A, 0242.B\n" +
+		"  anagrammatize: （还没有题目引用）\n" +
+		"snippets/go/math.go\n" +
+		"  abs: （还没有题目引用）\n"
+	if got := usageReport(canon, uses); got != want {
+		t.Fatalf("got:\n%s\nwant:\n%s", got, want)
 	}
 }
 

@@ -228,6 +228,8 @@ Go 的目录叫 `go` 但包名是 `structures`（`go` 是关键字，不能当�
 
 检查写在 `snippets/go/check_test.go`，由 `make snippets` 单独跑，也随全量 `make test`（`gotest.sh` 末尾）和 CI 跑，单题模式不跑。它必须留在 `_test.go` 里：放进非测试文件，检查器自己的函数就会被登记成 snippet。
 
+**代码上的关联题由 snippet 文件引出**：`make snippets` 通过时按「snippet 文件 → 函数 → 题目」打印引用关系，同一个文件引出的题目就是代码上相关的题。这份清单只从代码推出，不要在 snippet 或题解里手写互相的链接——手写清单会过时，而检查发现不了。解题思路上的关联见「同类题」。
+
 按名字识别意味着**同一个套路在所有题里必须用同一个名字**。改名复制的副本不会被检查到；反过来，题解里有与 snippet 同名但用途不同的函数会报不一致，改名即可。
 
 `snippets/go/` 下的具体函数是作者的个人积累，只放 `main`；`template` 只带检查机制。目前只支持 Go，Python / Java 用到再补。
