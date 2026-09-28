@@ -142,7 +142,7 @@ tests.finish();
 - **只写直接前置**：242 → 49 → X 时，X 只写 49
 - **行的先后没有含义**，做题顺序由工具排
 
-格式固定是为了以后能自动生成做题顺序，不要改成表格或别的写法。
+`make similar` 检查同类题两边都写了、链接指向的题目存在、同一对题没有两侧都标前置、每行都符合格式，只报告不改写。全量 `make test` 也会跑它。格式固定是为了能做这些检查、以后还能自动生成做题顺序，不要改成表格或别的写法。
 
 前三节沿用 halfrost 原仓库的格式，`## 复杂度` 是本仓库加的——原仓库把复杂度记在 `ctl/meta/` 里用于渲染站点，那套机制没有搬过来，所以在 README 里留个固定位置。
 
@@ -158,6 +158,7 @@ make test-go / test-python / test-java   # 单语言，同样支持 ID=94
 make readme                      # 重新生成本 README
 make readme-anon                 # 同上但不含个人数据，给 template 分支用
 make snippets                    # 检查题解里的辅助函数副本和 snippets/go 一致
+make similar                     # 检查同类题两边都写了、链接有效
 make fmt / vet / tidy            # Go 格式化、静态检查、依赖整理
 make clean                       # 清构建产物，不碰题解
 ```
