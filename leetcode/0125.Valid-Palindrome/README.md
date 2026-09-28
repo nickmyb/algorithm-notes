@@ -89,6 +89,9 @@ Since an empty string reads the same forward and backward, it is a palindrome.
 
 ### 同类题
 
+- [283. Move Zeroes](../0283.Move-Zeroes/)：双指针
+- [167. Two Sum II - Input Array Is Sorted](../0167.Two-Sum-II-Input-Array-Is-Sorted/)：双指针
+
 ## 复杂度
 
 - 时间复杂度： O(n), 遍历1次字符串, 指针移动

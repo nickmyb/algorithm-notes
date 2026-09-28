@@ -70,6 +70,9 @@ Output: [0]
 
 ### 同类题
 
+- [125. Valid Palindrome](../0125.Valid-Palindrome/)：双指针
+- [167. Two Sum II - Input Array Is Sorted](../0167.Two-Sum-II-Input-Array-Is-Sorted/)：双指针
+
 ## 复杂度
 
 - 时间复杂度： O(n)
