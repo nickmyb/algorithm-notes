@@ -420,24 +420,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**4**|**1**|**0**|**5**|
+|Accepted|**5**|**1**|**0**|**6**|
 |Total|968|2121|979|4068|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|0.4%|0.0%|0.0%|0.1%|
+|Completion Rate|0.5%|0.0%|0.0%|0.1%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|5|100.0%|
-|Python|1|20.0%|
-|Java|1|20.0%|
-|**合计题数**|**5**|—|
+|Go|6|100.0%|
+|Python|1|16.7%|
+|Java|1|16.7%|
+|**合计题数**|**6**|—|
 
 
 ## 题目列表
 
-以下已经收录了 5 道题的题解，还有 0 道题在尝试中
+以下已经收录了 6 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -446,6 +446,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
+|0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
 
 
 ---
