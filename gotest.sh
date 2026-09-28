@@ -70,4 +70,5 @@ fi
 
 # 工具链自己的测试（ctl 的 HTML→Markdown 转换、structures 的数据结构）不进覆盖率统计，
 # 但必须跑，否则改坏了 ctl 要到下次生成 README 才发现。
-"$GO" test ./ctl/... ./structures/...
+# snippets 的测试里包含「题解副本和 snippet 逐字一致」的检查，见 snippets/go/doc.go。
+"$GO" test ./ctl/... ./structures/... ./snippets/...

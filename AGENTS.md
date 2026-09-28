@@ -24,6 +24,7 @@ make test                        # 三门语言全跑
 make test ID=94                  # 只测一道题，那题没写的语言安静跳过
 make test-go / test-python / test-java   # 同样支持 ID=94
 make readme                      # 重新生成根 README.md
+make snippets                    # 检查题解里的辅助函数副本和 snippets/go 一致
 make fmt / vet / tidy / clean
 ```
 
@@ -105,6 +106,7 @@ structures/                   # 各语言共用的数据结构，按语言分子
 ├── go/                       # package structures，import 路径 .../structures/go
 ├── java/                     # TreeNode.java 等，javac 编译每个题目目录时一并带上
 └── python/                   # tree_node.py / list_node.py，conftest.py 把它加进 sys.path
+snippets/go/                  # 题解辅助函数的权威版本，只复制不引用，见「辅助函数片段」
 conftest.py pytest.ini        # Python 测试基建
 gotest.sh pytest.sh javatest.sh   # 三门语言的测试脚本，都接受可选的目录参数
 scripts/init.sh               # make init 的实现
@@ -209,6 +211,29 @@ Go 的目录叫 `go` 但包名是 `structures`（`go` 是关键字，不能当�
 4. 只在真需要时加。halfrost 的 Go 版树相关函数有 13 个，Java / Python 侧移植了建树、层序展开、三种遍历、查找、比较，其余用到哪个补哪个。
 
 加新语言时，`structures/<lang>/` 只是其中一步，完整的六步清单见下文「加一门新语言」。
+
+## 辅助函数片段（snippets）
+
+多道题会用到同一个辅助函数（如变位词题的字母计数）。它**不能**进 `structures/`：`structures/` 放的是 LeetCode 平台预置的类型，属于接线区，复制出去删掉即可；辅助函数是答案的一部分，引用它的话复制到 LeetCode 会缺函数，违反约束 8。
+
+所以辅助函数在每道题里**各自保留一份副本**，`snippets/go/` 存放经过测试的权威版本，由检查保证副本不漂移：
+
+| 规则 | 说明 |
+|:---|:---|
+| 什么是 snippet | `snippets/go/` 非测试文件里的顶层函数（不含方法），按函数名识别 |
+| 什么算引用 | `leetcode/` 下的题解定义了同名顶层函数。不需要标记，题解本体一行不加 |
+| 比较范围 | 从 `func` 关键字到函数结尾逐字比较；**文档注释不比较**，各题可以写自己的说明 |
+| 依赖 | 只能 import 标准库，否则复制到 LeetCode 编译不过 |
+| 测试 | 每个 snippet 配测试，和 `structures/` 同理，写错会让所有副本一起错 |
+
+检查写在 `snippets/go/check_test.go`，由 `make snippets` 单独跑，也随全量 `make test`（`gotest.sh` 末尾）和 CI 跑，单题模式不跑。它必须留在 `_test.go` 里：放进非测试文件，检查器自己的函数就会被登记成 snippet。
+
+**代码上的关联题由 snippet 文件引出**：`make snippets` 通过时按「snippet 文件 → 函数 → 题目」打印引用关系，同一个文件引出的题目就是代码上相关的题。这份清单只从代码推出，不要在 snippet 或题解里手写互相的链接——手写清单会过时，而检查发现不了。解题思路上的关联见「同类题」。
+
+按名字识别意味着**同一个套路在所有题里必须用同一个名字**。改名复制的副本不会被检查到；反过来，题解里有与 snippet 同名但用途不同的函数会报不一致，改名即可。
+
+`snippets/go/` 下的具体函数是作者的个人积累，只放 `main`；`template` 只带检查机制。目前只支持 Go，Python / Java 用到再补。
+
 
 ## 不要破坏的约束
 

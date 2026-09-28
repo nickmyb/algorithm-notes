@@ -102,6 +102,7 @@ fi
     assert "/out/" not in result.stdout
     assert "./ctl/..." in result.stdout
     assert "./structures/..." in result.stdout
+    assert "./snippets/..." in result.stdout
 
 
 @pytest.mark.parametrize("script", ["gotest.sh", "pytest.sh", "javatest.sh"])
