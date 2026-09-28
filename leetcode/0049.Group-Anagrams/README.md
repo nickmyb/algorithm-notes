@@ -83,7 +83,7 @@ Go无法使用map作为map的key,使用[26]int记录单词的每个字母出现�
 
 ### 同类题
 
-- 前置：[242. Valid Anagram](../0242.Valid-Anagram/)： 如何检查字母异位词
+- 前置：[242. Valid Anagram](../0242.Valid-Anagram/)：如何检查字母异位词
 
 ## 复杂度
 
