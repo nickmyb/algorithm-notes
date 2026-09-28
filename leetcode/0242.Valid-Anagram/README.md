@@ -62,6 +62,10 @@ Given two strings `s` and `t`, return `true` if `t` is an anagram of `s`, and `f
 1. 排序str
 2. 计算str的字母表签名
 
+### 同类题
+
+- [49. Group Anagrams](../0049.Group-Anagrams/)
+
 ## 复杂度
 
 - 时间复杂度： 1. O(n*log(n)); 2. O(n)
