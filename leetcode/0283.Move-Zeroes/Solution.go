@@ -21,3 +21,20 @@ func moveZeroes(nums []int) {
 		zeroCount -= 1
 	}
 }
+
+func moveZeroesTwoPointer(nums []int) {
+	zeroIndex := -1
+	//nonZeroIndex := -1
+
+	for i, num := range nums {
+		// 找到第1个0,后面0只会依次向后1个个移动
+		if zeroIndex == -1 && num == 0 {
+			zeroIndex = i
+		}
+
+		if zeroIndex != -1 && num != 0 {
+			nums[zeroIndex], nums[i] = num, 0
+			zeroIndex += 1
+		}
+	}
+}
