@@ -84,6 +84,10 @@ test-java: ## 编译并跑 Java 题解测试，加 ID=94 只测一道题
 snippets: ## 检查题解里的辅助函数副本和 snippets/go 逐字一致
 	"$(GO)" test -v -run TestSolutionsMatchSnippets ./snippets/...
 
+.PHONY: similar
+similar: ## 检查题解 README 的同类题两边都写了、链接有效
+	cd ctl && "$(GO)" test -count=1 -run TestSimilarProblemsSymmetric .
+
 # 只在缺失或依赖清单变动时重建虚拟环境，避免每次跑测试都重装
 $(PYTEST): requirements-dev.txt
 	"$(PYTHON)" -m venv $(VENV)
