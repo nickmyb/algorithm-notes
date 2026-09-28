@@ -120,14 +120,29 @@ tests.finish();
 
 ### 5. 填题解 README
 
-`make new` 生成的那份 README 有四个小节：
+`make new` 生成的那份 README 有四个小节，`## 解题思路` 下另有一个 `### 同类题`：
 
 | 小节 | 谁来填 |
 |:---|:---|
 | `## 题目` | **自动**：英文原文 + 折叠的官方中文翻译 |
 | `## 题目大意` | **自己写**，一两句话复述题意。这一步的价值就在于自己写，所以没有自动填 |
 | `## 解题思路` | 思路推导，为什么这么做 |
+| `### 同类题` | 思路相同的题，每行一个链接，格式见下 |
 | `## 复杂度` | 时间 / 空间复杂度 |
+
+同类题按**解题思路**判断，不按是否共用辅助函数——后者由 `make snippets` 从代码推出。每行一题，链接指向题目目录，冒号后可以写一句为什么同类；建议先做的题加 `前置：` 前缀。下面是第 49 题的写法：
+
+```markdown
+- 前置：[242. Valid Anagram](../0242.Valid-Anagram/)：先会用字母计数判断异位词
+- [438. Find All Anagrams in a String](../0438.Find-All-Anagrams-in-a-String/)：同样用字母计数，改成滑动窗口
+```
+
+- **前置写在后做的那道题里**，只写一次，反向的「后续题」由工具推出
+- **多个前置各写一行**，含义是都建议先做；不支持「任选其一」，那种情况挑一道标前置，其余写成普通同类题
+- **只写直接前置**：242 → 49 → X 时，X 只写 49
+- **行的先后没有含义**，做题顺序由工具排
+
+格式固定是为了以后能自动生成做题顺序，不要改成表格或别的写法。
 
 前三节沿用 halfrost 原仓库的格式，`## 复杂度` 是本仓库加的——原仓库把复杂度记在 `ctl/meta/` 里用于渲染站点，那套机制没有搬过来，所以在 README 里留个固定位置。
 
@@ -142,6 +157,7 @@ make test [ID=94]                # 跑测试，带 ID 只测一道
 make test-go / test-python / test-java   # 单语言，同样支持 ID=94
 make readme                      # 重新生成本 README
 make readme-anon                 # 同上但不含个人数据，给 template 分支用
+make snippets                    # 检查题解里的辅助函数副本和 snippets/go 一致
 make fmt / vet / tidy            # Go 格式化、静态检查、依赖整理
 make clean                       # 清构建产物，不碰题解
 ```
@@ -256,6 +272,16 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 
 只在真用到时加。Java / Python 侧目前提供建树、层序展开、三种遍历、查找和比较，其他辅助用到再补。Java 另外提供测试报告器 `ExampleTests`，供题目测试使用。
 
+### 辅助函数片段
+
+多道题共用的辅助函数（如字母计数）不能像 `TreeNode` 那样引用：它是答案的一部分，引用的话复制到 LeetCode 会缺函数。所以每道题各自保留一份副本，`snippets/go/` 存放经过测试的权威版本，`make snippets` 检查所有副本和它逐字一致：
+
+- 题解里定义了和 snippet **同名**的顶层函数就算引用，不用加任何标记
+- 从 `func` 到函数结尾逐字比较，文档注释不比较
+- snippet 只能 import 标准库
+
+目前只支持 Go，规则见 `snippets/go/doc.go`。
+
 ## 环境要求
 
 下面是**我们实际在跑的环境**，不是兼容性承诺：
@@ -310,6 +336,7 @@ algorithm-notes/
 │   ├── go/                      # package structures，带 halfrost 原有的 9 个结构
 │   ├── java/                    # TreeNode/ListNode + 辅助，test/ 下是它们的测试
 │   └── python/                  # tree_node.py / list_node.py + 各自的测试
+├── snippets/go/                 # 题解辅助函数的权威版本，只复制不引用
 ├── conftest.py                  # pytest 的 solution fixture，见「多语言约定」
 ├── pytest.ini                   # pytest 配置
 ├── gotest.sh                    # Go 测试 + 覆盖率

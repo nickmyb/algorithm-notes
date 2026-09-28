@@ -83,7 +83,7 @@ func TestNewProblemAndAnonymousReadme(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, text := range []string{"English fixture", "中文测试数据", "## 题目大意\n\n## 解题思路"} {
+	for _, text := range []string{"English fixture", "中文测试数据", "## 题目大意\n\n## 解题思路", "## 解题思路\n\n### 同类题\n\n## 复杂度"} {
 		if !strings.Contains(string(readme), text) {
 			t.Errorf("题目 README 缺少 %q", text)
 		}
