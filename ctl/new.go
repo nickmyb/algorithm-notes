@@ -166,6 +166,9 @@ func templateFiles(lang util.Language) ([]string, error) {
 //
 // 「题目大意」故意留空：halfrost 原仓库里这一节是他自己写的一两句话概要
 // （不含示例和约束），不是翻译。自己复述一遍题意是理解题目的一环，自动填就没意义了。
+//
+// 「同类题」同样留空，由作者判断哪些题是同一个思路。每行一个题目链接，
+// 格式固定（见 AGENTS.md「同类题」），以后可以据此自动生成同类题列表。
 func problemReadme(id int, title, slug, difficulty string, detail *questionDetail) string {
 	english, chinese := "", ""
 	if detail != nil {
@@ -189,6 +192,7 @@ func problemReadme(id int, title, slug, difficulty string, detail *questionDetai
 
 	b.WriteString("## 题目大意\n\n")
 	b.WriteString("## 解题思路\n\n")
+	b.WriteString("### 同类题\n\n")
 	b.WriteString("## 复杂度\n\n")
 	b.WriteString("- 时间复杂度：\n")
 	b.WriteString("- 空间复杂度：\n")
