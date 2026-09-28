@@ -80,6 +80,10 @@ test-python: $(PYTEST) ## 跑 Python 题解测试，加 ID=94 只测一道题
 test-java: ## 编译并跑 Java 题解测试，加 ID=94 只测一道题
 	JAVAC="$(JAVAC)" JAVA="$(JAVA)" bash ./javatest.sh $(PROBLEM_DIR)
 
+.PHONY: snippets
+snippets: ## 检查题解里的辅助函数副本和 snippets/go 逐字一致
+	"$(GO)" test -v -run TestSolutionsMatchSnippets ./snippets/...
+
 # 只在缺失或依赖清单变动时重建虚拟环境，避免每次跑测试都重装
 $(PYTEST): requirements-dev.txt
 	"$(PYTHON)" -m venv $(VENV)

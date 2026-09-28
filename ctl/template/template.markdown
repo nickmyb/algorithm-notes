@@ -142,6 +142,7 @@ make test [ID=94]                # 跑测试，带 ID 只测一道
 make test-go / test-python / test-java   # 单语言，同样支持 ID=94
 make readme                      # 重新生成本 README
 make readme-anon                 # 同上但不含个人数据，给 template 分支用
+make snippets                    # 检查题解里的辅助函数副本和 snippets/go 一致
 make fmt / vet / tidy            # Go 格式化、静态检查、依赖整理
 make clean                       # 清构建产物，不碰题解
 ```
@@ -256,6 +257,16 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 
 只在真用到时加。Java / Python 侧目前提供建树、层序展开、三种遍历、查找和比较，其他辅助用到再补。Java 另外提供测试报告器 `ExampleTests`，供题目测试使用。
 
+### 辅助函数片段
+
+多道题共用的辅助函数（如字母计数）不能像 `TreeNode` 那样引用：它是答案的一部分，引用的话复制到 LeetCode 会缺函数。所以每道题各自保留一份副本，`snippets/go/` 存放经过测试的权威版本，`make snippets` 检查所有副本和它逐字一致：
+
+- 题解里定义了和 snippet **同名**的顶层函数就算引用，不用加任何标记
+- 从 `func` 到函数结尾逐字比较，文档注释不比较
+- snippet 只能 import 标准库
+
+目前只支持 Go，规则见 `snippets/go/doc.go`。
+
 ## 环境要求
 
 下面是**我们实际在跑的环境**，不是兼容性承诺：
@@ -310,6 +321,7 @@ algorithm-notes/
 │   ├── go/                      # package structures，带 halfrost 原有的 9 个结构
 │   ├── java/                    # TreeNode/ListNode + 辅助，test/ 下是它们的测试
 │   └── python/                  # tree_node.py / list_node.py + 各自的测试
+├── snippets/go/                 # 题解辅助函数的权威版本，只复制不引用
 ├── conftest.py                  # pytest 的 solution fixture，见「多语言约定」
 ├── pytest.ini                   # pytest 配置
 ├── gotest.sh                    # Go 测试 + 覆盖率
