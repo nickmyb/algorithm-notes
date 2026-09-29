@@ -454,24 +454,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**11**|**3**|**0**|**14**|
+|Accepted|**12**|**3**|**0**|**15**|
 |Total|968|2121|979|4068|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.1%|0.1%|0.0%|0.3%|
+|Completion Rate|1.2%|0.1%|0.0%|0.4%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|14|100.0%|
-|Python|1|7.1%|
-|Java|1|7.1%|
-|**合计题数**|**14**|—|
+|Go|15|100.0%|
+|Python|1|6.7%|
+|Java|1|6.7%|
+|**合计题数**|**15**|—|
 
 
 ## 题目列表
 
-以下已经收录了 14 道题的题解，还有 0 道题在尝试中
+以下已经收录了 15 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -482,6 +482,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
 |0125|Valid Palindrome|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0125.Valid-Palindrome/Solution.go)|49.1%|Easy|
+|0141|Linked List Cycle|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0141.Linked-List-Cycle/Solution.go)|55.1%|Easy|
 |0167|Two Sum II - Input Array Is Sorted|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0167.Two-Sum-II-Input-Array-Is-Sorted/Solution.go)|61.0%|Medium|
 |0206|Reverse Linked List|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0206.Reverse-Linked-List/Solution.go)|76.5%|Easy|
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
