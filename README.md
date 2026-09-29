@@ -454,29 +454,30 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**12**|**3**|**0**|**15**|
+|Accepted|**13**|**3**|**0**|**16**|
 |Total|968|2121|979|4068|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.2%|0.1%|0.0%|0.4%|
+|Completion Rate|1.3%|0.1%|0.0%|0.4%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|15|100.0%|
-|Python|1|6.7%|
-|Java|1|6.7%|
-|**合计题数**|**15**|—|
+|Go|16|100.0%|
+|Python|1|6.2%|
+|Java|1|6.2%|
+|**合计题数**|**16**|—|
 
 
 ## 题目列表
 
-以下已经收录了 15 道题的题解，还有 0 道题在尝试中
+以下已经收录了 16 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
 |0001|Two Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0001.Two-Sum/Solution.go)|55.2%|Easy|
 |0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|43.0%|Medium|
+|0020|Valid Parentheses|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0020.Valid-Parentheses/Solution.go)|45.9%|Easy|
 |0021|Merge Two Sorted Lists|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0021.Merge-Two-Sorted-Lists/Solution.go)|68.3%|Easy|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
