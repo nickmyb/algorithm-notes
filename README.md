@@ -454,24 +454,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**9**|**3**|**0**|**12**|
+|Accepted|**10**|**3**|**0**|**13**|
 |Total|968|2121|979|4068|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|0.9%|0.1%|0.0%|0.3%|
+|Completion Rate|1.0%|0.1%|0.0%|0.3%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|12|100.0%|
-|Python|1|8.3%|
-|Java|1|8.3%|
-|**合计题数**|**12**|—|
+|Go|13|100.0%|
+|Python|1|7.7%|
+|Java|1|7.7%|
+|**合计题数**|**13**|—|
 
 
 ## 题目列表
 
-以下已经收录了 12 道题的题解，还有 0 道题在尝试中
+以下已经收录了 13 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -482,6 +482,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
 |0125|Valid Palindrome|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0125.Valid-Palindrome/Solution.go)|49.1%|Easy|
 |0167|Two Sum II - Input Array Is Sorted|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0167.Two-Sum-II-Input-Array-Is-Sorted/Solution.go)|61.0%|Medium|
+|0206|Reverse Linked List|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0206.Reverse-Linked-List/Solution.go)|76.5%|Easy|
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
 |0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
