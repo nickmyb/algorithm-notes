@@ -71,6 +71,8 @@ Output: 5.00000
 
 ### 同类题
 
+- [3. Longest Substring Without Repeating Characters](../0003.Longest-Substring-Without-Repeating-Characters/)：可变窗口
+
 ## 复杂度
 
 - 时间复杂度： O(n)
