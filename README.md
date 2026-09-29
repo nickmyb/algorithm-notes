@@ -454,29 +454,29 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**8**|**3**|**0**|**11**|
+|Accepted|**9**|**3**|**0**|**12**|
 |Total|968|2121|979|4068|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|0.8%|0.1%|0.0%|0.3%|
+|Completion Rate|0.9%|0.1%|0.0%|0.3%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|11|100.0%|
-|Python|1|9.1%|
-|Java|1|9.1%|
-|**合计题数**|**11**|—|
+|Go|12|100.0%|
+|Python|1|8.3%|
+|Java|1|8.3%|
+|**合计题数**|**12**|—|
 
 
 ## 题目列表
 
-以下已经收录了 11 道题的题解，还有 0 道题在尝试中
+以下已经收录了 12 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
 |0001|Two Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0001.Two-Sum/Solution.go)|55.2%|Easy|
-|0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|42.9%|Medium|
+|0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|43.0%|Medium|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
@@ -485,6 +485,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
 |0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
+|0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
 |0643|Maximum Average Subarray I|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0643.Maximum-Average-Subarray-I/Solution.go)|44.5%|Easy|
 
 
