@@ -24,6 +24,7 @@ type funcDef struct {
 	file string // 所在文件名，关联关系按它分组
 	line int
 	pos  string // file:line，报错用
+	sig  string // 从 func 关键字到返回值结尾，即函数头
 	body string // 从 func 关键字到函数结尾，不含文档注释
 }
 
@@ -135,9 +136,18 @@ func checkSolutions(canon map[string]funcDef, roots []string) (uses map[string][
 				if !ok {
 					continue
 				}
-				if got.body == want.body {
+				switch {
+				case got.body == want.body:
 					uses[name] = append(uses[name], filepath.Base(filepath.Dir(path)))
-				} else {
+				case got.sig != want.sig:
+					// 签名不同时多半是同名的另一个函数，只报第 1 行不一致看不出该怎么改
+					errs = append(errs, fmt.Sprintf("%s: %s 的签名与 snippet %s 不同\n"+
+						"  snippet: %s\n  题解:    %s\n"+
+						"  Go 没有重载，同名函数一律当作 snippet 的副本检查：\n"+
+						"  - 是副本：改回 snippet 的签名\n"+
+						"  - 是不同的函数：改个名字",
+						got.pos, name, want.pos, want.sig, got.sig))
+				default:
 					errs = append(errs, fmt.Sprintf("%s: %s 与 %s 不一致\n%s",
 						got.pos, name, want.pos, firstDiff(want.body, got.body)))
 				}
@@ -174,11 +184,13 @@ func topLevelFuncs(fset *token.FileSet, file *ast.File, src []byte) map[string]f
 		}
 		// 从 fn.Type.Func（func 关键字）开始截取，跳过 fn.Doc
 		start := fset.Position(fn.Type.Func).Offset
+		sigEnd := fset.Position(fn.Type.End()).Offset
 		end := fset.Position(fn.End()).Offset
 		defs[fn.Name.Name] = funcDef{
 			file: filepath.Base(fset.Position(fn.Pos()).Filename),
 			line: fset.Position(fn.Pos()).Line,
 			pos:  fmt.Sprintf("%s:%d", filepath.ToSlash(fset.Position(fn.Pos()).Filename), fset.Position(fn.Pos()).Line),
+			sig:  strings.ReplaceAll(string(src[start:sigEnd]), "\r\n", "\n"),
 			body: strings.ReplaceAll(string(src[start:end]), "\r\n", "\n"),
 		}
 	}
@@ -269,6 +281,36 @@ func abs(x int) int {
 	_, errs := checkSolutions(canon, []string{filepath.Join(root, "leetcode")})
 	if len(errs) != 1 || !strings.Contains(errs[0], "Solution.go:3: abs") || !strings.Contains(errs[0], "x <= 0") {
 		t.Fatalf("errs=%v", errs)
+	}
+}
+
+func TestCheckerHintsOnSignatureMismatch(t *testing.T) {
+	root := writeFiles(t, map[string]string{
+		"snippets/abs.go": sampleSnippet,
+		"leetcode/0001.A/Solution.go": `package leetcode
+
+func abs(x, y int) int {
+	if x < y {
+		return y - x
+	}
+	return x - y
+}
+`,
+	})
+	canon, _ := loadSnippets(filepath.Join(root, "snippets"))
+	_, errs := checkSolutions(canon, []string{filepath.Join(root, "leetcode")})
+	if len(errs) != 1 {
+		t.Fatalf("errs=%v", errs)
+	}
+	for _, want := range []string{
+		"Solution.go:3: abs 的签名与 snippet",
+		"snippet: func abs(x int) int\n",
+		"题解:    func abs(x, y int) int\n",
+		"改个名字",
+	} {
+		if !strings.Contains(errs[0], want) {
+			t.Fatalf("缺少 %q:\n%s", want, errs[0])
+		}
 	}
 }
 
