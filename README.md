@@ -454,24 +454,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**13**|**4**|**0**|**17**|
+|Accepted|**14**|**4**|**0**|**18**|
 |Total|968|2122|979|4069|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.3%|0.2%|0.0%|0.4%|
+|Completion Rate|1.4%|0.2%|0.0%|0.4%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|17|100.0%|
-|Python|1|5.9%|
-|Java|1|5.9%|
-|**合计题数**|**17**|—|
+|Go|18|100.0%|
+|Python|1|5.6%|
+|Java|1|5.6%|
+|**合计题数**|**18**|—|
 
 
 ## 题目列表
 
-以下已经收录了 17 道题的题解，还有 0 道题在尝试中
+以下已经收录了 18 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -488,6 +488,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0167|Two Sum II - Input Array Is Sorted|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0167.Two-Sum-II-Input-Array-Is-Sorted/Solution.go)|61.0%|Medium|
 |0206|Reverse Linked List|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0206.Reverse-Linked-List/Solution.go)|76.5%|Easy|
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
+|0232|Implement Queue using Stacks|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0232.Implement-Queue-using-Stacks/Solution.go)|68.0%|Easy|
 |0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
