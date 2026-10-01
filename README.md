@@ -454,24 +454,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**14**|**4**|**0**|**18**|
+|Accepted|**15**|**4**|**0**|**19**|
 |Total|968|2122|979|4069|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.4%|0.2%|0.0%|0.4%|
+|Completion Rate|1.5%|0.2%|0.0%|0.5%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|18|100.0%|
-|Python|1|5.6%|
-|Java|1|5.6%|
-|**合计题数**|**18**|—|
+|Go|19|100.0%|
+|Python|1|5.3%|
+|Java|1|5.3%|
+|**合计题数**|**19**|—|
 
 
 ## 题目列表
 
-以下已经收录了 18 道题的题解，还有 0 道题在尝试中
+以下已经收录了 19 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -493,6 +493,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
 |0643|Maximum Average Subarray I|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0643.Maximum-Average-Subarray-I/Solution.go)|44.5%|Easy|
+|0704|Binary Search|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0704.Binary-Search/Solution.go)|56.2%|Easy|
 
 
 ---
