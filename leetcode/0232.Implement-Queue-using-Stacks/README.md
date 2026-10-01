@@ -98,11 +98,12 @@ myQueue.empty(); // return false
 ## 解题思路
 
 1. stack (pop + push) = queue
-2. queue保证当前只会取第一个元素,当queue耗尽时再新生成queue即可,push/pop的时候不必保证所有元素都在其中的一个底层数据结构中
+2. push操作的时候保证元素全在stack,pop的时候保证元素全在queue
+3. 优化: queue保证当前只会取第一个元素,当queue耗尽时再新生成queue即可,push/pop的时候不必保证所有元素都在其中的一个底层数据结构中
 
 ### 同类题
 
 ## 复杂度
 
-- 时间复杂度：O(1)
+- 时间复杂度：O(1), pop/peek = amortized O(1)
 - 空间复杂度：O(n)
