@@ -454,7 +454,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**16**|**4**|**0**|**20**|
+|Accepted|**16**|**5**|**0**|**21**|
 |Total|968|2122|979|4069|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
 |Completion Rate|1.7%|0.2%|0.0%|0.5%|
@@ -463,15 +463,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|20|100.0%|
-|Python|1|5.0%|
-|Java|1|5.0%|
-|**合计题数**|**20**|—|
+|Go|21|100.0%|
+|Python|1|4.8%|
+|Java|1|4.8%|
+|**合计题数**|**21**|—|
 
 
 ## 题目列表
 
-以下已经收录了 20 道题的题解，还有 0 道题在尝试中
+以下已经收录了 21 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -479,6 +479,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|43.0%|Medium|
 |0020|Valid Parentheses|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0020.Valid-Parentheses/Solution.go)|45.9%|Easy|
 |0021|Merge Two Sorted Lists|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0021.Merge-Two-Sorted-Lists/Solution.go)|68.3%|Easy|
+|0034|Find First and Last Position of Element in Sorted Array|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/Solution.go)|47.1%|Medium|
 |0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|49.9%|Easy|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
