@@ -72,6 +72,8 @@ Explanation: 2 does not exist in nums so return -1
 
 ### 同类题
 
+- [35. Search Insert Position](../0035.Search-Insert-Position/)
+
 ## 复杂度
 
 - 时间复杂度：O(log(n))

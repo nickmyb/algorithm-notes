@@ -99,6 +99,8 @@ claude code给出的解释
 
 ### 同类题
 
+- 前置：[704. Binary Search](../0704.Binary-Search/)：二分查找
+
 ## 复杂度
 
 - 时间复杂度：O(log(n))
