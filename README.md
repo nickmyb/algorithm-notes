@@ -144,6 +144,12 @@ tests.finish();
 
 `make similar` 检查同类题两边都写了、链接指向的题目存在、同一对题没有两侧都标前置、每行都符合格式，只报告不改写。全量 `make test` 也会跑它。格式固定是为了能做这些检查、以后还能自动生成做题顺序，不要改成表格或别的写法。
 
+需要配图时，图片放在仓库根的 `images/<题目目录>/` 下，不放进题目目录。题解 README 在 `leetcode/<题目目录>/` 里，引用时往上两级回到仓库根：
+
+```markdown
+![三种区间的完整过程](../../images/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/three-intervals.png)
+```
+
 前三节沿用 halfrost 原仓库的格式，`## 复杂度` 是本仓库加的——原仓库把复杂度记在 `ctl/meta/` 里用于渲染站点，那套机制没有搬过来，所以在 README 里留个固定位置。
 
 ## 命令
@@ -338,6 +344,8 @@ algorithm-notes/
 │       ├── solution_test.py     # Python 测试
 │       ├── Solution.java        # Java 题解
 │       └── SolutionTest.java    # Java 测试
+├── images/                      # 题解配图，按题目目录分子目录
+│   └── 0001.Two-Sum/            # 题解 README 用 ../../images/0001.Two-Sum/xxx.png 引用
 ├── ctl/                         # 命令行工具：建题目录、生成 README
 ├── structures/                  # 各语言共用的数据结构（TreeNode、ListNode 等）
 │   ├── go/                      # package structures，带 halfrost 原有的 9 个结构
