@@ -102,6 +102,7 @@ leetcode/<NNNN>.<英文标题>/    # 一题一目录，NNNN 是四位题号
 ├── Solution.go  Solution_test.go
 ├── solution.py  solution_test.py
 └── Solution.java SolutionTest.java
+images/<NNNN>.<英文标题>/      # 题解配图，按题目目录分开；题解 README 用 ../../images/<题目目录>/xxx.png 引用
 ctl/                          # 命令行工具
 structures/                   # 各语言共用的数据结构，按语言分子目录
 ├── go/                       # package structures，import 路径 .../structures/go
