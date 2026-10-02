@@ -17,12 +17,19 @@ func TestSearchRange(t *testing.T) {
 		{"Example 3", []int{}, 0, []int{-1, -1}},
 	}
 
+	impls := map[string]func([]int, int) []int{
+		"searchRange":        searchRange,
+		"searchRangeRedBlue": searchRangeRedBlue,
+	}
+
 	for _, q := range qs {
-		t.Run(q.name, func(t *testing.T) {
-			got := searchRange(q.nums, q.target)
-			if !reflect.DeepEqual(got, q.want) {
-				t.Fatalf("searchRange(%v, %d) = %v, want %v", q.nums, q.target, got, q.want)
-			}
-		})
+		for implName, impl := range impls {
+			t.Run(q.name+"/"+implName, func(t *testing.T) {
+				got := impl(q.nums, q.target)
+				if !reflect.DeepEqual(got, q.want) {
+					t.Fatalf("%v(%v, %d) = %v, want %v", implName, q.nums, q.target, got, q.want)
+				}
+			})
+		}
 	}
 }

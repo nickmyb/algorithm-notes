@@ -81,12 +81,15 @@ Output: [-1,-1]
 
 ## 解题思路
 
-1. 分别计算左界和右界
-2. 递归
+1. 遍历数组实现简单，时间复杂度= O(n);递归实现复杂，且时间复杂度= O(n); 都不适合这类题目!
+2. 分别计算左界和右界
+3. 红蓝染色法
+   - ![红蓝染色法](../../images/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/red-blue-definition.png)
+   - ![三种区间的完整过程](../../images/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/three-intervals.png)
 
 ### 同类题
 
 ## 复杂度
 
-- 时间复杂度：searchRange = O(log(n)); searchRangeRecursive = O(n);
+- 时间复杂度：searchRange = O(log(n)); searchRangeRedBlue = O(log(n));
 - 空间复杂度：O(1)
