@@ -102,7 +102,7 @@ func TestSimilarReportsMutualPrereq(t *testing.T) {
 		"0242.Valid-Anagram": similarReadme("242. Valid Anagram",
 			"### 同类题\n\n- 前置：[49. Group Anagrams](../0049.Group-Anagrams/)\n"),
 	})
-	// 同一对只报一次
+	// 同一对只报一次，环检查也不再重复报
 	wantSimilarErrors(t, checkSimilar(root), "互相标了前置，这是成环")
 }
 
@@ -160,14 +160,16 @@ func TestSimilarAcceptsIndependentPrereqs(t *testing.T) {
 	wantSimilarErrors(t, checkSimilar(root))
 }
 
-func TestSimilarRedundancyIgnoresLongCycle(t *testing.T) {
-	// 1 → 2 → 3 → 1 是三道题的环，3 另有前置 4。从 1 出发经过 3 本身才能回到 3，
-	// 不算冗余；环本身暂不检查，所以这里不报任何错
+func TestSimilarReportsLongCycle(t *testing.T) {
+	// 1 → 2 → 3 → 1 是三道题的环，3 另有前置 4。从 4 出发经过 3 本身才能到 2，
+	// 不算冗余，所以只报环，而且每道题都在环上也只报一次
 	root := similarRepo(t, map[string]string{
 		"0001.A": similarReadme("1. A", "### 同类题\n\n- 前置：[3. C](../0003.C/)\n- [2. B](../0002.B/)\n"),
 		"0002.B": similarReadme("2. B", "### 同类题\n\n- 前置：[1. A](../0001.A/)\n- [3. C](../0003.C/)\n"),
 		"0003.C": similarReadme("3. C", "### 同类题\n\n- 前置：[2. B](../0002.B/)\n- 前置：[4. D](../0004.D/)\n- [1. A](../0001.A/)\n"),
 		"0004.D": similarReadme("4. D", "### 同类题\n\n- [3. C](../0003.C/)\n"),
 	})
-	wantSimilarErrors(t, checkSimilar(root))
+	// 从题号最小的 1 起，闭合边「前置：3」在 1 的 README 第 9 行
+	wantSimilarErrors(t, checkSimilar(root),
+		"leetcode/0001.A/README.md:9: 前置成环：0001.A → 0002.B → 0003.C → 0001.A")
 }
