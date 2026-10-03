@@ -77,7 +77,7 @@ func parseSimilar(readme string) (similarNotes, []string) {
 }
 
 // checkSimilar 检查 root 下所有题目的同类题：链接指向的目录存在、两边都写了、
-// 同一对题没有两侧都标前置（那是成环）。
+// 同一对题没有两侧都标前置（那是成环）、没有能由传递推出的冗余前置。
 func checkSimilar(root string) []string {
 	entries, err := os.ReadDir(root)
 	if err != nil {
@@ -145,6 +145,73 @@ func checkSimilar(root string) []string {
 			}
 		}
 	}
+	errs = append(errs, redundantPrereqs(all, dirs, readmePath)...)
 	sort.Strings(errs)
 	return errs
+}
+
+// redundantPrereqs 报出能由传递推出的前置：A 写了「前置：B」，而 B 经由 A 的
+// 另一个前置 C 已经排在 A 之前（B → … → C → A），那么 B → A 这条边是冗余的。
+// 找路径时绕开 A 本身，否则多于两道题的环会被误报成冗余（环本身暂不检查）。
+func redundantPrereqs(all map[string]similarNotes, dirs []string, readmePath func(string) string) []string {
+	// 前置边 B → A：B 建议先做，记在 A 的 README 里
+	next := map[string][]string{}
+	prereqs := map[string][]string{}
+	for _, a := range dirs {
+		for b, link := range all[a].links {
+			if _, ok := all[b]; !ok || b == a || !link.prereq {
+				continue // 链接本身的问题在 checkSimilar 里报
+			}
+			next[b] = append(next[b], a)
+			prereqs[a] = append(prereqs[a], b)
+		}
+	}
+	for _, succ := range next {
+		sort.Strings(succ)
+	}
+
+	var errs []string
+	for _, a := range dirs {
+		ps := prereqs[a]
+		sort.Strings(ps)
+		for _, b := range ps {
+			for _, c := range ps {
+				if c == b {
+					continue
+				}
+				if path := prereqPath(next, b, c, a); path != nil {
+					errs = append(errs, fmt.Sprintf("%s:%d: 前置 %s 可由 %s → %s 推出，是冗余前置。只写直接前置：去掉这一行的「前置：」，或者两侧一起删掉",
+						readmePath(a), all[a].links[b].line, b, strings.Join(path, " → "), a))
+					break
+				}
+			}
+		}
+	}
+	return errs
+}
+
+// prereqPath 沿前置边找一条 from 到 to 的路径（BFS，取最短的），不经过 avoid。
+// 找不到时返回 nil。
+func prereqPath(next map[string][]string, from, to, avoid string) []string {
+	parent := map[string]string{from: ""}
+	queue := []string{from}
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		if cur == to {
+			var path []string
+			for n := to; n != ""; n = parent[n] {
+				path = append([]string{n}, path...)
+			}
+			return path
+		}
+		for _, n := range next[cur] {
+			if _, seen := parent[n]; seen || n == avoid {
+				continue
+			}
+			parent[n] = cur
+			queue = append(queue, n)
+		}
+	}
+	return nil
 }
