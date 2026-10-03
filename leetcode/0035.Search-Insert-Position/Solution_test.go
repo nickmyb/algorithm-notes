@@ -17,12 +17,19 @@ func TestSearchInsert(t *testing.T) {
 		{"target 小于所有元素", []int{1, 3, 5, 6}, 0, 0},
 	}
 
+	impls := map[string]func([]int, int) int{
+		"searchInsert":           searchInsert,
+		"searchInsertLowerBound": searchInsertLowerBound,
+	}
+
 	for _, q := range qs {
-		t.Run(q.name, func(t *testing.T) {
-			got := searchInsert(q.nums, q.target)
-			if got != q.want {
-				t.Fatalf("searchInsert(%v, %d) = %d, want %d", q.nums, q.target, got, q.want)
-			}
-		})
+		for implName, impl := range impls {
+			t.Run(q.name+"/"+implName, func(t *testing.T) {
+				got := impl(q.nums, q.target)
+				if got != q.want {
+					t.Fatalf("%v(%v, %d) = %d, want %d", implName, q.nums, q.target, got, q.want)
+				}
+			})
+		}
 	}
 }
