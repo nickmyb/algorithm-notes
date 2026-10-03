@@ -89,6 +89,8 @@ Output: [-1,-1]
 
 ### 同类题
 
+- 前置：[35. Search Insert Position](../0035.Search-Insert-Position/)
+
 ## 复杂度
 
 - 时间复杂度：searchRange = O(log(n)); searchRangeRedBlue = O(log(n));

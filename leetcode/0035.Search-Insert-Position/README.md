@@ -100,6 +100,7 @@ claude code给出的解释
 ### 同类题
 
 - 前置：[704. Binary Search](../0704.Binary-Search/)：二分查找
+- [34. Find First and Last Position of Element in Sorted Array](../0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/)
 
 ## 复杂度
 
