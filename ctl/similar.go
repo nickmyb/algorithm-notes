@@ -77,7 +77,7 @@ func parseSimilar(readme string) (similarNotes, []string) {
 }
 
 // checkSimilar 检查 root 下所有题目的同类题：链接指向的目录存在、两边都写了、
-// 同一对题没有两侧都标前置（那是成环）。
+// 前置不成环（两道题互标、多道题绕一圈）、没有能由传递推出的冗余前置。
 func checkSimilar(root string) []string {
 	entries, err := os.ReadDir(root)
 	if err != nil {
@@ -145,6 +145,107 @@ func checkSimilar(root string) []string {
 			}
 		}
 	}
+	errs = append(errs, redundantPrereqs(all, dirs, readmePath)...)
+	errs = append(errs, prereqCycles(all, dirs, readmePath)...)
 	sort.Strings(errs)
 	return errs
+}
+
+// prereqGraph 收集前置边 B → A（B 建议先做，记在 A 的 README 里）：
+// next 是每道题的后继，prereqs 是每道题的直接前置，都已排序。
+func prereqGraph(all map[string]similarNotes, dirs []string) (next, prereqs map[string][]string) {
+	next, prereqs = map[string][]string{}, map[string][]string{}
+	for _, a := range dirs {
+		for b, link := range all[a].links {
+			if _, ok := all[b]; !ok || b == a || !link.prereq {
+				continue // 链接本身的问题在 checkSimilar 里报
+			}
+			next[b] = append(next[b], a)
+			prereqs[a] = append(prereqs[a], b)
+		}
+	}
+	for _, m := range []map[string][]string{next, prereqs} {
+		for _, v := range m {
+			sort.Strings(v)
+		}
+	}
+	return next, prereqs
+}
+
+// prereqCycles 报出多于两道题的前置环（两道题互标前置在 checkSimilar 里报）。
+// 对每道题找经过它的最短环，同一组题的环只报一次。
+func prereqCycles(all map[string]similarNotes, dirs []string, readmePath func(string) string) []string {
+	next, _ := prereqGraph(all, dirs)
+	seen := map[string]bool{}
+	var errs []string
+	for _, s := range dirs {
+		var cycle []string // s → … → s，不含末尾重复的 s
+		for _, n := range next[s] {
+			if path := prereqPath(next, n, s, ""); path != nil && (cycle == nil || len(path) < len(cycle)) {
+				cycle = append([]string{s}, path[:len(path)-1]...)
+			}
+		}
+		if len(cycle) <= 2 {
+			continue
+		}
+		members := append([]string(nil), cycle...)
+		sort.Strings(members)
+		if key := strings.Join(members, " "); !seen[key] {
+			seen[key] = true
+			// 闭合环的最后一条边记在 s 的 README 里：「前置：cycle 的最后一道」
+			errs = append(errs, fmt.Sprintf("%s:%d: 前置成环：%s → %s。前置表示建议先做，环里的题排不出先后，把其中一条改成普通同类题",
+				readmePath(s), all[s].links[cycle[len(cycle)-1]].line, strings.Join(cycle, " → "), s))
+		}
+	}
+	return errs
+}
+
+// redundantPrereqs 报出能由传递推出的前置：A 写了「前置：B」，而 B 经由 A 的
+// 另一个前置 C 已经排在 A 之前（B → … → C → A），那么 B → A 这条边是冗余的。
+// 找路径时绕开 A 本身，否则环会被误报成冗余（环由 prereqCycles 报）。
+func redundantPrereqs(all map[string]similarNotes, dirs []string, readmePath func(string) string) []string {
+	next, prereqs := prereqGraph(all, dirs)
+	var errs []string
+	for _, a := range dirs {
+		ps := prereqs[a]
+		for _, b := range ps {
+			for _, c := range ps {
+				if c == b {
+					continue
+				}
+				if path := prereqPath(next, b, c, a); path != nil {
+					errs = append(errs, fmt.Sprintf("%s:%d: 前置 %s 可由 %s → %s 推出，是冗余前置。只写直接前置：去掉这一行的「前置：」，或者两侧一起删掉",
+						readmePath(a), all[a].links[b].line, b, strings.Join(path, " → "), a))
+					break
+				}
+			}
+		}
+	}
+	return errs
+}
+
+// prereqPath 沿前置边找一条 from 到 to 的路径（BFS，取最短的），不经过 avoid。
+// 找不到时返回 nil。
+func prereqPath(next map[string][]string, from, to, avoid string) []string {
+	parent := map[string]string{from: ""}
+	queue := []string{from}
+	for len(queue) > 0 {
+		cur := queue[0]
+		queue = queue[1:]
+		if cur == to {
+			var path []string
+			for n := to; n != ""; n = parent[n] {
+				path = append([]string{n}, path...)
+			}
+			return path
+		}
+		for _, n := range next[cur] {
+			if _, seen := parent[n]; seen || n == avoid {
+				continue
+			}
+			parent[n] = cur
+			queue = append(queue, n)
+		}
+	}
+	return nil
 }

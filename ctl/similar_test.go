@@ -102,7 +102,7 @@ func TestSimilarReportsMutualPrereq(t *testing.T) {
 		"0242.Valid-Anagram": similarReadme("242. Valid Anagram",
 			"### 同类题\n\n- 前置：[49. Group Anagrams](../0049.Group-Anagrams/)\n"),
 	})
-	// 同一对只报一次
+	// 同一对只报一次，环检查也不再重复报
 	wantSimilarErrors(t, checkSimilar(root), "互相标了前置，这是成环")
 }
 
@@ -128,4 +128,48 @@ func TestSimilarIgnoresCodeBlocksOtherSectionsAndTemplate(t *testing.T) {
 		"0015.3Sum": similarReadme("15. 3Sum", "### 同类题\n"),
 	})
 	wantSimilarErrors(t, checkSimilar(root))
+}
+
+func TestSimilarReportsRedundantPrereq(t *testing.T) {
+	root := similarRepo(t, map[string]string{
+		"0704.Binary-Search": similarReadme("704. Binary Search",
+			"### 同类题\n\n- [35. Search Insert Position](../0035.Search-Insert-Position/)\n- [34. Find First](../0034.Find-First/)\n"),
+		"0035.Search-Insert-Position": similarReadme("35. Search Insert Position",
+			"### 同类题\n\n- 前置：[704. Binary Search](../0704.Binary-Search/)\n- [34. Find First](../0034.Find-First/)\n"),
+		// 704 → 35 → 34 已经推出 704 在 34 之前，这里再标前置 704 是冗余边
+		"0034.Find-First": similarReadme("34. Find First",
+			"### 同类题\n\n- 前置：[35. Search Insert Position](../0035.Search-Insert-Position/)\n- 前置：[704. Binary Search](../0704.Binary-Search/)\n"),
+	})
+	// 只报冗余的那一条，并给出推出它的路径；直接前置 35 不报
+	wantSimilarErrors(t, checkSimilar(root),
+		"leetcode/0034.Find-First/README.md:10: 前置 0704.Binary-Search 可由 0704.Binary-Search → 0035.Search-Insert-Position → 0034.Find-First 推出")
+}
+
+func TestSimilarAcceptsIndependentPrereqs(t *testing.T) {
+	// 多个前置之间没有先后（与关系），一道题也可以是多道题的前置：都不是冗余
+	root := similarRepo(t, map[string]string{
+		"0001.Two-Sum": similarReadme("1. Two Sum",
+			"### 同类题\n\n- [15. 3Sum](../0015.3Sum/)\n- [18. 4Sum](../0018.4Sum/)\n"),
+		"0167.Two-Sum-II": similarReadme("167. Two Sum II",
+			"### 同类题\n\n- [15. 3Sum](../0015.3Sum/)\n"),
+		"0015.3Sum": similarReadme("15. 3Sum",
+			"### 同类题\n\n- 前置：[1. Two Sum](../0001.Two-Sum/)\n- 前置：[167. Two Sum II](../0167.Two-Sum-II/)\n"),
+		"0018.4Sum": similarReadme("18. 4Sum",
+			"### 同类题\n\n- 前置：[1. Two Sum](../0001.Two-Sum/)\n"),
+	})
+	wantSimilarErrors(t, checkSimilar(root))
+}
+
+func TestSimilarReportsLongCycle(t *testing.T) {
+	// 1 → 2 → 3 → 1 是三道题的环，3 另有前置 4。从 4 出发经过 3 本身才能到 2，
+	// 不算冗余，所以只报环，而且每道题都在环上也只报一次
+	root := similarRepo(t, map[string]string{
+		"0001.A": similarReadme("1. A", "### 同类题\n\n- 前置：[3. C](../0003.C/)\n- [2. B](../0002.B/)\n"),
+		"0002.B": similarReadme("2. B", "### 同类题\n\n- 前置：[1. A](../0001.A/)\n- [3. C](../0003.C/)\n"),
+		"0003.C": similarReadme("3. C", "### 同类题\n\n- 前置：[2. B](../0002.B/)\n- 前置：[4. D](../0004.D/)\n- [1. A](../0001.A/)\n"),
+		"0004.D": similarReadme("4. D", "### 同类题\n\n- [3. C](../0003.C/)\n"),
+	})
+	// 从题号最小的 1 起，闭合边「前置：3」在 1 的 README 第 9 行
+	wantSimilarErrors(t, checkSimilar(root),
+		"leetcode/0001.A/README.md:9: 前置成环：0001.A → 0002.B → 0003.C → 0001.A")
 }
