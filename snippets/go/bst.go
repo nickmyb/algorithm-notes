@@ -5,6 +5,11 @@ package snippets
 //
 // 泛型写法参照 Go 官方博客 When To Use Generics 的 General purpose data structures 一节：
 // https://go.dev/blog/when-generics
+//
+// 改成泛型之前是 string 键、int 值的版本，在仓库根目录执行：
+//
+//	git show 3caa89e:snippets/go/bst.go                  # 查看旧版本
+//	git diff 3caa89e 250ca21 -- snippets/go/bst.go       # 查看旧版本改成泛型的差异
 type BST[K, V any] struct {
 	cmp  func(K, K) int
 	root *node[K, V]
