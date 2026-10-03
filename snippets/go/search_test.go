@@ -27,3 +27,30 @@ func TestBinarySearch(t *testing.T) {
 		})
 	}
 }
+
+func TestLowerBoundClosed(t *testing.T) {
+	tests := []struct {
+		name   string
+		nums   []int
+		target int
+		want   int
+	}{
+		// 有重复：抓把 < 写成 <=，那样返回第一个 > target 的位置（upper bound，这里会得 5）；
+		// 也抓循环条件写成 lo < hi，lo == hi 时那一格没染色就退出（这里会得 4）
+		{"有重复", []int{5, 7, 7, 8, 8, 10}, 8, 3},
+		// 不存在：抓返回最后一个红（hi）而不是第一个蓝（hi + 1）；也抓找不到时返回 -1
+		{"不存在", []int{5, 7, 7, 8, 8, 10}, 6, 1},
+		// 比所有元素都大：抓 hi 初值写成 len(nums)（混用了左闭右开），mid 会取到 len(nums) 越界
+		{"比所有元素都大", []int{5, 7, 7, 8, 8, 10}, 11, 6},
+		// 空数组：抓循环后再读 nums[mid] 决定 mid / mid + 1 的写法（第 35 题 searchInsert），空数组会越界；
+		// 第 34 题允许 nums 为空
+		{"空数组", []int{}, 0, 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := lowerBoundClosed(tt.nums, tt.target); got != tt.want {
+				t.Errorf("lowerBoundClosed(%v, %d) = %d, want %d", tt.nums, tt.target, got, tt.want)
+			}
+		})
+	}
+}

@@ -65,7 +65,7 @@ func searchRangeRedBlue(nums []int, target int) []int {
 	return []int{lo, hi}
 }
 
-// lowerBoundClosed [lo, hi]
+// lowerBoundClosed 二分搜索 红蓝染色法 闭区间 [lo, hi], 返回第一个>=target的index
 func lowerBoundClosed(nums []int, target int) int {
 	lo, hi := 0, len(nums)-1
 
