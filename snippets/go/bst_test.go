@@ -1,6 +1,7 @@
 package snippets
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -60,21 +61,6 @@ func TestBSTPutOverwrite(t *testing.T) {
 	}
 }
 
-func TestBSTSize(t *testing.T) {
-	bst := NewBST[string, int](strings.Compare)
-	// 空树：抓 size 没处理 nil 接收者，root 为 nil 时直接 panic
-	if got := bst.Size(); got != 0 {
-		t.Errorf("空树 Size() = %d, want 0", got)
-	}
-	// 根的两侧都有子树：抓 n 只累加了一侧（algs4 的 size(left) + size(right) + 1 漏项）
-	for _, k := range []string{"B", "A", "C"} {
-		bst.Put(k, 0)
-	}
-	if got := bst.Size(); got != 3 {
-		t.Errorf("Size() = %d, want 3", got)
-	}
-}
-
 func TestBSTCmpSign(t *testing.T) {
 	// cmp 返回 -4 这类非 ±1 的值：抓 switch 写成 case -1 / case 1，
 	// 其余值落进 default 被当成相等，覆盖掉别的 key。strings.Compare 只返回 -1、0、1，
@@ -90,6 +76,80 @@ func TestBSTCmpSign(t *testing.T) {
 		if got, ok := bst.Get(tt.key); got != tt.want || !ok {
 			t.Errorf("Get(%d) = %q, %v, want %q, true", tt.key, got, ok, tt.want)
 		}
+	}
+	if got := bst.Size(); got != 3 {
+		t.Errorf("Size() = %d, want 3", got)
+	}
+}
+
+// bstKeys 用 Select 按排名取出全部键。Select 靠每个结点的 n 定位，
+// 所以 n 没维护好、或者树里丢了或多出结点，取出来的序列都会不对。
+func bstKeys(bst *BST[string, int]) []string {
+	keys := make([]string, 0, bst.Size())
+	for k := range bst.Size() {
+		key, _ := bst.Select(k)
+		keys = append(keys, key)
+	}
+	return keys
+}
+
+// newDeleteTestBST 在 TestBSTMinMax 那棵树上多插一个 Q，
+// 让根 M 的后继 Q 不是 M 的直接右孩子，而在 T 的左子树里：
+//
+//	     M
+//	   /   \
+//	  E     T
+//	 /     / \
+//	A     Q   Z
+//	 \       /
+//	  C     W
+func newDeleteTestBST() *BST[string, int] {
+	bst := NewBST[string, int](strings.Compare)
+	for _, k := range []string{"M", "E", "T", "A", "Z", "C", "W", "Q"} {
+		bst.Put(k, 0)
+	}
+	return bst
+}
+
+func TestBSTDelete(t *testing.T) {
+	tests := []struct {
+		name string
+		key  string
+		want []string
+	}{
+		// 叶子：抓删除后没有更新路径上的 n，Size 仍是 8，Select 取出一个空键
+		{"叶子", "C", []string{"A", "E", "M", "Q", "T", "W", "Z"}},
+		// 只有右孩子：抓两个单孩子分支写反（返回 x.left），C 跟着丢掉
+		{"只有右孩子", "A", []string{"C", "E", "M", "Q", "T", "W", "Z"}},
+		// 只有左孩子：同上，左右对称，W 跟着丢掉
+		{"只有左孩子", "Z", []string{"A", "C", "E", "M", "Q", "T", "W"}},
+		// 两个孩子，后继在更深处：抓先接左子树再 deleteMin
+		// （后继有了左孩子，deleteMin 会越过它去删 A）、
+		// 没把后继从右子树摘掉（Q 出现两次）、deleteMin 没更新 n
+		{"两个孩子", "M", []string{"A", "C", "E", "Q", "T", "W", "Z"}},
+		// 不存在：抓没有判 nil，走到空子树后 x.key 直接 panic
+		{"不存在", "D", []string{"A", "C", "E", "M", "Q", "T", "W", "Z"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bst := newDeleteTestBST()
+			bst.Delete(tt.key)
+			if got := bstKeys(bst); !slices.Equal(got, tt.want) {
+				t.Errorf("Delete(%q) 后 = %v, want %v", tt.key, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBSTSize(t *testing.T) {
+	bst := NewBST[string, int](strings.Compare)
+	// 空树：抓 size 没处理 nil 接收者，root 为 nil 时直接 panic
+	if got := bst.Size(); got != 0 {
+		t.Errorf("空树 Size() = %d, want 0", got)
+	}
+	// 根的两侧都有子树：抓 n 只累加了一侧（algs4 的 size(left) + size(right) + 1 漏项）
+	for _, k := range []string{"B", "A", "C"} {
+		bst.Put(k, 0)
 	}
 	if got := bst.Size(); got != 3 {
 		t.Errorf("Size() = %d, want 3", got)
@@ -137,6 +197,40 @@ func TestBSTMinMax(t *testing.T) {
 				t.Errorf("%s() = %q, %v, want %q, true", tt.name, got, ok, tt.want)
 			}
 		})
+	}
+}
+
+func TestBSTDeleteMin(t *testing.T) {
+	// 空树：抓 deleteMin 开头没有判 nil，空树上直接 panic
+	empty := NewBST[string, int](strings.Compare)
+	empty.DeleteMin()
+	if got := empty.Size(); got != 0 {
+		t.Errorf("空树 DeleteMin 后 Size() = %d, want 0", got)
+	}
+
+	// 最小值 A 有右孩子 C：抓返回 nil 而不是 x.right（C 跟着丢掉）、没更新 n
+	bst := newDeleteTestBST()
+	bst.DeleteMin()
+	want := []string{"C", "E", "M", "Q", "T", "W", "Z"}
+	if got := bstKeys(bst); !slices.Equal(got, want) {
+		t.Errorf("DeleteMin 后 = %v, want %v", got, want)
+	}
+}
+
+func TestBSTDeleteMax(t *testing.T) {
+	// 空树：抓 deleteMax 开头没有判 nil，空树上直接 panic
+	empty := NewBST[string, int](strings.Compare)
+	empty.DeleteMax()
+	if got := empty.Size(); got != 0 {
+		t.Errorf("空树 DeleteMax 后 Size() = %d, want 0", got)
+	}
+
+	// 最大值 Z 有左孩子 W：抓返回 nil 而不是 x.left（W 跟着丢掉）、没更新 n
+	bst := newDeleteTestBST()
+	bst.DeleteMax()
+	want := []string{"A", "C", "E", "M", "Q", "T", "W"}
+	if got := bstKeys(bst); !slices.Equal(got, want) {
+		t.Errorf("DeleteMax 后 = %v, want %v", got, want)
 	}
 }
 

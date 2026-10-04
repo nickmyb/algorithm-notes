@@ -61,6 +61,68 @@ func (t *BST[K, V]) put(x *node[K, V], key K, val V) *node[K, V] {
 	return x
 }
 
+// delete 在以 x 为根的子树中删除 key，返回删除后的子树根，key 不存在时子树不变。
+// 用的是 Hibbard 删除：被删结点缺一个孩子时，直接用另一个孩子顶替它；
+// 两个孩子都在时，用后继（右子树的最小结点）顶替它，后继先从右子树里摘掉，
+// 再接上原结点的左右子树。
+//
+// 以 TestBSTDelete 的树删除 M 为例，后继 Q 是 T 的左孩子。
+//
+// 先删后挂（正确）：deleteMin 从 T 往左一步遇到没有左孩子的 Q，把它摘掉，
+// T.left 变成 nil；再让 Q 接上 M 原来的左右子树 E 和 T：
+//
+//	     M                       Q
+//	   /   \                   /   \
+//	  E     T                 E     T
+//	 /     / \       ==>     /       \
+//	A     Q   Z             A         Z
+//	 \       /               \       /
+//	  C     W                 C     W
+//
+// 先挂后删（错误）：Q.left = E 之后 Q 有了左孩子，deleteMin 从 T 出发
+// 沿 T、Q、E、A 一路向左，删掉的是 A；T.left 仍指向 Q，Q.right 又指向 T，成环：
+//
+//	     M                       Q
+//	   /   \                   /   \
+//	  E     T                 E     T
+//	 /     / \       ==>     /     / \
+//	A     Q   Z             C    (Q)  Z
+//	 \       /                       /
+//	  C     W                       W
+//
+// 右图 T 的左孩子 (Q) 就是根 Q 本身，不是另一个结点：Q -> T -> Q 无限循环，
+// 而且 A 被误删、C 顶替了它的位置。
+func (t *BST[K, V]) delete(x *node[K, V], key K) *node[K, V] {
+	if x == nil {
+		return nil
+	}
+
+	switch c := t.cmp(key, x.key); {
+	case c < 0:
+		x.left = t.delete(x.left, key)
+	case c > 0:
+		x.right = t.delete(x.right, key)
+	default:
+		switch {
+		case x.left == nil:
+			return x.right
+		case x.right == nil:
+			return x.left
+		default:
+			tmp := x
+			x = x.right.min()
+			// 必须先删后挂（图见上方 delete 的注释）：deleteMin 靠「没有左孩子」认出最小结点，也就是后继 x。
+			// 先挂 x.left = tmp.left 的话，x 有了左孩子，deleteMin 会越过它，
+			// 删掉原左子树里的最小结点；返回的右子树里仍留着 x，
+			// x.right 再指向它，就成了环（x 是直接右孩子时 x.right 指回 x 自己）。
+			x.right = tmp.right.deleteMin()
+			x.left = tmp.left
+		}
+	}
+	x.n = 1 + x.left.size() + x.right.size()
+	return x
+}
+
 // floor 返回以 x 为根的子树中不大于 key 的最大键所在的结点，没有返回 nil。
 // key 小于 x.key 时，x 和它的右子树都太大，答案只能在左子树；
 // key 大于 x.key 时，x 是一个候选，但右子树里可能有更接近 key 的，
@@ -123,10 +185,11 @@ func (t *BST[K, V]) rank(x *node[K, V], key K) int {
 	}
 }
 
-// node 是树的结点。nil 表示空子树：get、put、floor、ceiling、rank 遇到 nil 的 x 直接处理，
-// size、min、max、nSelect 允许 nil 接收者，所以递归时可以直接传 x.left、调用 x.left.size()，不必先判空。
-// get、put、floor、ceiling、rank 要用 cmp，写在 BST 上，x 作参数传入；
-// size、min、max、nSelect 不用 cmp，写在 node 上。
+// node 是树的结点。nil 表示空子树：get、put、delete、floor、ceiling、rank 遇到 nil 的 x 直接处理，
+// size、min、max、deleteMin、deleteMax、nSelect 允许 nil 接收者，所以递归时可以直接传 x.left、
+// 调用 x.left.size()，不必先判空。
+// get、put、delete、floor、ceiling、rank 要用 cmp，写在 BST 上，x 作参数传入；
+// size、min、max、deleteMin、deleteMax、nSelect 不用 cmp，写在 node 上。
 type node[K, V any] struct {
 	key         K
 	value       V
@@ -168,6 +231,37 @@ func (x *node[K, V]) max() *node[K, V] {
 	return x.right.max()
 }
 
+// deleteMin 删除以 x 为根的子树中键最小的结点，返回删除后的子树根，空子树返回 nil。
+// 最小结点没有左孩子，用它的右子树顶替它即可。递归前已判断 x.left 非空，
+// 所以开头的 nil 判断只在空树上调用时起作用。
+func (x *node[K, V]) deleteMin() *node[K, V] {
+	if x == nil {
+		return nil
+	}
+
+	if x.left == nil {
+		return x.right
+	}
+	x.left = x.left.deleteMin()
+	x.n = 1 + x.left.size() + x.right.size()
+	return x
+}
+
+// deleteMax 删除以 x 为根的子树中键最大的结点，返回删除后的子树根，空子树返回 nil，
+// 和 deleteMin 左右对称：最大结点没有右孩子，用它的左子树顶替它。
+func (x *node[K, V]) deleteMax() *node[K, V] {
+	if x == nil {
+		return nil
+	}
+
+	if x.right == nil {
+		return x.left
+	}
+	x.right = x.right.deleteMax()
+	x.n = 1 + x.left.size() + x.right.size()
+	return x
+}
+
 // nSelect 返回以 x 为根的子树中排名为 k 的结点（从 0 开始数，即恰好有 k 个键比它小），
 // k 越界（小于 0 或不小于子树结点数）时返回 nil。select 是 Go 的关键字，所以叫 nSelect。
 // 设左子树有 c 个结点：k < c 时答案在左子树，排名不变；k > c 时答案在右子树，
@@ -197,6 +291,11 @@ func (t *BST[K, V]) Put(key K, val V) {
 	t.root = t.put(t.root, key, val)
 }
 
+// Delete 删除 key 及其值，key 不存在时什么都不做。
+func (t *BST[K, V]) Delete(key K) {
+	t.root = t.delete(t.root, key)
+}
+
 // Size 返回树中键值对的数量。
 func (t *BST[K, V]) Size() int {
 	return t.root.size()
@@ -220,6 +319,16 @@ func (t *BST[K, V]) Max() (K, bool) {
 		return zero, false
 	}
 	return x.key, true
+}
+
+// DeleteMin 删除最小的键及其值，树为空时什么都不做。
+func (t *BST[K, V]) DeleteMin() {
+	t.root = t.root.deleteMin()
+}
+
+// DeleteMax 删除最大的键及其值，树为空时什么都不做。
+func (t *BST[K, V]) DeleteMax() {
+	t.root = t.root.deleteMax()
 }
 
 // Floor 返回不大于 key 的最大键，key 在树中时就是它自己；
