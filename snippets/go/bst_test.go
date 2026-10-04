@@ -189,3 +189,61 @@ func TestBSTFloorCeiling(t *testing.T) {
 		})
 	}
 }
+
+func TestBSTSelectRank(t *testing.T) {
+	// 和 TestBSTMinMax 同一棵树，排好序是 A C E M T W Z，排名依次是 0 到 6：
+	//
+	//	        M
+	//	      /   \
+	//	     E     T
+	//	    /       \
+	//	   A         Z
+	//	    \       /
+	//	     C     W
+	bst := NewBST[string, int](strings.Compare)
+	for _, k := range []string{"M", "E", "T", "A", "Z", "C", "W"} {
+		bst.Put(k, 0)
+	}
+
+	selectTests := []struct {
+		name   string
+		k      int
+		want   string
+		wantOK bool
+	}{
+		// 在左子树里要先向左再向右（M → E → A → C）：抓两个分支写反
+		{"左子树", 1, "C", true},
+		// 连续向右两次再向左（M → T → Z → W）：抓去右子树时排名减 c 而不是 c+1，
+		// 每向右一次多算一位，最后走进空子树返回 false
+		{"右子树", 5, "W", true},
+		// 越界：抓没有判 nil，走到空子树后 x.left.size() 直接 panic
+		{"越界", 7, "", false},
+	}
+	for _, tt := range selectTests {
+		t.Run("Select "+tt.name, func(t *testing.T) {
+			if got, ok := bst.Select(tt.k); got != tt.want || ok != tt.wantOK {
+				t.Errorf("Select(%d) = %q, %v, want %q, %v", tt.k, got, ok, tt.want, tt.wantOK)
+			}
+		})
+	}
+
+	rankTests := []struct {
+		name string
+		key  string
+		want int
+	}{
+		// 根：抓相等时多加了 x 自己（返回 left.size()+1，得到 4）
+		{"根", "M", 3},
+		// 向右两次：抓向右时漏了 +1 或漏了左子树的结点数
+		{"右子树", "W", 5},
+		// 不在树中：抓没有判 nil 直接 panic，或者以为 key 一定在树里
+		{"不在树中", "D", 2},
+	}
+	for _, tt := range rankTests {
+		t.Run("Rank "+tt.name, func(t *testing.T) {
+			if got := bst.Rank(tt.key); got != tt.want {
+				t.Errorf("Rank(%q) = %d, want %d", tt.key, got, tt.want)
+			}
+		})
+	}
+}

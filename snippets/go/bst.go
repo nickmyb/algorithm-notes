@@ -104,9 +104,29 @@ func (t *BST[K, V]) ceiling(x *node[K, V], key K) *node[K, V] {
 	}
 }
 
-// node 是树的结点。nil 表示空子树：get、put、floor、ceiling 遇到 nil 的 x 直接处理，
-// size、min、max 允许 nil 接收者，所以递归时可以直接传 x.left、调用 x.left.size()，不必先判空。
-// get、put、floor、ceiling 要用 cmp，写在 BST 上，x 作参数传入；size、min、max 不用 cmp，写在 node 上。
+// rank 返回以 x 为根的子树中小于 key 的键的个数，key 不必在树中。
+// key 小于 x.key 时，x 和右子树都不算，只数左子树；
+// key 大于 x.key 时，左子树和 x 都小于 key，再加上右子树里比 key 小的；
+// 相等时正好是左子树的结点数。
+func (t *BST[K, V]) rank(x *node[K, V], key K) int {
+	if x == nil {
+		return 0
+	}
+
+	switch c := t.cmp(key, x.key); {
+	case c < 0:
+		return t.rank(x.left, key)
+	case c > 0:
+		return x.left.size() + 1 + t.rank(x.right, key)
+	default:
+		return x.left.size()
+	}
+}
+
+// node 是树的结点。nil 表示空子树：get、put、floor、ceiling、rank 遇到 nil 的 x 直接处理，
+// size、min、max、nSelect 允许 nil 接收者，所以递归时可以直接传 x.left、调用 x.left.size()，不必先判空。
+// get、put、floor、ceiling、rank 要用 cmp，写在 BST 上，x 作参数传入；
+// size、min、max、nSelect 不用 cmp，写在 node 上。
 type node[K, V any] struct {
 	key         K
 	value       V
@@ -146,6 +166,25 @@ func (x *node[K, V]) max() *node[K, V] {
 		return x
 	}
 	return x.right.max()
+}
+
+// nSelect 返回以 x 为根的子树中排名为 k 的结点（从 0 开始数，即恰好有 k 个键比它小），
+// k 越界（小于 0 或不小于子树结点数）时返回 nil。select 是 Go 的关键字，所以叫 nSelect。
+// 设左子树有 c 个结点：k < c 时答案在左子树，排名不变；k > c 时答案在右子树，
+// 左子树和 x 共 c+1 个键排在前面，在右子树里的排名是 k-c-1；k == c 时就是 x。
+func (x *node[K, V]) nSelect(k int) *node[K, V] {
+	if x == nil {
+		return nil
+	}
+
+	switch c := x.left.size(); {
+	case c < k:
+		return x.right.nSelect(k - c - 1)
+	case c > k:
+		return x.left.nSelect(k)
+	default:
+		return x
+	}
 }
 
 // Get 返回 key 对应的值；ok 为 false 表示 key 不存在，此时值为 V 的零值。
@@ -203,4 +242,21 @@ func (t *BST[K, V]) Ceiling(key K) (K, bool) {
 		return zero, false
 	}
 	return x.key, true
+}
+
+// Select 返回排名为 k 的键，即从小到大第 k 个（从 0 开始数），Select(0) 就是 Min；
+// ok 为 false 表示 k 越界（小于 0 或不小于 Size），此时键为 K 的零值。
+func (t *BST[K, V]) Select(k int) (K, bool) {
+	x := t.root.nSelect(k)
+	if x == nil {
+		var zero K
+		return zero, false
+	}
+	return x.key, true
+}
+
+// Rank 返回树中小于 key 的键的个数，key 不必在树中。
+// key 在树中时，Select(Rank(key)) 就是 key 自己。
+func (t *BST[K, V]) Rank(key K) int {
+	return t.rank(t.root, key)
 }
