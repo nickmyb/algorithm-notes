@@ -341,3 +341,51 @@ func TestBSTSelectRank(t *testing.T) {
 		})
 	}
 }
+
+func TestBSTScan(t *testing.T) {
+	// 和 newDeleteTestBST 同形状，但值取插入序号，这样能检查 yield 出的值配对正确。
+	// 排好序是 A C E M Q T W Z：
+	//
+	//	     M
+	//	   /   \
+	//	  E     T
+	//	 /     / \
+	//	A     Q   Z
+	//	 \       /
+	//	  C     W
+	bst := NewBST[string, int](strings.Compare)
+	for i, k := range []string{"M", "E", "T", "A", "Z", "C", "W", "Q"} {
+		bst.Put(k, i)
+	}
+	type kv struct {
+		k string
+		v int
+	}
+	// 端点都在树中、区间跨过根的两侧：抓端点写成开区间（得到 E M）、
+	// 先 yield 再走左子树这类非中序的顺序（M 排到前面）、值和键没配对，
+	// 以及剪枝条件写反或用错端点（丢掉区间里的部分键）
+	t.Run("端点在树中", func(t *testing.T) {
+		var got []kv
+		for k, v := range bst.Scan("C", "Q") {
+			got = append(got, kv{k, v})
+		}
+		if want := []kv{{"C", 5}, {"E", 1}, {"M", 0}, {"Q", 7}}; !slices.Equal(got, want) {
+			t.Errorf("Scan(C, Q) = %v, want %v", got, want)
+		}
+	})
+
+	// break：抓 scan 没有把 yield 的 false 往上传，break 之后继续调用 yield，
+	// 运行时 panic（range function continued iteration ...）
+	t.Run("break", func(t *testing.T) {
+		var got []string
+		for k := range bst.Scan("A", "Z") {
+			got = append(got, k)
+			if k == "E" {
+				break
+			}
+		}
+		if want := []string{"A", "C", "E"}; !slices.Equal(got, want) {
+			t.Errorf("在 E 处 break = %v, want %v", got, want)
+		}
+	})
+}

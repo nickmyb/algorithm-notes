@@ -1,5 +1,7 @@
 package snippets
 
+import "iter"
+
 // BST 是 algs4 3.2 节的二叉查找树符号表，键类型 K、值类型 V 由调用方指定。
 // 键的顺序由 cmp 决定，必须用 NewBST 创建，零值 BST 的 cmp 为 nil，不能直接使用。
 //
@@ -185,10 +187,36 @@ func (t *BST[K, V]) rank(x *node[K, V], key K) int {
 	}
 }
 
-// node 是树的结点。nil 表示空子树：get、put、delete、floor、ceiling、rank 遇到 nil 的 x 直接处理，
+// scan 按键从小到大，对以 x 为根的子树中落在 [lo, hi] 的键值对调用 yield，
+// 返回 false 表示 yield 返回过 false（调用方 break 了），必须立刻停止。
+// 中序遍历加剪枝：lo 不小于 x.key 时左子树都在区间外，不进去；
+// hi 不大于 x.key 时右子树同理。
+//
+// yield 的 false 要一层层往上传，不能像 size 那样写成没有返回值的递归：
+// 调用方 break 之后 yield 再被调用，运行时直接 panic
+// （range function continued iteration after function for loop body returned false）。
+func (t *BST[K, V]) scan(x *node[K, V], lo, hi K, yield func(K, V) bool) bool {
+	if x == nil {
+		return true
+	}
+
+	clo, chi := t.cmp(lo, x.key), t.cmp(hi, x.key)
+	if clo < 0 && !t.scan(x.left, lo, hi, yield) {
+		return false
+	}
+	if clo <= 0 && chi >= 0 && !yield(x.key, x.value) {
+		return false
+	}
+	if chi > 0 && !t.scan(x.right, lo, hi, yield) {
+		return false
+	}
+	return true
+}
+
+// node 是树的结点。nil 表示空子树：get、put、delete、floor、ceiling、rank、scan 遇到 nil 的 x 直接处理，
 // size、min、max、deleteMin、deleteMax、nSelect 允许 nil 接收者，所以递归时可以直接传 x.left、
 // 调用 x.left.size()，不必先判空。
-// get、put、delete、floor、ceiling、rank 要用 cmp，写在 BST 上，x 作参数传入；
+// get、put、delete、floor、ceiling、rank、scan 要用 cmp，写在 BST 上，x 作参数传入；
 // size、min、max、deleteMin、deleteMax、nSelect 不用 cmp，写在 node 上。
 type node[K, V any] struct {
 	key         K
@@ -368,4 +396,17 @@ func (t *BST[K, V]) Select(k int) (K, bool) {
 // key 在树中时，Select(Rank(key)) 就是 key 自己。
 func (t *BST[K, V]) Rank(key K) int {
 	return t.rank(t.root, key)
+}
+
+// TODO: 学习 iter.Seq2、yield 和 range-over-func 的用法后，回来重读 Scan 和 scan。
+
+// Scan 返回按键从小到大遍历 lo <= key <= hi 的键值对的迭代器，对应 algs4 的 keys(lo, hi)，
+// 用 for k, v := range bst.Scan(lo, hi) 遍历，lo、hi 不必在树中，lo > hi 时什么都不遍历。
+// 迭代器按需取值，break 之后不再往下走；需要切片时用 slices.Collect 之类收集。
+// 命名照 go doc iter 的 Naming Conventions：带参数的区间迭代器叫 Scan。
+// 要求 Go 1.23 及以上（iter 包和 range-over-func）。
+func (t *BST[K, V]) Scan(lo, hi K) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		t.scan(t.root, lo, hi, yield)
+	}
 }
