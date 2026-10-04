@@ -95,3 +95,97 @@ func TestBSTCmpSign(t *testing.T) {
 		t.Errorf("Size() = %d, want 3", got)
 	}
 }
+
+func TestBSTMinMax(t *testing.T) {
+	bst := NewBST[string, int](strings.Compare)
+	// 空树：抓 min/max 没处理 nil 接收者，root 为 nil 时直接 panic；
+	// 也抓 Min/Max 漏了 ok，空树必须返回 false
+	if got, ok := bst.Min(); got != "" || ok {
+		t.Errorf("空树 Min() = %q, %v, want \"\", false", got, ok)
+	}
+	if got, ok := bst.Max(); got != "" || ok {
+		t.Errorf("空树 Max() = %q, %v, want \"\", false", got, ok)
+	}
+
+	// 按这个顺序插入后树的形状，最小、最大都在第三层，而且各有一个朝内的孩子：
+	//
+	//	        M
+	//	      /   \
+	//	     E     T
+	//	    /       \
+	//	   A         Z
+	//	    \       /
+	//	     C     W
+	for _, k := range []string{"M", "E", "T", "A", "Z", "C", "W"} {
+		bst.Put(k, 0)
+	}
+	tests := []struct {
+		name string
+		f    func() (string, bool)
+		want string
+	}{
+		// 抓递归方向写错（判断 x.left 却递归 x.right，M 转到 T 后 T 没有左孩子，得到 T）、
+		// 少递归一层（直接返回 x.left 得到 E），以及把「没有左孩子」写成「是叶子」
+		// （A 有右孩子 C，那种写法会越过 A 走到 nil）
+		{"Min", bst.Min, "A"},
+		// 同上，左右对称：方向写反得到 E，少一层得到 T，判叶子会越过 Z（它有左孩子 W）走到 nil
+		{"Max", bst.Max, "Z"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, ok := tt.f(); got != tt.want || !ok {
+				t.Errorf("%s() = %q, %v, want %q, true", tt.name, got, ok, tt.want)
+			}
+		})
+	}
+}
+
+func TestBSTFloorCeiling(t *testing.T) {
+	// 和 TestBSTMinMax 同一棵树，排好序是 A C E M T W Z：
+	//
+	//	        M
+	//	      /   \
+	//	     E     T
+	//	    /       \
+	//	   A         Z
+	//	    \       /
+	//	     C     W
+	bst := NewBST[string, int](strings.Compare)
+	for _, k := range []string{"M", "E", "T", "A", "Z", "C", "W"} {
+		bst.Put(k, 0)
+	}
+	tests := []struct {
+		name   string
+		f      func(string) (string, bool)
+		key    string
+		want   string
+		wantOK bool
+	}{
+		// key 在树中：抓相等分支写错，比如把相等并进 c < 0 去左子树找，得到 C
+		{"Floor 命中", bst.Floor, "E", "E", true},
+		// 答案在右子树里：抓 key > x.key 时直接返回 x、不去右子树找，在根停下得到 M。
+		// 特意选根的右半边：其余 Floor 用例都在 M 的左子树里，只靠它们的话，
+		// Floor 从错误的子树出发（比如传了 t.root.left）也照样全过
+		{"Floor 在右子树", bst.Floor, "X", "W", true},
+		// 右子树非空但全都比 key 大，答案是 x 自己：抓漏了「右子树找不到就返回 x」，得到 nil
+		{"Floor 回退到 x", bst.Floor, "B", "A", true},
+		// 比所有键都小（ASCII 里 '0' < 'A'）：抓没有 floor 时仍返回某个结点
+		{"Floor 不存在", bst.Floor, "0", "", false},
+
+		// 以下和 Floor 左右对称
+		{"Ceiling 命中", bst.Ceiling, "T", "T", true},
+		// 在根停下会得到 M；同样特意选根的另一半
+		{"Ceiling 在左子树", bst.Ceiling, "B", "C", true},
+		// Z 的左子树 W 比 Y 小
+		{"Ceiling 回退到 x", bst.Ceiling, "Y", "Z", true},
+		// "ZZ" 比 "Z" 大
+		{"Ceiling 不存在", bst.Ceiling, "ZZ", "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, ok := tt.f(tt.key); got != tt.want || ok != tt.wantOK {
+				t.Errorf("(%q) = %q, %v, want %q, %v", tt.key, got, ok, tt.want, tt.wantOK)
+			}
+		})
+	}
+}
