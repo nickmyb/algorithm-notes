@@ -462,24 +462,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**16**|**5**|**0**|**21**|
-|Total|968|2122|979|4069|
+|Accepted|**17**|**5**|**0**|**22**|
+|Total|969|2124|980|4073|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.7%|0.2%|0.0%|0.5%|
+|Completion Rate|1.8%|0.2%|0.0%|0.5%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|21|100.0%|
-|Python|1|4.8%|
-|Java|1|4.8%|
-|**合计题数**|**21**|—|
+|Go|22|100.0%|
+|Python|1|4.5%|
+|Java|1|4.5%|
+|**合计题数**|**22**|—|
 
 
 ## 题目列表
 
-以下已经收录了 21 道题的题解，还有 0 道题在尝试中
+以下已经收录了 22 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -495,10 +495,11 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0125|Valid Palindrome|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0125.Valid-Palindrome/Solution.go)|49.1%|Easy|
 |0141|Linked List Cycle|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0141.Linked-List-Cycle/Solution.go)|55.2%|Easy|
 |0155|Min Stack|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0155.Min-Stack/Solution.go)|62.9%|Medium|
-|0167|Two Sum II - Input Array Is Sorted|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0167.Two-Sum-II-Input-Array-Is-Sorted/Solution.go)|61.0%|Medium|
+|0167|Two Sum II - Input Array Is Sorted|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0167.Two-Sum-II-Input-Array-Is-Sorted/Solution.go)|61.1%|Medium|
 |0206|Reverse Linked List|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0206.Reverse-Linked-List/Solution.go)|76.5%|Easy|
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
-|0232|Implement Queue using Stacks|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0232.Implement-Queue-using-Stacks/Solution.go)|68.0%|Easy|
+|0226|Invert Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0226.Invert-Binary-Tree/Solution.go)|82.5%|Easy|
+|0232|Implement Queue using Stacks|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0232.Implement-Queue-using-Stacks/Solution.go)|67.9%|Easy|
 |0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
