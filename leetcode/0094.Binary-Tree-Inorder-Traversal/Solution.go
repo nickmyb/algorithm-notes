@@ -9,17 +9,17 @@ type TreeNode = structures.TreeNode
 // ===== 以下是题解本体，与提交到 LeetCode 的代码一字不差 =====
 
 func inorderTraversal(root *TreeNode) []int {
-	return inorder(root, []int{})
+	ret := []int{}
+	inorder(root, &ret)
+	return ret
 }
 
-func inorder(root *TreeNode, input []int) []int {
+func inorder(root *TreeNode, ret *[]int) {
 	if root == nil {
-		return input
+		return
 	}
 
-	output := inorder(root.Left, input)
-	output = append(output, root.Val)
-	output = inorder(root.Right, output)
-
-	return output
+	inorder(root.Left, ret)
+	*ret = append(*ret, root.Val)
+	inorder(root.Right, ret)
 }
