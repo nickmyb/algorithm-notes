@@ -90,6 +90,10 @@ Given the `root` of a binary tree, return *the inorder traversal of its nodes' v
 
 简单递归即可。
 
+### 同类题
+
+- [98. Validate Binary Search Tree](../0098.Validate-Binary-Search-Tree/)
+
 ## 复杂度
 
 - 时间复杂度：O(n)，n 为节点数。每个节点恰好访问一次，每次的追加操作在三门语言里都是摊还 O(1)（底层几何增长，n 次追加的总拷贝量是 O(n)，不是 O(n²)）

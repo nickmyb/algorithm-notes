@@ -84,6 +84,8 @@ Explanation: The root node's value is 5 but its right child's value is 4.
 
 ### 同类题
 
+- 前置：[94. Binary Tree Inorder Traversal](../0094.Binary-Tree-Inorder-Traversal/)：中序遍历后检查是否有序
+
 ## 复杂度
 
 - 时间复杂度：isValidBST = O(n); isValidBSTInorder = O(n);
