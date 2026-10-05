@@ -398,13 +398,14 @@ func (t *BST[K, V]) Rank(key K) int {
 	return t.rank(t.root, key)
 }
 
-// TODO: 学习 iter.Seq2、yield 和 range-over-func 的用法后，回来重读 Scan 和 scan。
-
 // Scan 返回按键从小到大遍历 lo <= key <= hi 的键值对的迭代器，对应 algs4 的 keys(lo, hi)，
 // 用 for k, v := range bst.Scan(lo, hi) 遍历，lo、hi 不必在树中，lo > hi 时什么都不遍历。
 // 迭代器按需取值，break 之后不再往下走；需要切片时用 slices.Collect 之类收集。
 // 命名照 go doc iter 的 Naming Conventions：带参数的区间迭代器叫 Scan。
 // 要求 Go 1.23 及以上（iter 包和 range-over-func）。
+//
+// iter.Seq2、yield 和 range-over-func 的用法参照 Go 官方博客 Range Over Function Types：
+// https://go.dev/blog/range-functions
 func (t *BST[K, V]) Scan(lo, hi K) iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		t.scan(t.root, lo, hi, yield)
