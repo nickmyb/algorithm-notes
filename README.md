@@ -462,7 +462,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**17**|**6**|**0**|**23**|
+|Accepted|**17**|**7**|**0**|**24**|
 |Total|969|2124|980|4073|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
 |Completion Rate|1.8%|0.3%|0.0%|0.6%|
@@ -471,15 +471,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|23|100.0%|
-|Python|1|4.3%|
-|Java|1|4.3%|
-|**合计题数**|**23**|—|
+|Go|24|100.0%|
+|Python|1|4.2%|
+|Java|1|4.2%|
+|**合计题数**|**24**|—|
 
 
 ## 题目列表
 
-以下已经收录了 23 道题的题解，还有 0 道题在尝试中
+以下已经收录了 24 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -491,6 +491,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|49.9%|Easy|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
+|0098|Validate Binary Search Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0098.Validate-Binary-Search-Tree/Solution.go)|41.5%|Medium|
 |0102|Binary Tree Level Order Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0102.Binary-Tree-Level-Order-Traversal/Solution.go)|70.8%|Medium|
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
 |0125|Valid Palindrome|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0125.Valid-Palindrome/Solution.go)|49.1%|Easy|
