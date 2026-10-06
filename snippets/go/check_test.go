@@ -52,7 +52,9 @@ func TestSolutionsMatchSnippets(t *testing.T) {
 	}
 }
 
-// usageReport 按 snippet 文件 → 函数 → 题目分组，函数、类型、方法按在文件里的先后排列。
+// usageReport 按 snippet 文件 → 函数 / 类型 → 题目分组，按在文件里的先后排列。
+// 方法并到同一文件里它所属的类型那一行：引用的题目和类型相同的只计数，
+// 不同的（只复制了一部分的题）在类型下面单独列出。
 func usageReport(canon map[string]funcDef, uses map[string][]string) string {
 	names := make([]string, 0, len(canon))
 	for name := range canon {
@@ -65,19 +67,53 @@ func usageReport(canon map[string]funcDef, uses map[string][]string) string {
 		}
 		return a.line < b.line
 	})
+	// 类型 → 同一文件里它的方法，保持先后顺序
+	methods := map[string][]string{}
+	for _, name := range names {
+		typ, _, ok := strings.Cut(name, ".")
+		if def, has := canon["type "+typ]; ok && has && def.file == canon[name].file {
+			methods["type "+typ] = append(methods["type "+typ], name)
+		}
+	}
+	folded := map[string]bool{}
+	for _, ms := range methods {
+		for _, m := range ms {
+			folded[m] = true
+		}
+	}
+	problems := func(name string) string {
+		if len(uses[name]) == 0 {
+			return "（还没有题目引用）"
+		}
+		return strings.Join(uses[name], ", ")
+	}
+
 	var b strings.Builder
 	file := ""
 	for _, name := range names {
+		if folded[name] {
+			continue
+		}
 		if def := canon[name]; def.file != file {
 			file = def.file
 			fmt.Fprintf(&b, "snippets/go/%s\n", file)
 		}
-		problems := uses[name]
-		if len(problems) == 0 {
-			fmt.Fprintf(&b, "  %s: （还没有题目引用）\n", name)
-			continue
+		var same, differ []string
+		for _, m := range methods[name] {
+			if problems(m) == problems(name) {
+				same = append(same, m)
+			} else {
+				differ = append(differ, m)
+			}
 		}
-		fmt.Fprintf(&b, "  %s: %s\n", name, strings.Join(problems, ", "))
+		label := name
+		if len(same) > 0 {
+			label += fmt.Sprintf(" 及 %d 个方法", len(same))
+		}
+		fmt.Fprintf(&b, "  %s: %s\n", label, problems(name))
+		for _, m := range differ {
+			fmt.Fprintf(&b, "    %s: %s\n", m, problems(m))
+		}
 	}
 	return b.String()
 }
@@ -558,5 +594,31 @@ func TestCheckerSkipsAliasesAndPlatformTypes(t *testing.T) {
 	canon, _ = loadSnippets(filepath.Join(root, "snippets"), "")
 	if _, errs = checkSolutions(canon, []string{filepath.Join(root, "leetcode")}); len(errs) != 0 {
 		t.Fatalf("alias reported: %v", errs)
+	}
+}
+
+// 方法并到类型那一行；只复制了一部分的题让方法和类型的引用不同，单独列在类型下面
+func TestUsageReportFoldsMethodsIntoType(t *testing.T) {
+	pq := "package snippets\n\ntype PQ struct{}\n\nfunc (*PQ) push() {}\n\nfunc (*PQ) pop() {}\n\nfunc (*PQ) grow() {}\n"
+	full := strings.Replace(pq, "package snippets", "package leetcode", 1)
+	root := writeFiles(t, map[string]string{
+		"snippets/pq.go":              pq,
+		"snippets/unused.go":          "package snippets\n\ntype S struct{}\n\nfunc (S) f() {}\n",
+		"leetcode/0215.A/Solution.go": full,
+		// 0703 没复制 grow
+		"leetcode/0703.B/Solution.go": strings.Replace(full, "func (*PQ) grow() {}\n", "", 1),
+	})
+	canon, _ := loadSnippets(filepath.Join(root, "snippets"), "")
+	uses, errs := checkSolutions(canon, []string{filepath.Join(root, "leetcode")})
+	if len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	want := "snippets/go/pq.go\n" +
+		"  type PQ 及 2 个方法: 0215.A, 0703.B\n" +
+		"    PQ.grow: 0215.A\n" +
+		"snippets/go/unused.go\n" +
+		"  type S 及 1 个方法: （还没有题目引用）\n"
+	if got := usageReport(canon, uses); got != want {
+		t.Fatalf("got:\n%s\nwant:\n%s", got, want)
 	}
 }
