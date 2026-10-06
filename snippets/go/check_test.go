@@ -259,6 +259,9 @@ func checkSolutions(canon map[string]funcDef, roots []string) (uses map[string][
 //	// endregion @snippets/go/heap.go
 var markerRe = regexp.MustCompile(`^// (region|endregion) @snippets/go/(\S+\.go)$`)
 
+// looksLikeMarkerRe 匹配想写标记但格式可能不对的注释，如 //region、// region snippets/go/heap.go
+var looksLikeMarkerRe = regexp.MustCompile(`^//\s*(end)?region\b`)
+
 type region struct {
 	file       string // snippet 文件名
 	start, end int    // 开始、结束标记所在的行
@@ -282,8 +285,9 @@ func checkMarkers(fset *token.FileSet, file *ast.File, canon map[string]funcDef,
 			text := strings.TrimSpace(c.Text)
 			m := markerRe.FindStringSubmatch(text)
 			if m == nil {
-				// 写错格式的标记会被当成普通注释，里面的副本再报「不在标记里」就看不出原因
-				if strings.Contains(text, "@snippets/") {
+				// 写错格式的标记会被当成普通注释，里面的副本再报「不在标记里」就看不出原因。
+				// 只看以 region / endregion 开头的注释：说明文字里提到 @snippets/ 不算标记
+				if looksLikeMarkerRe.MatchString(text) && strings.Contains(text, "@snippets/") {
 					report(c.Pos(), "标记格式不对，应为 // region @snippets/go/<文件名>.go 和 "+
 						"// endregion @snippets/go/<文件名>.go：%s", text)
 				}
@@ -787,6 +791,8 @@ func TestCheckerMarkers(t *testing.T) {
 		{"start used as end", "// region @snippets/go/abs.go\n\n" + abs + "\n// region @snippets/go/abs.go\n",
 			"@snippets/go/abs.go 的标记还没结束，就开始了 @snippets/go/abs.go"},
 		{"empty region", marked("pq.go", "") + "\n" + marked("abs.go", abs), "@snippets/go/pq.go 的标记之间没有它的定义"},
+		// 骨架注释里讲标记写法会提到 @snippets/，ctl new 会把它复制进每道新题，不能报格式不对
+		{"prose mentioning markers", "// 复制来的代码前后加 // region @snippets/go/<文件名>.go 和 endregion\n" + solve, ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
