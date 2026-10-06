@@ -236,3 +236,77 @@ func TestMaxPQReleasesRemoved(t *testing.T) {
 		}
 	}
 }
+
+func TestMaxPQCap(t *testing.T) {
+	// 对照 algs4 的 MaxPQ(int max)：max 是元素个数，pq[0] 还占一格，所以容量要 max+1。
+	// 写成 make([]T, 1, max) 的话，第 max 次 Insert 就会扩容，底层数组换掉。
+	for _, max := range []int{0, 1, 5} {
+		pq := NewMaxPQCap(cmp.Compare[int], max)
+		checkHeap(t, pq)
+		first, c := &pq.pq[0], cap(pq.pq)
+		for i := range max {
+			pq.Insert(i)
+			checkHeap(t, pq)
+		}
+		if &pq.pq[0] != first {
+			t.Fatalf("max=%d: reallocated within %d inserts, initial cap = %d, want >= %d", max, max, c, max+1)
+		}
+		// max 只是预留容量，不是上限：超过之后照常 append 扩容
+		insertAll(t, pq, []int{100, 200})
+		if got, _ := pq.Max(); got != 200 {
+			t.Fatalf("max=%d: Max after exceeding = %d, want 200", max, got)
+		}
+	}
+}
+
+func TestMaxPQFrom(t *testing.T) {
+	// 自底向上建堆：从 n/2 往前逐个 sink。n 取 0..33 跨过各层边界，
+	// 抓起点写成 n/2-1（最后一个有孩子的节点没处理）、循环到 k > 1 漏掉根。
+	for n := 0; n <= 33; n++ {
+		a := make([]int, n)
+		seed := 7
+		for i := range a {
+			seed = (seed*1103515245 + 12345) % (1 << 31)
+			a[i] = seed % 50
+		}
+		orig := slices.Clone(a)
+
+		pq := NewMaxPQFrom(cmp.Compare[int], a)
+		checkHeap(t, pq)
+		// 直接拿 a 当底层数组的话，sink 会把调用方的切片打乱
+		if !slices.Equal(a, orig) {
+			t.Fatalf("n=%d: a modified to %v, want %v", n, a, orig)
+		}
+		want := slices.Clone(a)
+		slices.Sort(want)
+		slices.Reverse(want)
+		if got := drain(t, pq); len(want) > 0 && !slices.Equal(got, want) {
+			t.Fatalf("n=%d: drain = %v, want %v", n, got, want)
+		}
+		// 建出来的堆还能继续用
+		insertAll(t, pq, []int{3, 8})
+		if got, _ := pq.Max(); got != 8 {
+			t.Fatalf("n=%d: Max after Insert = %d, want 8", n, got)
+		}
+	}
+}
+
+func TestMaxPQFromLinear(t *testing.T) {
+	// From 存在的理由是 O(n) 建堆。逐个 Insert 结果完全一样、只是 O(n log n)，
+	// 上面的用例看不出区别，只能数比较次数。
+	// 自底向上建堆的比较次数不超过 2n（algs4 命题 R）；升序输入逐个 Insert 时
+	// 每个元素都要 swim 到根，n = 1023 时约 8000 次。
+	n := 1023
+	a := make([]int, n)
+	for i := range a {
+		a[i] = i
+	}
+	count := 0
+	NewMaxPQFrom(func(x, y int) int {
+		count++
+		return cmp.Compare(x, y)
+	}, a)
+	if count > 2*n {
+		t.Fatalf("NewMaxPQFrom used %d comparisons for n=%d, want <= %d", count, n, 2*n)
+	}
+}

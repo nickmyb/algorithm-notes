@@ -35,6 +35,39 @@ func NewMaxPQ[T any](cmp func(T, T) int) *MaxPQ[T] {
 	}
 }
 
+// NewMaxPQCap 返回一个空堆，预留 maxN 个元素的容量（pq[0] 另占一格，所以是 maxN+1）。
+// maxN 只是容量提示，不是上限：超过之后 append 照常扩容。
+func NewMaxPQCap[T any](cmp func(T, T) int, maxN int) *MaxPQ[T] {
+	return &MaxPQ[T]{
+		cmp: cmp,
+		pq:  make([]T, 1, maxN+1),
+		n:   0,
+	}
+}
+
+// NewMaxPQFrom 用 a 中的元素建堆，不修改 a。O(n)。
+// 对照 algs4 MaxPQ.java 的 MaxPQ(Key[] keys)，书中 2.4 节堆排序的第一阶段「堆的构造」：
+// 先把 a 原样复制到 pq[1..n]，再从最后一个有孩子的节点 n/2 往前逐个 sink。
+// 编号大于 n/2 的节点都是叶子，各自已经是合法的堆；sink(k) 时 k 的两棵子树已经是堆，
+// 下沉完以 k 为根的子树也成了堆，到 k = 1 时整棵树就是堆。
+// 逐个 Insert 结果一样，但要 O(n log n)；这里大部分节点在底层、下沉距离很短，
+// 比较次数不超过 2n（algs4 命题 R）。
+//
+// 必须复制而不是直接拿 a 当底层数组：sink 会打乱调用方的切片，之后 append 还可能和它共用内存。
+func NewMaxPQFrom[T any](cmp func(T, T) int, a []T) *MaxPQ[T] {
+	pq := &MaxPQ[T]{
+		cmp: cmp,
+		pq:  make([]T, len(a)+1),
+		n:   len(a),
+	}
+	copy(pq.pq[1:], a)
+	// 2k是k的左节点, 2k <= pq.n
+	for k := pq.n / 2; k >= 1; k-- {
+		pq.sink(k)
+	}
+	return pq
+}
+
 // Insert 把 x 放到最后一个位置，再上浮到满足堆序的位置。O(log n)。
 func (pq *MaxPQ[T]) Insert(x T) {
 	pq.n += 1
