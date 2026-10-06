@@ -190,3 +190,7 @@ func topKFrequent(nums []int, k int) []int {
 
 	return frequents
 }
+
+// TODO: topKFrequentBucket 按频率分桶，O(n)，满足 Follow up（algs4 5.1 Key-indexed counting，
+// CS61B Lecture 35 Counting Sort）。频率最多是 n，buckets[freq] 放出现 freq 次的数，
+// 从 buckets[n] 往下收集，凑够 k 个就停；题目保证答案唯一，整桶收集正好停在 k 个。
