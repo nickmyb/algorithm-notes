@@ -223,7 +223,8 @@ Go 的目录叫 `go` 但包名是 `structures`（`go` 是关键字，不能当�
 | 规则 | 说明 |
 |:---|:---|
 | 什么是 snippet | `snippets/go/` 非测试文件里的顶层函数、类型和方法，按名字识别：函数 `abs`、类型 `type MaxPQ`、方法 `MaxPQ.sink`（接收者去掉 `*` 和类型参数） |
-| 什么算引用 | `leetcode/` 下的题解定义了同名的函数、类型或方法。不需要标记，题解本体一行不加 |
+| 什么算引用 | `leetcode/` 下的题解定义了同名的函数、类型或方法 |
+| 标记 | 副本放在 `// region @snippets/go/heap.go` 和 `// endregion @snippets/go/heap.go` 之间。这是 JetBrains 的折叠注释，GoLand 里能把副本折叠成一行，题解不会被复制来的代码撑长；`//` 后面要有空格，检查只认这一种写法。标记之间只能是那个 snippet 文件里的定义，snippet 的副本也不能漏在标记外面；同一个文件可以分几段标记 |
 | 比较范围 | 从 `func` / `type` 关键字到结尾逐字比较，结构体字段上的注释也算；**文档注释不比较**，各题可以写自己的说明 |
 | 部分复制 | 数据结构只用到一部分时只复制那一部分（连同它内部调用的方法），题解里没定义的名字不检查 |
 | 不算 snippet | 和 `structures/go` 同名的类型（如 `traversal.go` 的 `TreeNode`）是平台类型的替身，只为让 snippet 能编译；题解里的类型别名（`type TreeNode = structures.TreeNode`）是接线。两者都不检查 |
@@ -538,11 +539,13 @@ README 里 `## 题目` 一节本来就是英文版（中文折叠在 `<details>`
 
 测试用**同一组用例跑所有实现**（Go 用 `t.Run` 子测试，Python 用 `parametrize`），不要每种解法单写一份测试。
 
-### 什么时候另开文件
+### 辅助数据结构不另开文件
 
-只有需要独立辅助数据结构时（如第 307 题的线段树），文件名按**结构**命名：`SegmentTree.go`，不要叫 `Solution2.go`。
+题解本体只有一个文件（约束 8），辅助数据结构也写在 `Solution.go` 里，整段复制就能提交。多道题共用的结构（如堆）在 `snippets/go/` 维护权威版本，题解里放一份带标记的副本，见「辅助函数片段」。
 
-`util.Languages` 的 `Entry` 字段就是为此存在的：一个目录里同语言有多个文件时，README 优先链到 `Solution.go` 而不是字典序第一的 `SegmentTree.go`。
+早先这里约定过「需要独立辅助数据结构时另开文件，按结构命名（如第 307 题的 `SegmentTree.go`）」。那是初始化时照上游写的假设例子，本仓库没有一道题这样做过；上游 halfrost 的第 307 题其实是 import 共享的 `template.SegmentTree` 包，正是约束 8 不允许的写法。另开文件意味着提交时要手工拼接，2026-10 有了 snippet 标记后废止。
+
+`util.Languages` 的 `Entry` 字段保留：目录里同语言有多个非测试文件时，README 仍优先链到 `Solution.go`，不会链到字典序第一的那个。
 
 ### 加一门新语言
 

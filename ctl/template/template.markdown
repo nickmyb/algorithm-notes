@@ -233,18 +233,9 @@ twoSumTwoPointers
 
 测试不为每种解法单写一份，而是**同一组用例跑所有实现**，顺带保证它们结果一致（Go 用 `t.Run` 子测试，Python 用 `parametrize`）。
 
-### 什么时候才另开文件
+### 辅助数据结构也写在同一个文件里
 
-只有需要独立的辅助数据结构时，比如第 307 题的线段树：
-
-```
-0307.Range-Sum-Query-Mutable/
-├── SegmentTree.go     ← 辅助结构，按结构命名
-├── Solution.go        ← 题解入口，调用 SegmentTree
-└── solution.py        ← Python 没有这个约束，类直接写在同一个文件里
-```
-
-文件名按**结构**命名，不要叫 `Solution2.go`——那会读成"第二种解法"，和上面的约定冲突。Java 的辅助类声明成 `public` 就必须单独一个文件，不写 `public` 可以塞进 `Solution.java`；Go 纯属风格选择，不拆也能编译。
+题解要能整段复制到 LeetCode 提交，所以辅助数据结构（堆、线段树……）也写在 `Solution.go` 里，不另开文件。Java 的辅助类不要声明成 `public`，否则它必须单独一个文件。多道题共用的结构从 `snippets/go/` 复制，见下文「辅助函数片段」。
 
 下面表格里的 `Solution` 列按目录里**实际存在**的文件渲染，写了几门语言就显示几个链接。
 
@@ -281,10 +272,17 @@ Go 的目录叫 `go` 而包名是 `structures`（`go` 是关键字不能当包�
 
 ### 辅助函数片段
 
-多道题共用的辅助函数（如字母计数）不能像 `TreeNode` 那样引用：它是答案的一部分，引用的话复制到 LeetCode 会缺函数。所以每道题各自保留一份副本，`snippets/go/` 存放经过测试的权威版本，`make snippets` 检查所有副本和它逐字一致：
+多道题共用的辅助函数（如字母计数）和数据结构（如堆）不能像 `TreeNode` 那样引用：它们是答案的一部分，引用的话复制到 LeetCode 会缺代码。所以每道题各自保留一份副本，`snippets/go/` 存放经过测试的权威版本，`make snippets` 检查所有副本和它逐字一致：
 
-- 题解里定义了和 snippet **同名**的顶层函数就算引用，不用加任何标记
-- 从 `func` 到函数结尾逐字比较，文档注释不比较
+- 函数、类型、方法按名字对应（`abs`、`type MaxPQ`、`MaxPQ.sink`），从 `func` / `type` 到结尾逐字比较，文档注释不比较
+- 副本放在一对标记之间，标记外的就是这道题自己写的代码。标记是 JetBrains 的折叠注释，GoLand 里能把副本折叠起来：
+
+  ```go
+  // region @snippets/go/heap.go
+  … 从 heap.go 复制来的定义，用到哪些复制哪些 …
+  // endregion @snippets/go/heap.go
+  ```
+
 - snippet 只能 import 标准库
 
 函数放在哪个文件决定了 `make snippets` 怎么给题目分组：
@@ -351,7 +349,7 @@ algorithm-notes/
 │   ├── go/                      # package structures，带 halfrost 原有的 9 个结构
 │   ├── java/                    # TreeNode/ListNode + 辅助，test/ 下是它们的测试
 │   └── python/                  # tree_node.py / list_node.py + 各自的测试
-├── snippets/go/                 # 题解辅助函数的权威版本，只复制不引用
+├── snippets/go/                 # 题解辅助函数和数据结构的权威版本，只复制不引用
 ├── conftest.py                  # pytest 的 solution fixture，见「多语言约定」
 ├── pytest.ini                   # pytest 配置
 ├── gotest.sh                    # Go 测试 + 覆盖率
