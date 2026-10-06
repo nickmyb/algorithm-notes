@@ -23,8 +23,7 @@ package leetcode
 // 同一题的多种解法写在本文件里的多个函数，入口函数保持 LeetCode 给的签名名，
 // 其余解法加后缀说明算法：twoSum / twoSumBruteForce / twoSumTwoPointers。
 // 辅助数据结构也写在本文件里，题解要能整段复制提交。多道题共用的从 snippets/go
-// 复制，前后加 // region @snippets/go/<文件名>.go 和
-// // endregion @snippets/go/<文件名>.go，见 snippets/go/doc.go。
+// 复制，前后加 region / endregion 标记，写法见 snippets/go/doc.go。
 //
 // Go 的包名来自 package 声明，跟文件名无关，所以每道题的文件都可以
 // 叫 Solution.go 而不冲突。
