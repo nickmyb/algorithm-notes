@@ -1,13 +1,14 @@
 package snippets
 
 import (
+	"cmp"
 	"slices"
 	"testing"
 )
 
 // checkHeap 检查 MaxPQ 的内部状态，每次 Insert / DelMax 之后都调用。
 // 只看出队顺序时，堆序被破坏往往要再操作几次才表现出来，离出错的那一步很远。
-func checkHeap(t *testing.T, pq *MaxPQ) {
+func checkHeap(t *testing.T, pq *MaxPQ[int]) {
 	t.Helper()
 	// pq[0] 空着不用，所以切片长度总是 n+1；
 	// DelMax 没截掉最后一格的话，下一次 Insert 会 append 到 n+2，中间留下旧值
@@ -15,14 +16,14 @@ func checkHeap(t *testing.T, pq *MaxPQ) {
 		t.Fatalf("len(pq) = %d, want n+1 = %d", len(pq.pq), pq.n+1)
 	}
 	for i := 2; i <= pq.n; i++ {
-		if pq.pq[i/2] < pq.pq[i] {
+		if pq.cmp(pq.pq[i/2], pq.pq[i]) < 0 {
 			t.Fatalf("heap order violated: pq[%d] = %d < pq[%d] = %d", i/2, pq.pq[i/2], i, pq.pq[i])
 		}
 	}
 }
 
 // insertAll 依次 Insert，并在每次之后检查结构
-func insertAll(t *testing.T, pq *MaxPQ, xs []int) {
+func insertAll(t *testing.T, pq *MaxPQ[int], xs []int) {
 	t.Helper()
 	for _, x := range xs {
 		pq.Insert(x)
@@ -31,7 +32,7 @@ func insertAll(t *testing.T, pq *MaxPQ, xs []int) {
 }
 
 // drain 不断 DelMax 直到空，返回出队序列
-func drain(t *testing.T, pq *MaxPQ) []int {
+func drain(t *testing.T, pq *MaxPQ[int]) []int {
 	t.Helper()
 	var got []int
 	for !pq.IsEmpty() {
@@ -47,7 +48,7 @@ func drain(t *testing.T, pq *MaxPQ) []int {
 
 func TestMaxPQEmpty(t *testing.T) {
 	// 空堆上 Max / DelMax 要报 ok = false，而不是去读 pq[1] 越界 panic
-	pq := NewMaxPQ()
+	pq := NewMaxPQ(cmp.Compare[int])
 	if !pq.IsEmpty() || pq.Size() != 0 {
 		t.Fatalf("IsEmpty = %v, Size = %d, want true, 0", pq.IsEmpty(), pq.Size())
 	}
@@ -108,7 +109,7 @@ func TestMaxPQDrainSorted(t *testing.T) {
 		t.Run(in.name, func(t *testing.T) {
 			for n := 1; n <= 33; n++ {
 				xs := in.gen(n)
-				pq := NewMaxPQ()
+				pq := NewMaxPQ(cmp.Compare[int])
 				insertAll(t, pq, xs)
 				if pq.Size() != n {
 					t.Fatalf("n=%d: Size = %d after inserts", n, pq.Size())
@@ -134,7 +135,7 @@ func TestMaxPQOnlyLeftChild(t *testing.T) {
 	//	  9            3
 	//	 / \    →     /
 	//	5   3        5
-	pq := NewMaxPQ()
+	pq := NewMaxPQ(cmp.Compare[int])
 	insertAll(t, pq, []int{9, 5, 3})
 	if got := drain(t, pq); !slices.Equal(got, []int{9, 5, 3}) {
 		t.Fatalf("drain = %v, want [9 5 3]", got)
@@ -151,7 +152,7 @@ func TestMaxPQEqualChildren(t *testing.T) {
 	//	  2   2
 	//	 /
 	//	1
-	pq := NewMaxPQ()
+	pq := NewMaxPQ(cmp.Compare[int])
 	insertAll(t, pq, []int{9, 2, 2, 1})
 	if got := drain(t, pq); !slices.Equal(got, []int{9, 2, 2, 1}) {
 		t.Fatalf("drain = %v, want [9 2 2 1]", got)
@@ -162,7 +163,7 @@ func TestMaxPQInterleaved(t *testing.T) {
 	// 前面的用例都是先全部 Insert 再全部出队。交替进行时，
 	// Insert 放的位置依赖 DelMax 正确地截掉了最后一格、n 减对了；
 	// 否则新元素会排在旧值后面，或者 n 和切片长度对不上。
-	pq := NewMaxPQ()
+	pq := NewMaxPQ(cmp.Compare[int])
 	ops := []struct {
 		add  int  // pop 为 false 时 Insert 这个值
 		pop  bool // true 表示 DelMax
@@ -199,7 +200,7 @@ func TestMaxPQInterleaved(t *testing.T) {
 func TestMaxPQReuseAfterEmpty(t *testing.T) {
 	// 取走最后一个元素时切片要截回只剩 pq[0]。
 	// 漏了的话下一次 Insert 会 append 到下标 2，而 n = 1 指向的 pq[1] 还是旧值。
-	pq := NewMaxPQ()
+	pq := NewMaxPQ(cmp.Compare[int])
 	insertAll(t, pq, []int{4})
 	if got := drain(t, pq); !slices.Equal(got, []int{4}) {
 		t.Fatalf("drain = %v, want [4]", got)
@@ -207,5 +208,31 @@ func TestMaxPQReuseAfterEmpty(t *testing.T) {
 	insertAll(t, pq, []int{6, 9})
 	if got := drain(t, pq); !slices.Equal(got, []int{9, 6}) {
 		t.Fatalf("drain = %v, want [9 6]", got)
+	}
+}
+
+func TestMaxPQCustomCmp(t *testing.T) {
+	// 反过来的 cmp 得到最小堆。cmp 用减法，返回值不只是 -1、0、1：
+	// less 里写成 cmp(a, b) == -1 的话，除了相差 1 的两个数，其余都被当成「不小于」，
+	// 堆就不动了。cmp.Compare 恰好只返回 -1、0、1，前面的用例抓不到这种写法。
+	pq := NewMaxPQ(func(a, b int) int { return b - a })
+	insertAll(t, pq, []int{5, 1, 9, 3, 7})
+	if got := drain(t, pq); !slices.Equal(got, []int{1, 3, 5, 7, 9}) {
+		t.Fatalf("drain = %v, want [1 3 5 7 9]", got)
+	}
+}
+
+func TestMaxPQReleasesRemoved(t *testing.T) {
+	// DelMax 截掉最后一格后，那一格还在底层数组里。
+	// 不清零的话，T 是指针时出队的元素一直被引用着，GC 回收不了，出队顺序上看不出来。
+	a, b := 1, 2
+	pq := NewMaxPQ(func(x, y *int) int { return cmp.Compare(*x, *y) })
+	pq.Insert(&a)
+	pq.Insert(&b)
+	for pq.Size() > 0 {
+		pq.DelMax()
+		if p := pq.pq[:pq.n+2][pq.n+1]; p != nil {
+			t.Fatalf("slot %d after DelMax = &%d, want nil", pq.n+1, *p)
+		}
 	}
 }
