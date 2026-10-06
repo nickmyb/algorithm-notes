@@ -67,10 +67,11 @@ Output: 4
 
 1. 普通排序
 2. 堆排序
+3. 快排
 
 ### 同类题
 
 ## 复杂度
 
-- 时间复杂度：findKthLargest = O(n + k log n);
-- 空间复杂度：findKthLargest = O(n);
+- 时间复杂度：findKthLargest = O(n + k log n); findKthLargestMinPQ = O(nlog(k));
+- 空间复杂度：findKthLargest = O(n); findKthLargestMinPQ = O(k);

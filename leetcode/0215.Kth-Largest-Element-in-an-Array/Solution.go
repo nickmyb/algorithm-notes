@@ -171,3 +171,29 @@ func findKthLargest(nums []int, k int) int {
 	}
 	return maxK
 }
+
+func findKthLargestMinPQ(nums []int, k int) int {
+	minPQ := NewMaxPQCap(func(i, j int) int { return cmp.Compare(j, i) }, k+1)
+
+	for _, num := range nums {
+
+		if maxK, ok := minPQ.Max(); ok && minPQ.Size() == k && num <= maxK {
+			continue
+		}
+		minPQ.Insert(num)
+
+		if minPQ.Size() > k {
+			minPQ.DelMax()
+		}
+	}
+
+	maxK, ok := minPQ.Max()
+	if ok {
+		return maxK
+	}
+	return 0
+}
+
+// TODO: findKthLargestQuickSelect 快速选择，平均 O(n)（algs4 2.5 Selection）。
+// 划分后枢轴落在最终位置 j，和目标下标 n-k 比较，只往一边继续；
+// 先打乱或随机选枢轴，重复值多时用三向切分（algs4 2.3 Quick3way），否则会退化到 O(n²)。
