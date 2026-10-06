@@ -96,9 +96,9 @@ func LoadSolutions() (solutions []Solution, pending int) {
 
 // detectLanguages 找出一个题目目录里每门语言的题解入口文件。
 //
-// 一道题一门语言通常只有一个文件，但有些题需要单独的辅助数据结构（比如线段树写在
-// SegmentTree.go 里），目录里就会出现同语言的多个文件。这时优先认 Language.Entry
-// 指定的入口文件；没有入口文件才退回字典序第一个，免得 README 链到辅助文件上去。
+// 一道题一门语言通常只有一个文件，辅助数据结构也写在里面。目录里万一出现同语言的
+// 多个非测试文件，优先认 Language.Entry 指定的入口文件；没有入口文件才退回字典序
+// 第一个，免得 README 链到别的文件上去。
 func detectLanguages(dir string) ([]SolutionFile, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {

@@ -14,7 +14,7 @@
  * <p>同一题的多种解法写在本类里的多个方法，入口方法保持 LeetCode 给的签名名，
  * 其余解法加后缀说明算法：twoSum / twoSumBruteForce / twoSumTwoPointers。
  *
- * <p>辅助类如果声明成 public，Java 强制它必须单独一个文件，按结构命名（SegmentTree.java）；
+ * <p>辅助类不要声明成 public：public 类必须单独一个文件，题解就不能整段复制提交了。
  * 不写 public 就能和题解放在同一个文件里。
  */
 class Solution {
