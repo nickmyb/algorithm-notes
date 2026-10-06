@@ -460,7 +460,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**17**|**8**|**0**|**25**|
+|Accepted|**17**|**9**|**0**|**26**|
 |Total|969|2124|980|4073|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
 |Completion Rate|1.8%|0.4%|0.0%|0.6%|
@@ -469,15 +469,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|25|100.0%|
-|Python|1|4.0%|
-|Java|1|4.0%|
-|**合计题数**|**25**|—|
+|Go|26|100.0%|
+|Python|1|3.8%|
+|Java|1|3.8%|
+|**合计题数**|**26**|—|
 
 
 ## 题目列表
 
-以下已经收录了 25 道题的题解，还有 0 道题在尝试中
+以下已经收录了 26 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -504,6 +504,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
+|0347|Top K Frequent Elements|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0347.Top-K-Frequent-Elements/Solution.go)|66.1%|Medium|
 |0643|Maximum Average Subarray I|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0643.Maximum-Average-Subarray-I/Solution.go)|44.5%|Easy|
 |0704|Binary Search|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0704.Binary-Search/Solution.go)|56.2%|Easy|
 

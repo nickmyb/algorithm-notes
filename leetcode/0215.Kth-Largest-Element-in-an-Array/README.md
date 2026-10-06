@@ -67,7 +67,8 @@ Output: 4
 
 1. 普通排序
 2. 堆排序
-   - 找第K大 = minPQ[k]; size > k, deleteMin; -> 最后剩下k个, 比删除的数字都大; 就是k个最大的;
+3. - 找第K大 = maxPQ[n]; n 都排序后, k 次 deleteMax, 返回 k 个最大的;
+   - 找第K大 = minPQ[k]; size > k, deleteMin; -> 最后剩下 k 个, 比删除的数字都大; 就是 k 个最大的;
 3. 快排
 
 ### 同类题
