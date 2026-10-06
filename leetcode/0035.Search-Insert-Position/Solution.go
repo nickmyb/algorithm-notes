@@ -31,6 +31,8 @@ func searchInsertLowerBound(nums []int, target int) int {
 	return lowerBoundClosed(nums, target)
 }
 
+// region @snippets/go/search.go
+
 // lowerBoundClosed 二分搜索 红蓝染色法 闭区间 [lo, hi], 返回第一个>=target的index
 func lowerBoundClosed(nums []int, target int) int {
 	lo, hi := 0, len(nums)-1
@@ -64,3 +66,5 @@ func lowerBoundClosed(nums []int, target int) int {
 	// 返回值 可以根据需要返回 第一个蓝或者最后一个红 都可以
 	return hi + 1
 }
+
+// endregion @snippets/go/search.go

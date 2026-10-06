@@ -7,6 +7,8 @@ import (
 
 // ===== 以下是题解本体，必须和提交到 LeetCode 的代码一字不差 =====
 
+// region @snippets/go/heap.go
+
 // MaxPQ 是 algs4 2.4 节用数组实现的最大堆，元素类型 T 由调用方指定。
 // 「最大」按 cmp 的顺序算，必须用 NewMaxPQ 创建，零值 MaxPQ 的 cmp 为 nil，不能直接使用。
 // 要最小堆就把 cmp 反过来传，例如 func(a, b int) int { return cmp.Compare(b, a) }。
@@ -157,6 +159,8 @@ func (pq *MaxPQ[T]) sink(k int) {
 		k = j
 	}
 }
+
+// endregion @snippets/go/heap.go
 
 func findKthLargest(nums []int, k int) int {
 	maxPQ := NewMaxPQFrom(cmp.Compare[int], nums)

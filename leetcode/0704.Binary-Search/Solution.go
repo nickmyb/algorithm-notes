@@ -8,6 +8,8 @@ func search(nums []int, target int) int {
 	return binarySearch(target, nums)
 }
 
+// region @snippets/go/search.go
+
 // binarySearch 二分查找
 func binarySearch(key int, a []int) int {
 	lo, hi := 0, len(a)-1
@@ -25,3 +27,5 @@ func binarySearch(key int, a []int) int {
 	}
 	return -1
 }
+
+// endregion @snippets/go/search.go

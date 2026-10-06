@@ -10,6 +10,8 @@ func isAnagram(s string, t string) bool {
 	return countLetters(s) == countLetters(t)
 }
 
+// region @snippets/go/anagram.go
+
 // countLetters 统计字符串中每个小写字母出现的次数。
 // 返回长度为 26 的数组，下标 0~25 依次对应 'a'~'z'。
 // 调用方需保证 str 只包含小写字母 a-z，否则下标越界会 panic。
@@ -23,9 +25,13 @@ func countLetters(str string) [26]int {
 	return letters
 }
 
+// endregion @snippets/go/anagram.go
+
 func isAnagramBySort(s string, t string) bool {
 	return anagrammatize(s) == anagrammatize(t)
 }
+
+// region @snippets/go/anagram.go
 
 // anagrammatize 将字符串按字符升序排序，返回其规范形式。
 // 互为变位词的字符串排序后结果相同，因此可用作变位词分组的 key。
@@ -37,3 +43,5 @@ func anagrammatize(str string) string {
 	})
 	return string(r)
 }
+
+// endregion @snippets/go/anagram.go

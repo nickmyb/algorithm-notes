@@ -14,6 +14,8 @@ func inorderTraversal(root *TreeNode) []int {
 	return ret
 }
 
+// region @snippets/go/traversal.go
+
 func inorder(root *TreeNode, ret *[]int) {
 	if root == nil {
 		return
@@ -23,3 +25,5 @@ func inorder(root *TreeNode, ret *[]int) {
 	*ret = append(*ret, root.Val)
 	inorder(root.Right, ret)
 }
+
+// endregion @snippets/go/traversal.go
