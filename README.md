@@ -460,36 +460,37 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**17**|**9**|**0**|**26**|
-|Total|969|2124|980|4073|
+|Accepted|**17**|**10**|**0**|**27**|
+|Total|971|2128|983|4082|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.8%|0.4%|0.0%|0.6%|
+|Completion Rate|1.8%|0.5%|0.0%|0.7%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|26|100.0%|
-|Python|1|3.8%|
-|Java|1|3.8%|
-|**合计题数**|**26**|—|
+|Go|27|100.0%|
+|Python|1|3.7%|
+|Java|1|3.7%|
+|**合计题数**|**27**|—|
 
 
 ## 题目列表
 
-以下已经收录了 26 道题的题解，还有 0 道题在尝试中
+以下已经收录了 27 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
-|0001|Two Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0001.Two-Sum/Solution.go)|55.2%|Easy|
+|0001|Two Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0001.Two-Sum/Solution.go)|55.3%|Easy|
 |0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|43.0%|Medium|
 |0020|Valid Parentheses|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0020.Valid-Parentheses/Solution.go)|45.9%|Easy|
 |0021|Merge Two Sorted Lists|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0021.Merge-Two-Sorted-Lists/Solution.go)|68.3%|Easy|
 |0034|Find First and Last Position of Element in Sorted Array|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/Solution.go)|47.1%|Medium|
-|0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|49.9%|Easy|
+|0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|50.0%|Easy|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
+|0056|Merge Intervals|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0056.Merge-Intervals/Solution.go)|54.3%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
-|0098|Validate Binary Search Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0098.Validate-Binary-Search-Tree/Solution.go)|41.5%|Medium|
+|0098|Validate Binary Search Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0098.Validate-Binary-Search-Tree/Solution.go)|41.6%|Medium|
 |0102|Binary Tree Level Order Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0102.Binary-Tree-Level-Order-Traversal/Solution.go)|70.8%|Medium|
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
 |0125|Valid Palindrome|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0125.Valid-Palindrome/Solution.go)|49.1%|Easy|
@@ -504,7 +505,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
-|0347|Top K Frequent Elements|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0347.Top-K-Frequent-Elements/Solution.go)|66.1%|Medium|
+|0347|Top K Frequent Elements|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0347.Top-K-Frequent-Elements/Solution.go)|66.2%|Medium|
 |0643|Maximum Average Subarray I|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0643.Maximum-Average-Subarray-I/Solution.go)|44.5%|Easy|
 |0704|Binary Search|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0704.Binary-Search/Solution.go)|56.2%|Easy|
 
