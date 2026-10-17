@@ -1,6 +1,7 @@
 package snippets
 
 import (
+	"cmp"
 	"slices"
 	"testing"
 )
@@ -9,38 +10,80 @@ func TestQuickSort(t *testing.T) {
 	tests := []struct {
 		name string
 		in   []int
-		lo   int
-		hi   int
 		want []int
 	}{
-		// 空切片：检查入口在分区和打乱前返回。
-		{"空切片", []int{}, 0, -1, []int{}},
-		// 单元素：检查长度为一时不进入分区。
-		{"单元素", []int{7}, 0, 0, []int{7}},
-		// 基准最小：检查右侧扫描能在 lo 停下。
-		{"基准最小", []int{1, 2}, 0, 1, []int{1, 2}},
-		// 重复值：检查等于基准的元素不会导致划分停滞或错排。
-		{"重复值", []int{2, 1, 2, 3}, 0, 3, []int{1, 2, 2, 3}},
-		// 正负混合：检查比较直接按整数大小进行，不依赖非负输入。
-		{"正负混合", []int{0, -2, 3, -1}, 0, 3, []int{-2, -1, 0, 3}},
-		// 子区间：检查排序不会改动 lo、hi 以外的元素。
-		{"子区间", []int{9, 2, 3, 1, 8}, 1, 3, []int{9, 1, 2, 3, 8}},
-		// 基准最大：检查左侧扫描不会访问 hi+1。
-		{"基准最大", []int{2, 1}, 0, 1, []int{1, 2}},
+		{"nil 切片", nil, nil},
+		{"空切片", []int{}, []int{}},
+		{"单元素", []int{7}, []int{7}},
+		{"两个元素", []int{2, 1}, []int{1, 2}},
+		{"重复值", []int{3, 1, 3, 2, 1}, []int{1, 1, 2, 3, 3}},
+		{"全部相等", []int{4, 4, 4, 4}, []int{4, 4, 4, 4}},
+		{"正负混合", []int{0, -2, 3, -1}, []int{-2, -1, 0, 3}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := slices.Clone(tt.in)
-			defer func() {
-				if p := recover(); p != nil {
-					t.Errorf("quickSort(%v, %d, %d) panic: %v", tt.in, tt.lo, tt.hi, p)
-				}
-			}()
-			quickSort(got, tt.lo, tt.hi)
-			if !slices.Equal(got, tt.want) {
-				t.Errorf("quickSort(%v, %d, %d) = %v, want %v", tt.in, tt.lo, tt.hi, got, tt.want)
+			in := slices.Clone(tt.in)
+			q := NewQuickFrom(cmp.Compare[int], in)
+			q.Sort()
+			if !slices.Equal(q.Arr(), tt.want) {
+				t.Errorf("Arr() = %v, want %v", q.Arr(), tt.want)
+			}
+			if !slices.Equal(in, tt.want) {
+				t.Errorf("Sort() changed input to %v, want %v", in, tt.want)
 			}
 		})
+	}
+}
+
+func TestQuickAppendAndResort(t *testing.T) {
+	q := NewQuickCap(cmp.Compare[int], 2)
+	for _, x := range []int{3, 1, 2} {
+		q.Append(x)
+	}
+	q.Sort()
+	if want := []int{1, 2, 3}; !slices.Equal(q.Arr(), want) {
+		t.Fatalf("first Sort(): got %v, want %v", q.Arr(), want)
+	}
+
+	q.Append(0)
+	q.Sort()
+	if want := []int{0, 1, 2, 3}; !slices.Equal(q.Arr(), want) {
+		t.Errorf("second Sort(): got %v, want %v", q.Arr(), want)
+	}
+}
+
+func TestQuickFromSortsInputInPlace(t *testing.T) {
+	in := []int{3, 1, 2}
+	q := NewQuickFrom(cmp.Compare[int], in)
+	q.Sort()
+	if want := []int{1, 2, 3}; !slices.Equal(in, want) {
+		t.Fatalf("NewQuickFrom input after Sort() = %v, want %v", in, want)
+	}
+
+	in[0] = 99
+	if q.Arr()[0] != 99 {
+		t.Errorf("input mutation not reflected in Quick: got %v", q.Arr())
+	}
+	q.Arr()[0] = 10
+	if in[0] != 10 {
+		t.Errorf("Arr() mutation not reflected in input: in[0] = %d", in[0])
+	}
+}
+
+func TestQuickCustomComparator(t *testing.T) {
+	type item struct {
+		name string
+		rank int
+	}
+	in := []item{{"low", 1}, {"high", 3}, {"middle", 2}}
+	q := NewQuickFrom(func(a, b item) int { return cmp.Compare(b.rank, a.rank) }, in)
+	q.Sort()
+	want := []item{{"high", 3}, {"middle", 2}, {"low", 1}}
+	if !slices.Equal(q.Arr(), want) {
+		t.Errorf("Sort() = %v, want %v", q.Arr(), want)
+	}
+	if !slices.Equal(in, want) {
+		t.Errorf("Sort() changed input to %v, want %v", in, want)
 	}
 }
