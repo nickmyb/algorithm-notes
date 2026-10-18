@@ -99,7 +99,7 @@ The starting pixel is already colored with 0, which is the same as the target co
 
 ## 解题思路
 
-1. 递归
+1. 确定起点 → 检查边界和访问条件 → 标记当前格 → 遍历四个邻居
 
 ### 同类题
 

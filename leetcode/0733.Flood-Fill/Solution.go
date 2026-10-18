@@ -4,60 +4,30 @@ package leetcode
 
 // ===== 以下是题解本体，必须和提交到 LeetCode 的代码一字不差 =====
 func floodFill(image [][]int, sr int, sc int, color int) [][]int {
-	graph := NewGraph(image)
+	original := image[sr][sc]
+	if original == color {
+		return image
+	}
 
-	fill(graph, sr, sc, image[sr][sc], color)
+	rows := len(image)
+	cols := len(image[0])
 
-	return graph.filled
-}
-
-func fill(graph *Graph, sr int, sc int, colorB int, colorA int) {
-	// sr, sc
-	if 0 <= sr && sr < graph.row && 0 <= sc && sc < graph.column && graph.marked[sr][sc] == false {
-		graph.marked[sr][sc] = true
-
-		if graph.image[sr][sc] == colorB {
-			graph.filled[sr][sc] = colorA
-		} else {
+	var dfs func(int, int)
+	dfs = func(x, y int) {
+		if x < 0 || x >= rows || y < 0 || y >= cols {
+			return
+		}
+		if image[x][y] != original {
 			return
 		}
 
-		fill(graph, sr-1, sc, colorB, colorA)
-		fill(graph, sr+1, sc, colorB, colorA)
-		fill(graph, sr, sc-1, colorB, colorA)
-		fill(graph, sr, sc+1, colorB, colorA)
-	} else {
-		return
-	}
-}
-
-type Graph struct {
-	image  [][]int
-	marked [][]bool
-	filled [][]int
-	row    int
-	column int
-}
-
-func NewGraph(image [][]int) *Graph {
-	g := &Graph{
-		image:  image,
-		row:    len(image),
-		column: len(image[0]),
+		image[x][y] = color
+		dfs(x-1, y)
+		dfs(x+1, y)
+		dfs(x, y-1)
+		dfs(x, y+1)
 	}
 
-	for _, row := range image {
-		var markedRow []bool
-		var filledRow []int
-
-		for _, block := range row {
-			markedRow = append(markedRow, false)
-			filledRow = append(filledRow, block)
-		}
-
-		g.marked = append(g.marked, markedRow)
-		g.filled = append(g.filled, filledRow)
-	}
-
-	return g
+	dfs(sr, sc)
+	return image
 }
