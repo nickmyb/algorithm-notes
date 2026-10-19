@@ -460,8 +460,8 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**18**|**10**|**0**|**28**|
-|Total|971|2128|983|4082|
+|Accepted|**18**|**11**|**0**|**29**|
+|Total|972|2130|984|4086|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
 |Completion Rate|1.9%|0.5%|0.0%|0.7%|
 
@@ -469,15 +469,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|28|100.0%|
-|Python|1|3.6%|
-|Java|1|3.6%|
-|**合计题数**|**28**|—|
+|Go|29|100.0%|
+|Python|1|3.4%|
+|Java|1|3.4%|
+|**合计题数**|**29**|—|
 
 
 ## 题目列表
 
-以下已经收录了 28 道题的题解，还有 0 道题在尝试中
+以下已经收录了 29 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -497,6 +497,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0141|Linked List Cycle|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0141.Linked-List-Cycle/Solution.go)|55.2%|Easy|
 |0155|Min Stack|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0155.Min-Stack/Solution.go)|62.9%|Medium|
 |0167|Two Sum II - Input Array Is Sorted|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0167.Two-Sum-II-Input-Array-Is-Sorted/Solution.go)|61.1%|Medium|
+|0200|Number of Islands|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0200.Number-of-Islands/Solution.go)|64.2%|Medium|
 |0206|Reverse Linked List|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0206.Reverse-Linked-List/Solution.go)|76.5%|Easy|
 |0215|Kth Largest Element in an Array|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0215.Kth-Largest-Element-in-an-Array/Solution.go)|60.0%|Medium|
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
