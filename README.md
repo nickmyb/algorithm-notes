@@ -460,24 +460,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**18**|**12**|**0**|**30**|
+|Accepted|**18**|**13**|**0**|**31**|
 |Total|972|2130|984|4086|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.9%|0.6%|0.0%|0.7%|
+|Completion Rate|1.9%|0.6%|0.0%|0.8%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|30|100.0%|
-|Python|1|3.3%|
-|Java|1|3.3%|
-|**合计题数**|**30**|—|
+|Go|31|100.0%|
+|Python|1|3.2%|
+|Java|1|3.2%|
+|**合计题数**|**31**|—|
 
 
 ## 题目列表
 
-以下已经收录了 30 道题的题解，还有 0 道题在尝试中
+以下已经收录了 31 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -489,6 +489,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|50.0%|Easy|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
 |0056|Merge Intervals|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0056.Merge-Intervals/Solution.go)|54.3%|Medium|
+|0078|Subsets|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0078.Subsets/Solution.go)|81.7%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
 |0098|Validate Binary Search Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0098.Validate-Binary-Search-Tree/Solution.go)|41.6%|Medium|
 |0102|Binary Tree Level Order Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0102.Binary-Tree-Level-Order-Traversal/Solution.go)|70.8%|Medium|
