@@ -460,24 +460,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**18**|**11**|**0**|**29**|
+|Accepted|**18**|**12**|**0**|**30**|
 |Total|972|2130|984|4086|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.9%|0.5%|0.0%|0.7%|
+|Completion Rate|1.9%|0.6%|0.0%|0.7%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|29|100.0%|
-|Python|1|3.4%|
-|Java|1|3.4%|
-|**合计题数**|**29**|—|
+|Go|30|100.0%|
+|Python|1|3.3%|
+|Java|1|3.3%|
+|**合计题数**|**30**|—|
 
 
 ## 题目列表
 
-以下已经收录了 29 道题的题解，还有 0 道题在尝试中
+以下已经收录了 30 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -510,6 +510,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0643|Maximum Average Subarray I|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0643.Maximum-Average-Subarray-I/Solution.go)|44.5%|Easy|
 |0704|Binary Search|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0704.Binary-Search/Solution.go)|56.2%|Easy|
 |0733|Flood Fill|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0733.Flood-Fill/Solution.go)|59.8%|Easy|
+|0994|Rotting Oranges|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0994.Rotting-Oranges/Solution.go)|55.8%|Medium|
 
 
 ---
