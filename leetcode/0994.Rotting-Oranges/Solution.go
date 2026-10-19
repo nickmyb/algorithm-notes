@@ -22,21 +22,6 @@ func orangesRotting(grid [][]int) int {
 
 	dirs := [4][2]int{{-1, 0}, {1, 0}, {0, -1}, {0, 1}}
 
-	// BFS 骨架（单源；本题把所有腐烂橘子同时作为起点入队）：
-	// q := []int{s}
-	// marked[s] = true
-	// for len(q) > 0 {
-	//     v := q[0]
-	//     q = q[1:]
-	//     for _, w := range adj(v) {
-	//         if !marked[w] {
-	//             q = append(q, w)
-	//             marked[w] = true
-	//             edgeTo[w] = v // 需要还原路径时才记录
-	//         }
-	//     }
-	// }
-	// 本题用 grid 的值代替 marked，队列中的 m 记录腐烂所需分钟数，不需要 edgeTo。
 	for len(q) > 0 {
 		cur := q[0]
 		q = q[1:]
