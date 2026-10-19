@@ -10,7 +10,7 @@ func orangesRotting(grid [][]int) int {
 	var q [][]int
 	maxM := 0
 
-	// 找所以烂橘子
+	// 找所有烂橘子
 	for r := range grid {
 		for c := range grid[r] {
 			if grid[r][c] == 2 {
