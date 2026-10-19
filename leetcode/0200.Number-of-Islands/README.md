@@ -89,6 +89,8 @@ Output: 3
 
 ### 同类题
 
+- 前置：[733. Flood Fill](../0733.Flood-Fill/)
+
 ## 复杂度
 
 - 时间复杂度：numIslands = O(mn);

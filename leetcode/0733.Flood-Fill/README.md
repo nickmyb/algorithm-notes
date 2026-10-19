@@ -103,6 +103,8 @@ The starting pixel is already colored with 0, which is the same as the target co
 
 ### 同类题
 
+- [200. Number of Islands](../0200.Number-of-Islands/)
+
 ## 复杂度
 
 - 时间复杂度： floodFill = O(mn)
