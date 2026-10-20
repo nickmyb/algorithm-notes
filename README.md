@@ -460,24 +460,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**18**|**13**|**0**|**31**|
+|Accepted|**18**|**14**|**0**|**32**|
 |Total|972|2130|984|4086|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.9%|0.6%|0.0%|0.8%|
+|Completion Rate|1.9%|0.7%|0.0%|0.8%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|31|100.0%|
-|Python|1|3.2%|
-|Java|1|3.2%|
-|**合计题数**|**31**|—|
+|Go|32|100.0%|
+|Python|1|3.1%|
+|Java|1|3.1%|
+|**合计题数**|**32**|—|
 
 
 ## 题目列表
 
-以下已经收录了 31 道题的题解，还有 0 道题在尝试中
+以下已经收录了 32 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -487,6 +487,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0021|Merge Two Sorted Lists|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0021.Merge-Two-Sorted-Lists/Solution.go)|68.3%|Easy|
 |0034|Find First and Last Position of Element in Sorted Array|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/Solution.go)|47.1%|Medium|
 |0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|50.0%|Easy|
+|0046|Permutations|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0046.Permutations/Solution.go)|80.0%|Medium|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
 |0056|Merge Intervals|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0056.Merge-Intervals/Solution.go)|54.3%|Medium|
 |0078|Subsets|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0078.Subsets/Solution.go)|81.7%|Medium|

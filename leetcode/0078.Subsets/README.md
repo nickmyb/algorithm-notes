@@ -65,6 +65,8 @@ Output: [[],[0]]
 
 ### 同类题
 
+- [46. Permutations](../0046.Permutations/)
+
 ## 复杂度
 
 设 n = len(nums)。每个元素都有“选”或“不选”两种状态，所以一共有 2^n 个子集。
