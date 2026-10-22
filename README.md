@@ -460,8 +460,8 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**18**|**14**|**0**|**32**|
-|Total|972|2130|984|4086|
+|Accepted|**18**|**15**|**0**|**33**|
+|Total|972|2131|984|4087|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
 |Completion Rate|1.9%|0.7%|0.0%|0.8%|
 
@@ -469,15 +469,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|32|100.0%|
-|Python|1|3.1%|
-|Java|1|3.1%|
-|**合计题数**|**32**|—|
+|Go|33|100.0%|
+|Python|1|3.0%|
+|Java|1|3.0%|
+|**合计题数**|**33**|—|
 
 
 ## 题目列表
 
-以下已经收录了 32 道题的题解，还有 0 道题在尝试中
+以下已经收录了 33 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -487,13 +487,14 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0021|Merge Two Sorted Lists|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0021.Merge-Two-Sorted-Lists/Solution.go)|68.3%|Easy|
 |0034|Find First and Last Position of Element in Sorted Array|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/Solution.go)|47.1%|Medium|
 |0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|50.0%|Easy|
+|0039|Combination Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0039.Combination-Sum/Solution.go)|74.0%|Medium|
 |0046|Permutations|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0046.Permutations/Solution.go)|80.0%|Medium|
-|0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.4%|Medium|
+|0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.3%|Medium|
 |0056|Merge Intervals|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0056.Merge-Intervals/Solution.go)|54.3%|Medium|
 |0078|Subsets|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0078.Subsets/Solution.go)|81.7%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
 |0098|Validate Binary Search Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0098.Validate-Binary-Search-Tree/Solution.go)|41.6%|Medium|
-|0102|Binary Tree Level Order Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0102.Binary-Tree-Level-Order-Traversal/Solution.go)|70.8%|Medium|
+|0102|Binary Tree Level Order Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0102.Binary-Tree-Level-Order-Traversal/Solution.go)|70.9%|Medium|
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
 |0125|Valid Palindrome|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0125.Valid-Palindrome/Solution.go)|49.1%|Easy|
 |0141|Linked List Cycle|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0141.Linked-List-Cycle/Solution.go)|55.2%|Easy|
