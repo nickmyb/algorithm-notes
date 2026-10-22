@@ -460,24 +460,24 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |    |  Easy  |  Medium  |  Hard |  Total |
 |:--------:|:--------:|:--------:|:--------:|:--------:|
 |Optimizing|0|0|0|0|
-|Accepted|**18**|**15**|**0**|**33**|
+|Accepted|**18**|**16**|**0**|**34**|
 |Total|972|2131|984|4087|
 |Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.9%|0.7%|0.0%|0.8%|
+|Completion Rate|1.9%|0.8%|0.0%|0.8%|
 
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|33|100.0%|
-|Python|1|3.0%|
-|Java|1|3.0%|
-|**合计题数**|**33**|—|
+|Go|34|100.0%|
+|Python|1|2.9%|
+|Java|1|2.9%|
+|**合计题数**|**34**|—|
 
 
 ## 题目列表
 
-以下已经收录了 33 道题的题解，还有 0 道题在尝试中
+以下已经收录了 34 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -497,6 +497,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0102|Binary Tree Level Order Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0102.Binary-Tree-Level-Order-Traversal/Solution.go)|70.9%|Medium|
 |0104|Maximum Depth of Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0104.Maximum-Depth-of-Binary-Tree/Solution.go)|79.1%|Easy|
 |0125|Valid Palindrome|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0125.Valid-Palindrome/Solution.go)|49.1%|Easy|
+|0128|Longest Consecutive Sequence|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0128.Longest-Consecutive-Sequence/Solution.go)|48.6%|Medium|
 |0141|Linked List Cycle|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0141.Linked-List-Cycle/Solution.go)|55.2%|Easy|
 |0155|Min Stack|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0155.Min-Stack/Solution.go)|62.9%|Medium|
 |0167|Two Sum II - Input Array Is Sorted|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0167.Two-Sum-II-Input-Array-Is-Sorted/Solution.go)|61.1%|Medium|
