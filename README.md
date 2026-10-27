@@ -455,35 +455,26 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 ---
 
-## 个人数据
-
-|    |  Easy  |  Medium  |  Hard |  Total |
-|:--------:|:--------:|:--------:|:--------:|:--------:|
-|Optimizing|0|0|0|0|
-|Accepted|**18**|**17**|**0**|**35**|
-|Total|973|2133|985|4091|
-|Perfection Rate|100.0%|100.0%|-|100.0%|
-|Completion Rate|1.8%|0.8%|0.0%|0.9%|
-
 ## 题解统计
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|35|100.0%|
-|Python|1|2.9%|
-|Java|1|2.9%|
-|**合计题数**|**35**|—|
+|Go|36|100.0%|
+|Python|1|2.8%|
+|Java|1|2.8%|
+|**合计题数**|**36**|—|
 
 
 ## 题目列表
 
-以下已经收录了 35 道题的题解，还有 0 道题在尝试中
+以下已经收录了 36 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
 |0001|Two Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0001.Two-Sum/Solution.go)|55.3%|Easy|
-|0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|43.0%|Medium|
+|0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|43.1%|Medium|
 |0011|Container With Most Water|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0011.Container-With-Most-Water/Solution.go)|61.9%|Medium|
+|0015|3Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0015.3Sum/Solution.go)|40.7%|Medium|
 |0020|Valid Parentheses|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0020.Valid-Parentheses/Solution.go)|45.9%|Easy|
 |0021|Merge Two Sorted Lists|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0021.Merge-Two-Sorted-Lists/Solution.go)|68.3%|Easy|
 |0034|Find First and Last Position of Element in Sorted Array|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/Solution.go)|47.1%|Medium|
