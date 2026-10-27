@@ -459,15 +459,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|36|100.0%|
-|Python|1|2.8%|
-|Java|1|2.8%|
-|**合计题数**|**36**|—|
+|Go|37|100.0%|
+|Python|1|2.7%|
+|Java|1|2.7%|
+|**合计题数**|**37**|—|
 
 
 ## 题目列表
 
-以下已经收录了 36 道题的题解，还有 0 道题在尝试中
+以下已经收录了 37 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -475,7 +475,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0003|Longest Substring Without Repeating Characters|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0003.Longest-Substring-Without-Repeating-Characters/Solution.go)|43.1%|Medium|
 |0011|Container With Most Water|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0011.Container-With-Most-Water/Solution.go)|61.9%|Medium|
 |0015|3Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0015.3Sum/Solution.go)|40.7%|Medium|
-|0020|Valid Parentheses|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0020.Valid-Parentheses/Solution.go)|45.9%|Easy|
+|0020|Valid Parentheses|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0020.Valid-Parentheses/Solution.go)|46.0%|Easy|
 |0021|Merge Two Sorted Lists|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0021.Merge-Two-Sorted-Lists/Solution.go)|68.3%|Easy|
 |0034|Find First and Last Position of Element in Sorted Array|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0034.Find-First-and-Last-Position-of-Element-in-Sorted-Array/Solution.go)|47.1%|Medium|
 |0035|Search Insert Position|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0035.Search-Insert-Position/Solution.go)|50.0%|Easy|
@@ -503,6 +503,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
 |0347|Top K Frequent Elements|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0347.Top-K-Frequent-Elements/Solution.go)|66.2%|Medium|
+|0438|Find All Anagrams in a String|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0438.Find-All-Anagrams-in-a-String/Solution.go)|54.6%|Medium|
 |0643|Maximum Average Subarray I|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0643.Maximum-Average-Subarray-I/Solution.go)|44.5%|Easy|
 |0704|Binary Search|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0704.Binary-Search/Solution.go)|56.2%|Easy|
 |0733|Flood Fill|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0733.Flood-Fill/Solution.go)|59.8%|Easy|

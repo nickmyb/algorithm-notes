@@ -65,6 +65,7 @@ Given two strings `s` and `t`, return `true` if `t` is an anagram of `s`, and `f
 ### 同类题
 
 - [49. Group Anagrams](../0049.Group-Anagrams/)
+- [438. Find All Anagrams in a String](../0438.Find-All-Anagrams-in-a-String/)
 
 ## 复杂度
 
