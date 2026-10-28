@@ -459,15 +459,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|37|100.0%|
-|Python|1|2.7%|
-|Java|1|2.7%|
-|**合计题数**|**37**|—|
+|Go|38|100.0%|
+|Python|1|2.6%|
+|Java|1|2.6%|
+|**合计题数**|**38**|—|
 
 
 ## 题目列表
 
-以下已经收录了 37 道题的题解，还有 0 道题在尝试中
+以下已经收录了 38 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -504,6 +504,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
 |0347|Top K Frequent Elements|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0347.Top-K-Frequent-Elements/Solution.go)|66.2%|Medium|
 |0438|Find All Anagrams in a String|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0438.Find-All-Anagrams-in-a-String/Solution.go)|54.6%|Medium|
+|0560|Subarray Sum Equals K|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0560.Subarray-Sum-Equals-K/Solution.go)|47.1%|Medium|
 |0643|Maximum Average Subarray I|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0643.Maximum-Average-Subarray-I/Solution.go)|44.5%|Easy|
 |0704|Binary Search|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0704.Binary-Search/Solution.go)|56.2%|Easy|
 |0733|Flood Fill|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0733.Flood-Fill/Solution.go)|59.8%|Easy|
