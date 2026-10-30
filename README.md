@@ -459,15 +459,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|38|100.0%|
+|Go|39|100.0%|
 |Python|1|2.6%|
 |Java|1|2.6%|
-|**合计题数**|**38**|—|
+|**合计题数**|**39**|—|
 
 
 ## 题目列表
 
-以下已经收录了 38 道题的题解，还有 0 道题在尝试中
+以下已经收录了 39 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -482,7 +482,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0039|Combination Sum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0039.Combination-Sum/Solution.go)|74.0%|Medium|
 |0046|Permutations|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0046.Permutations/Solution.go)|80.0%|Medium|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.3%|Medium|
-|0056|Merge Intervals|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0056.Merge-Intervals/Solution.go)|54.3%|Medium|
+|0056|Merge Intervals|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0056.Merge-Intervals/Solution.go)|54.4%|Medium|
 |0078|Subsets|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0078.Subsets/Solution.go)|81.7%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
 |0098|Validate Binary Search Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0098.Validate-Binary-Search-Tree/Solution.go)|41.6%|Medium|
@@ -499,7 +499,8 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0217|Contains Duplicate|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0217.Contains-Duplicate/Solution.go)|56.2%|Easy|
 |0226|Invert Binary Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0226.Invert-Binary-Tree/Solution.go)|82.5%|Easy|
 |0232|Implement Queue using Stacks|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0232.Implement-Queue-using-Stacks/Solution.go)|67.9%|Easy|
-|0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.3%|Easy|
+|0239|Sliding Window Maximum|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0239.Sliding-Window-Maximum/Solution.go)|50.4%|Hard|
+|0242|Valid Anagram|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0242.Valid-Anagram/Solution.go)|67.2%|Easy|
 |0283|Move Zeroes|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0283.Move-Zeroes/Solution.go)|63.7%|Easy|
 |0303|Range Sum Query - Immutable|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0303.Range-Sum-Query-Immutable/Solution.go)|79.8%|Easy|
 |0347|Top K Frequent Elements|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0347.Top-K-Frequent-Elements/Solution.go)|66.2%|Medium|
