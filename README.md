@@ -459,15 +459,15 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 
 |  语言  |  题解数  |  占比  |
 |:--------:|:--------:|:--------:|
-|Go|39|100.0%|
-|Python|1|2.6%|
-|Java|1|2.6%|
-|**合计题数**|**39**|—|
+|Go|40|100.0%|
+|Python|1|2.5%|
+|Java|1|2.5%|
+|**合计题数**|**40**|—|
 
 
 ## 题目列表
 
-以下已经收录了 39 道题的题解，还有 0 道题在尝试中
+以下已经收录了 40 道题的题解，还有 0 道题在尝试中
 
 | No. |  Title  |  Solution  |  Acceptance |  Difficulty |
 |:--------:|:--------------------------------------------------------------|:--------:|:--------:|:--------:|
@@ -483,6 +483,7 @@ IDEA 的 [Resource patterns](https://www.jetbrains.com/help/idea/compiler.html) 
 |0046|Permutations|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0046.Permutations/Solution.go)|80.0%|Medium|
 |0049|Group Anagrams|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0049.Group-Anagrams/Solution.go)|69.3%|Medium|
 |0056|Merge Intervals|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0056.Merge-Intervals/Solution.go)|54.4%|Medium|
+|0076|Minimum Window Substring|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0076.Minimum-Window-Substring/Solution.go)|49.7%|Hard|
 |0078|Subsets|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0078.Subsets/Solution.go)|81.7%|Medium|
 |0094|Binary Tree Inorder Traversal|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.go) [Python](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/solution.py) [Java](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0094.Binary-Tree-Inorder-Traversal/Solution.java)|78.3%|Easy|
 |0098|Validate Binary Search Tree|[Go](https://github.com/nickmyb/algorithm-notes/blob/main/leetcode/0098.Validate-Binary-Search-Tree/Solution.go)|41.6%|Medium|

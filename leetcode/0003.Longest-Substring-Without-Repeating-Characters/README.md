@@ -86,6 +86,8 @@ Notice that the answer must be a substring, "pwke" is a subsequence and not a su
 
 ### 同类题
 
+- [76. Minimum Window Substring](../0076.Minimum-Window-Substring/)：滑动窗口，求满足覆盖条件的最短子串
+- [438. Find All Anagrams in a String](../0438.Find-All-Anagrams-in-a-String/)：滑动窗口，查找异位词子串
 - [643. Maximum Average Subarray I](../0643.Maximum-Average-Subarray-I/)：固定窗口
 
 ## 复杂度

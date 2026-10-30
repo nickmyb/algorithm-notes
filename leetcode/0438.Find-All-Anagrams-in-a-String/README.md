@@ -74,6 +74,8 @@ The substring with start index = 2 is "ab", which is an anagram of "ab".
 ### 同类题
 
 - 前置：[242. Valid Anagram](../0242.Valid-Anagram/)
+- [3. Longest Substring Without Repeating Characters](../0003.Longest-Substring-Without-Repeating-Characters/)：滑动窗口，求无重复字符的最长子串
+- [76. Minimum Window Substring](../0076.Minimum-Window-Substring/)：滑动窗口，求满足覆盖条件的最短子串
 
 ## 复杂度
 
