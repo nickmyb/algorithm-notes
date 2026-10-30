@@ -14,12 +14,19 @@ func TestMinWindow(t *testing.T) {
 		{"Example 3", "a", "aa", ""},
 	}
 
+	impls := map[string]func(string, string) string{
+		"minWindow":           minWindow,
+		"minWindowScanCounts": minWindowScanCounts,
+	}
+
 	for _, q := range qs {
-		t.Run(q.name, func(t *testing.T) {
-			got := minWindow(q.s, q.t)
-			if got != q.want {
-				t.Fatalf("minWindow(%q, %q) = %q, want %q", q.s, q.t, got, q.want)
-			}
-		})
+		for implName, impl := range impls {
+			t.Run(q.name+"/"+implName, func(t *testing.T) {
+				got := impl(q.s, q.t)
+				if got != q.want {
+					t.Fatalf("%s(%q, %q) = %q, want %q", implName, q.s, q.t, got, q.want)
+				}
+			})
+		}
 	}
 }
